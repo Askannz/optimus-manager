@@ -1,9 +1,8 @@
 import os
 import shutil
 import checks
+import envs
 from bash import exec_bash
-
-SYSTEM_CONFIGS_PATH = "/etc/prime_switcher/configs/"
 
 
 class SwitchError(Exception):
@@ -38,7 +37,7 @@ def switch_to_intel():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(SYSTEM_CONFIGS_PATH, "intel/xorg")
+    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "intel/xorg")
     xorg_config_folder = "/etc/X11/xorg.conf.d/"
     for f in os.listdir(xorg_config_folder):
         filepath = os.path.join(xorg_config_folder, f)
@@ -77,7 +76,7 @@ def switch_to_nvidia():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(SYSTEM_CONFIGS_PATH, "nvidia/xorg")
+    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "nvidia/xorg")
     xorg_config_folder = "/etc/X11/xorg.conf.d/"
     for f in os.listdir(xorg_config_folder):
         filepath = os.path.join(xorg_config_folder, f)
