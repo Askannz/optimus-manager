@@ -4,6 +4,7 @@ import socket
 import envs
 from config import read_startup_mode, write_startup_mode
 from switching import switch_to_intel, switch_to_nvidia
+from backup import restore_backup
 from bash import exec_bash
 
 
@@ -13,8 +14,11 @@ def main():
     startup_mode = read_startup_mode()
     print("Startup mode :", startup_mode)
     if startup_mode == "nvidia_once":
-        write_startup_mode("inactive")  # TEMPORARY : should set next startup to "restore backup" instead
+        write_startup_mode("backup")
         switch_to_nvidia()
+    elif startup_mode == "backup":
+        write_startup_mode("inactive")
+        restore_backup()
     elif startup_mode == "nvidia":
         switch_to_nvidia()
     elif startup_mode == "intel":
