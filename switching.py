@@ -37,7 +37,7 @@ def switch_to_intel():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "intel/xorg")
+    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "intel/xorg/xorg.conf.d/")
     xorg_config_folder = "/etc/X11/xorg.conf.d/"
     for f in os.listdir(xorg_config_folder):
         filepath = os.path.join(xorg_config_folder, f)
@@ -76,7 +76,7 @@ def switch_to_nvidia():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "nvidia/xorg")
+    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "nvidia/xorg/xorg.conf.d/")
     xorg_config_folder = "/etc/X11/xorg.conf.d/"
     for f in os.listdir(xorg_config_folder):
         filepath = os.path.join(xorg_config_folder, f)
