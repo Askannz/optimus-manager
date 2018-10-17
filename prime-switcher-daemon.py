@@ -3,15 +3,14 @@ import os
 import socket
 from switching import switch_to_intel, switch_to_nvidia
 from bash import exec_bash
-
-SOCKET_PATH = "/tmp/prime-switcher"
+import envs
 
 
 def main():
 
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    server.bind(SOCKET_PATH)
-    os.chmod(SOCKET_PATH, 0o666)
+    server.bind(envs.SOCKET_PATH)
+    os.chmod(envs.SOCKET_PATH, 0o666)
 
     while True:
 
