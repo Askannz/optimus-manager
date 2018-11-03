@@ -1,4 +1,3 @@
-import os
 import checks
 import envs
 from bash import exec_bash
@@ -21,14 +20,13 @@ def switch_to_intel():
     # Nvidia modules
     print("Unloading Nvidia modules")
     exec_bash("rmmod nvidia_drm nvidia_modeset nvidia")
-    os.popen("rmmod nvidia_drm nvidia_modeset nvidia")
     if not checks.are_nvidia_modules_unloaded():
         raise SwitchError("Cannot unload Nvidia modules")
 
     # bbswitch module
     if not checks.is_bbswitch_loaded():
         print("bbswitch not loaded, loading it...")
-        os.popen("modprobe bbswitch")
+        exec_bash("modprobe bbswitch")
     if not checks.is_bbswitch_loaded():
         raise SwitchError("Cannot load bbswitch")
 
