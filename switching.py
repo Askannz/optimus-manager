@@ -4,6 +4,7 @@ import envs
 from bash import exec_bash
 from detection import get_bus_ids
 from generation import generate_xorg_conf
+from login_managers import configure_login_managers
 
 
 # TODO : Add some error checking on exec_bash
@@ -45,6 +46,10 @@ def switch_to_intel():
     xorg_conf_text = generate_xorg_conf(bus_ids, mode="intel", options=[])
     _write_xorg_conf(xorg_conf_text)
 
+    # Login managers configuration
+    print("Configuring login managers..")
+    configure_login_managers(mode="intel")
+
 
 def switch_to_nvidia():
 
@@ -76,6 +81,10 @@ def switch_to_nvidia():
     bus_ids = get_bus_ids()
     xorg_conf_text = generate_xorg_conf(bus_ids, mode="nvidia", options=[])
     _write_xorg_conf(xorg_conf_text)
+
+    # Login managers configuration
+    print("Configuring login managers..")
+    configure_login_managers(mode="nvidia")
 
 
 # TODO :Move that to another file
