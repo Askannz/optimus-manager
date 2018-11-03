@@ -20,16 +20,12 @@ def configure_xorg(mode):
 
 def _generate_nvidia(bus_ids, options):
 
-    text = \
-"""
-Section \"Module\"
-\tLoad \"modesetting\"
-EndSection
-
-Section \"Device\"
-\tIdentifier \"nvidia\"
-\tDriver \"nvidia\"
-"""
+    text = "Section \"Module\"\n" \
+           "\tLoad \"modesetting\"\n" \
+           "EndSection\n\n" \
+           "Section \"Device\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDriver \"nvidia\"\n"
 
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
     text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
@@ -47,12 +43,9 @@ Section \"Device\"
 
 def _generate_intel(bus_ids, options):
 
-    text = \
-"""
-Section \"Device\"
-\tIdentifier  \"intel\"
-\tDriver      \"modesetting\"
-"""
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"intel\"\n" \
+           "\tDriver \"modesetting\"\n"
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
