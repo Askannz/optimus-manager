@@ -1,8 +1,6 @@
 import checks
-import envs
 from bash import exec_bash
-from detection import get_bus_ids
-from generation import generate_xorg_conf
+from xorg import configure_xorg
 from login_managers import configure_login_managers
 
 
@@ -39,10 +37,8 @@ def switch_to_intel():
         print("bbswitch reports that the GPU is OFF")
 
     # Xorg configuration
-    print("Setting up Xorg...")
-    bus_ids = get_bus_ids()
-    xorg_conf_text = generate_xorg_conf(bus_ids, mode="intel", options=[])
-    _write_xorg_conf(xorg_conf_text)
+    print("Configuring Xorg...")
+    configure_xorg(mode="intel")
 
     # Login managers configuration
     print("Configuring login managers..")
@@ -75,21 +71,9 @@ def switch_to_nvidia():
         raise SwitchError("Cannot load Nvidia modules")
 
     # Xorg configuration
-    print("Setting up Xorg...")
-    bus_ids = get_bus_ids()
-    xorg_conf_text = generate_xorg_conf(bus_ids, mode="nvidia", options=[])
-    _write_xorg_conf(xorg_conf_text)
+    print("Configuring Xorg...")
+    configure_xorg(mode="nvidia")
 
     # Login managers configuration
     print("Configuring login managers..")
     configure_login_managers(mode="nvidia")
-
-
-# TODO :Move that to another file
-def _write_xorg_conf(xorg_conf_text):
-
-    try:
-        with open(envs.XORG_CONF_PATH, 'w') as f:
-            f.write(xorg_conf_text)
-    except IOError:
-        raise SwitchError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
