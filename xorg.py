@@ -1,11 +1,21 @@
+import envs
+from detection import get_bus_ids
 
 
-def generate_xorg_conf(bus_ids, mode, options=[]):
+class XorgError(Exception):
+    pass
+
+
+def configure_xorg(mode):
+
+    bus_ids = get_bus_ids()
 
     if mode == "nvidia":
-        return _generate_nvidia(bus_ids, options)
+        xorg_conf_text = _generate_nvidia(bus_ids, options=["overclocking"])
     elif mode == "intel":
-        return _generate_intel(bus_ids, options)
+        xorg_conf_text = _generate_intel(bus_ids, options=["dri_3"])
+
+    _write_xorg_conf(xorg_conf_text)
 
 
 def _generate_nvidia(bus_ids, options):
@@ -52,3 +62,12 @@ Section \"Device\"
     text += "EndSection\n"
 
     return text
+
+
+def _write_xorg_conf(xorg_conf_text):
+
+    try:
+        with open(envs.XORG_CONF_PATH, 'w') as f:
+            f.write(xorg_conf_text)
+    except IOError:
+        raise XorgError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
