@@ -78,6 +78,7 @@ def switch_to_nvidia():
     _write_xorg_conf(xorg_conf_text)
 
 
+# TODO :Move that to another file
 def _write_xorg_conf(xorg_conf_text):
 
     try:
