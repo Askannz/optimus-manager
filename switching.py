@@ -1,8 +1,12 @@
 import os
-import shutil
 import checks
 import envs
 from bash import exec_bash
+from detection import get_bus_ids
+from generation import generate_xorg_conf
+
+
+# TODO : Add some error checking on exec_bash
 
 
 class SwitchError(Exception):
@@ -37,16 +41,9 @@ def switch_to_intel():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "intel/xorg/xorg.conf.d/")
-    xorg_config_folder = "/etc/X11/xorg.conf.d/"
-    for f in os.listdir(xorg_config_folder):
-        filepath = os.path.join(xorg_config_folder, f)
-        os.remove(filepath)
-    for f in os.listdir(reference_config_folder):
-        if "prime-switcher" in f:
-            orig_filepath = os.path.join(reference_config_folder, f)
-            dest_filepath = os.path.join(xorg_config_folder, f)
-            shutil.copy(orig_filepath, dest_filepath)
+    bus_ids = get_bus_ids()
+    xorg_conf_text = generate_xorg_conf(bus_ids, mode="intel", options=[])
+    _write_xorg_conf(xorg_conf_text)
 
 
 def switch_to_nvidia():
@@ -76,13 +73,15 @@ def switch_to_nvidia():
 
     # Xorg configuration
     print("Setting up Xorg...")
-    reference_config_folder = os.path.join(envs.SYSTEM_CONFIGS_PATH, "nvidia/xorg/xorg.conf.d/")
-    xorg_config_folder = "/etc/X11/xorg.conf.d/"
-    for f in os.listdir(xorg_config_folder):
-        filepath = os.path.join(xorg_config_folder, f)
-        os.remove(filepath)
-    for f in os.listdir(reference_config_folder):
-        if "prime-switcher" in f:
-            orig_filepath = os.path.join(reference_config_folder, f)
-            dest_filepath = os.path.join(xorg_config_folder, f)
-            shutil.copy(orig_filepath, dest_filepath)
+    bus_ids = get_bus_ids()
+    xorg_conf_text = generate_xorg_conf(bus_ids, mode="nvidia", options=[])
+    _write_xorg_conf(xorg_conf_text)
+
+
+def _write_xorg_conf(xorg_conf_text):
+
+    try:
+        with open(envs.XORG_CONF_PATH, 'w') as f:
+            f.write(xorg_conf_text)
+    except IOError:
+        raise SwitchError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
