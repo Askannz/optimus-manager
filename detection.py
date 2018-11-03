@@ -43,3 +43,16 @@ def get_bus_ids():
         raise DetectionError("Cannot find Intel GPU in PCI devices list.")
 
     return bus_ids
+
+
+def get_login_managers():
+
+    login_managers = []
+
+    ret = exec_bash("which sddm").returncode
+    if ret == 0:
+        login_managers.append("sddm")
+
+    # TODO : Add support for other login managers (LightDM and GDM at least)
+
+    return login_managers
