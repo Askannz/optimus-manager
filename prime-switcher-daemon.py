@@ -2,7 +2,7 @@
 import os
 import socket
 import envs
-from config import read_startup_mode, write_startup_mode
+from var import read_startup_mode, write_startup_mode, VarError
 from switching import switch_to_intel, switch_to_nvidia
 from bash import exec_bash
 
@@ -10,7 +10,14 @@ from bash import exec_bash
 def main():
 
     # Startup
-    startup_mode = read_startup_mode()
+    try:
+        startup_mode = read_startup_mode()
+    except VarError as e:
+        print("Cannot read startup mode : %s" % str(e))
+        print("Overwriting with %s" % envs.DEFAULT_STARTUP_MODE)
+        write_startup_mode(envs.DEFAULT_STARTUP_MODE)
+        startup_mode = envs.DEFAULT_STARTUP_MODE
+
     print("Startup mode :", startup_mode)
     if startup_mode == "inactive":
         pass

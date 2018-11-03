@@ -1,6 +1,10 @@
 import envs
 
 
+class VarError(Exception):
+    pass
+
+
 def read_startup_mode():
 
     try:
@@ -9,11 +13,9 @@ def read_startup_mode():
             if content in ["intel", "nvidia", "inactive", "nvidia_once"]:
                 mode = content
             else:
-                print("WARNING : Invalid startup mode in %s, defaulting to %s." % (envs.STARTUP_MODE_FILE_PATH, envs.DEFAULT_STARTUP_MODE))
-                mode = envs.DEFAULT_STARTUP_MODE
+                raise VarError("Invalid value : %s" % content)
     except IOError:
-        print("WARNING : Cannot read startup mode from %s, defaulting to %s." % (envs.STARTUP_MODE_FILE_PATH, envs.DEFAULT_STARTUP_MODE))
-        mode = envs.DEFAULT_STARTUP_MODE
+        raise VarError("Cannot open or read %s" % envs.STARTUP_MODE_FILE_PATH)
 
     return mode
 
@@ -22,5 +24,8 @@ def write_startup_mode(mode):
 
     assert mode in ["intel", "nvidia", "inactive", "nvidia_once"]
 
-    with open(envs.STARTUP_MODE_FILE_PATH, 'w') as f:
-        f.write(mode)
+    try:
+        with open(envs.STARTUP_MODE_FILE_PATH, 'w') as f:
+            f.write(mode)
+    except IOError:
+        raise VarError("Cannot open or write to %s" % envs.STARTUP_MODE_FILE_PATH)
