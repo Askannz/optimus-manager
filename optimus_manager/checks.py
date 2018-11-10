@@ -6,6 +6,11 @@ def is_bbswitch_loaded():
     return (ret == 0)
 
 
+def is_nouveau_loaded():
+    ret = exec_bash("lsmod | grep nouveau").returncode
+    return (ret == 0)
+
+
 def are_nvidia_modules_loaded():
     ret1 = exec_bash("lsmod | grep nvidia_drm").returncode
     ret2 = exec_bash("lsmod | grep nvidia_modeset").returncode
