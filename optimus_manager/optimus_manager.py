@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 import sys
 import socket
-
-SOCKET_PATH = "/tmp/optimus-manager"
+import envs
 
 
 def main():
@@ -17,7 +16,7 @@ def main():
         sys.exit(1)
 
     client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    client.connect(SOCKET_PATH)
+    client.connect(envs.SOCKET_PATH)
     client.send(mode.encode('utf-8'))
     client.close()
 
