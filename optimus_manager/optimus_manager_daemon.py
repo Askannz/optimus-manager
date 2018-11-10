@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import argparse
 import socket
 import optimus_manager.envs as envs
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
@@ -9,17 +10,23 @@ from optimus_manager.bash import exec_bash
 
 def main():
 
-    # Startup
-    try:
-        startup_mode = read_startup_mode()
-    except VarError as e:
-        print("Cannot read startup mode : %s" % str(e))
-        print("Overwriting with %s" % envs.DEFAULT_STARTUP_MODE)
-        write_startup_mode(envs.DEFAULT_STARTUP_MODE)
-        startup_mode = envs.DEFAULT_STARTUP_MODE
+    # Arguments parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--startup', action='store_true', help='Startup mode (configure GPU when daemon starts).')
+    args = parser.parse_args()
 
-    print("Startup mode :", startup_mode)
-    try:
+    # Startup
+    if args.startup:
+
+        try:
+            startup_mode = read_startup_mode()
+        except VarError as e:
+            print("Cannot read startup mode : %s" % str(e))
+            print("Overwriting with %s" % envs.DEFAULT_STARTUP_MODE)
+            write_startup_mode(envs.DEFAULT_STARTUP_MODE)
+            startup_mode = envs.DEFAULT_STARTUP_MODE
+
+        print("Startup mode :", startup_mode)
         if startup_mode == "inactive":
             pass
         if startup_mode == "nvidia_once":
@@ -29,11 +36,6 @@ def main():
             switch_to_nvidia()
         elif startup_mode == "intel":
             switch_to_intel()
-
-    except SwitchError as e:
-        print("Startup : cannot configure GPU : %s" % str(e))
-        print("Ignoring startup mode.")
-        pass
 
     # UNIX socket
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
