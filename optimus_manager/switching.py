@@ -11,7 +11,7 @@ class SwitchError(Exception):
     pass
 
 
-def switch_to_intel():
+def switch_to_intel(config):
 
     print("Switching to Intel")
 
@@ -38,14 +38,14 @@ def switch_to_intel():
 
     # Xorg configuration
     print("Configuring Xorg...")
-    configure_xorg(mode="intel")
+    configure_xorg(config, mode="intel")
 
     # Login managers configuration
     print("Configuring login managers..")
     configure_login_managers(mode="intel")
 
 
-def switch_to_nvidia():
+def switch_to_nvidia(config):
 
     print("Switching to Nvidia")
 
@@ -72,7 +72,7 @@ def switch_to_nvidia():
 
     # Xorg configuration
     print("Configuring Xorg...")
-    configure_xorg(mode="nvidia")
+    configure_xorg(config, mode="nvidia")
 
     # Login managers configuration
     print("Configuring login managers..")
