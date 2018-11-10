@@ -1,4 +1,4 @@
-from bash import exec_bash
+from optimus_manager.bash import exec_bash
 
 
 def is_bbswitch_loaded():

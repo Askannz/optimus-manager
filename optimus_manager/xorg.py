@@ -1,5 +1,5 @@
-import envs
-from detection import get_bus_ids
+import optimus_manager.envs as envs
+from optimus_manager.detection import get_bus_ids
 
 
 class XorgError(Exception):

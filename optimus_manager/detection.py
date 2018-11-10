@@ -1,4 +1,4 @@
-from bash import exec_bash
+from optimus_manager.bash import exec_bash
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"
