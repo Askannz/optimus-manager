@@ -47,7 +47,8 @@ def main():
         datagram = server.recv(1024)
         msg = datagram.decode('utf-8')
 
-        if msg not in ["intel", "nvidia"]:
+        if msg not in ["intel", "nvidia", "startup_inactive", "startup_nvidia_once",
+                       "startup_nvidia", "startup_intel"]:
             print("Invalid command received !")
 
         else:
