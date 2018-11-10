@@ -5,15 +5,18 @@ import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
+import optimus_manager.checks as checks
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.bash import exec_bash
 
 
 def gpu_switch(config, mode):
 
-    ret = exec_bash("systemctl stop display-manager")
-    if ret != 0:
-        print("Warning : cannot stop login manager. Continuing...")
+    if checks.is_login_manager_active():
+        print("Stopping login manager")
+        exec_bash("systemctl stop display-manager")
+        if checks.is_login_manager_active():
+            print("Warning : cannot stop login manager. Continuing...")
 
     try:
         if mode == "intel":
@@ -21,9 +24,8 @@ def gpu_switch(config, mode):
         elif mode == "nvidia":
             switch_to_nvidia(config)
 
-        ret = exec_bash("systemctl restart display-manager")
-        if ret != 0:
-            print("Warning : cannot restart login manager.")
+        print("Restarting login manager")
+        exec_bash("systemctl restart display-manager")
 
     except SwitchError as e:
         print("Cannot switch GPU : %s" % str(e))
