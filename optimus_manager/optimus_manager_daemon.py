@@ -9,6 +9,26 @@ from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchE
 from optimus_manager.bash import exec_bash
 
 
+def gpu_switch(config, mode):
+
+    ret = exec_bash("systemctl stop display-manager")
+    if ret != 0:
+        print("Warning : cannot stop login manager. Continuing...")
+
+    try:
+        if mode == "intel":
+            switch_to_intel(config)
+        elif mode == "nvidia":
+            switch_to_nvidia(config)
+
+        ret = exec_bash("systemctl restart display-manager")
+        if ret != 0:
+            print("Warning : cannot restart login manager.")
+
+    except SwitchError as e:
+        print("Cannot switch GPU : %s" % str(e))
+
+
 def main():
 
     # Arguments parsing
@@ -57,14 +77,12 @@ def main():
 
         else:
 
-            ret = exec_bash("systemctl stop sddm")
-
             try:
                 # Switching
                 if msg == "intel":
-                    switch_to_intel(config)
+                    gpu_switch(config, "intel")
                 elif msg == "nvidia":
-                    switch_to_nvidia(config)
+                    gpu_switch(config, "nvidia")
 
                 # Startup modes
                 elif msg == "startup_inactive":
@@ -79,8 +97,6 @@ def main():
             except SwitchError as e:
 
                 print("Cannot switch GPU : %s" % str(e))
-
-            ret = exec_bash("systemctl restart sddm")
 
     server.close()
 
