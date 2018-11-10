@@ -28,7 +28,7 @@ def _configure_sddm(mode):
 
     CONF_FOLDER_PATH = "/etc/sddm.conf.d/"
 
-    conf_filepath = os.path.join(CONF_FOLDER_PATH. envs.SDDM_CONF_NAME)
+    conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.SDDM_CONF_NAME)
 
     if mode == "intel":
 
