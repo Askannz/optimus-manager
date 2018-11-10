@@ -66,7 +66,9 @@ def switch_to_nvidia(config):
 
     # Nvidia modules
     print("Loading Nvidia modules")
-    exec_bash("modprobe nvidia_drm nvidia_modeset nvidia")
+    modeset_value = {"yes": 1, "no": 0}[config["nvidia"]["modeset"]]
+    exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
+    exec_bash("modprobe nvidia_modeset nvidia")
     if not checks.are_nvidia_modules_loaded():
         raise SwitchError("Cannot load Nvidia modules")
 
