@@ -54,10 +54,21 @@ def main():
 
             ret = exec_bash("systemctl stop sddm")
 
+            # Switching
             if msg == "intel":
                 switch_to_intel()
             elif msg == "nvidia":
                 switch_to_nvidia()
+
+            # Startup modes
+            elif msg == "startup_inactive":
+                write_startup_mode("inactive")
+            elif msg == "startup_nvidia_once":
+                write_startup_mode("nvidia_once")
+            elif msg == "startup_nvidia":
+                write_startup_mode("nvidia")
+            elif msg == "startup_intel":
+                write_startup_mode("intel")
 
             ret = exec_bash("systemctl restart sddm")
 
