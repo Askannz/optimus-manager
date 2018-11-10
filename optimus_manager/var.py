@@ -1,4 +1,4 @@
-import envs
+import optimus_manager.envs as envs
 
 
 class VarError(Exception):

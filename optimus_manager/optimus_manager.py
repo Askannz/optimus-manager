@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 import socket
-import envs
+import optimus_manager.envs as envs
 
 
 def main():

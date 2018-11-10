@@ -1,6 +1,6 @@
 import os
-import envs
-from detection import get_login_managers
+import optimus_manager.envs as envs
+from optimus_manager.detection import get_login_managers
 
 
 class LoginManagerError(Exception):

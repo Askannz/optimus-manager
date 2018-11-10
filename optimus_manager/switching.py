@@ -1,7 +1,7 @@
-import checks
-from bash import exec_bash
-from xorg import configure_xorg
-from login_managers import configure_login_managers
+import optimus_manager.checks as checks
+from optimus_manager.bash import exec_bash
+from optimus_manager.xorg import configure_xorg
+from optimus_manager.login_managers import configure_login_managers
 
 
 # TODO : Add some error checking on exec_bash

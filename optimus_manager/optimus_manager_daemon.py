@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import os
 import socket
-import envs
-from var import read_startup_mode, write_startup_mode, VarError
-from switching import switch_to_intel, switch_to_nvidia
-from bash import exec_bash
+import optimus_manager.envs as envs
+from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
+from optimus_manager.switching import switch_to_intel, switch_to_nvidia
+from optimus_manager.bash import exec_bash
 
 
 def main():
