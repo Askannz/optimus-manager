@@ -2,7 +2,7 @@
 import sys
 import socket
 
-SOCKET_PATH = "/tmp/prime-switcher"
+SOCKET_PATH = "/tmp/optimus-manager"
 
 
 def main():
