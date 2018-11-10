@@ -3,8 +3,9 @@ import os
 import argparse
 import socket
 import optimus_manager.envs as envs
+from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
-from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
+from optimus_manager.switching import switch_to_intel, switch_to_nvidia
 from optimus_manager.bash import exec_bash
 
 
@@ -14,6 +15,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--startup', action='store_true', help='Startup mode (configure GPU when daemon starts).')
     args = parser.parse_args()
+
+    # Config
+    config = load_config()
 
     # Startup
     if args.startup:
@@ -31,11 +35,11 @@ def main():
             pass
         if startup_mode == "nvidia_once":
             write_startup_mode("intel")
-            switch_to_nvidia()
+            switch_to_nvidia(config)
         elif startup_mode == "nvidia":
-            switch_to_nvidia()
+            switch_to_nvidia(config)
         elif startup_mode == "intel":
-            switch_to_intel()
+            switch_to_intel(config)
 
     # UNIX socket
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
@@ -57,9 +61,9 @@ def main():
 
             # Switching
             if msg == "intel":
-                switch_to_intel()
+                switch_to_intel(config)
             elif msg == "nvidia":
-                switch_to_nvidia()
+                switch_to_nvidia(config)
 
             # Startup modes
             elif msg == "startup_inactive":

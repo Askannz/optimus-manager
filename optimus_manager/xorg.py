@@ -6,14 +6,14 @@ class XorgError(Exception):
     pass
 
 
-def configure_xorg(mode):
+def configure_xorg(config, mode):
 
     bus_ids = get_bus_ids()
 
     if mode == "nvidia":
-        xorg_conf_text = _generate_nvidia(bus_ids, options=["overclocking"])
+        xorg_conf_text = _generate_nvidia(bus_ids, options=config["nvidia"]["options"])
     elif mode == "intel":
-        xorg_conf_text = _generate_intel(bus_ids, options=["dri_3"])
+        xorg_conf_text = _generate_intel(bus_ids, options=config["intel"]["options"])
 
     _write_xorg_conf(xorg_conf_text)
 
