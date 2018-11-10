@@ -5,7 +5,7 @@ import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
-from optimus_manager.switching import switch_to_intel, switch_to_nvidia
+from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.bash import exec_bash
 
 
@@ -59,21 +59,26 @@ def main():
 
             ret = exec_bash("systemctl stop sddm")
 
-            # Switching
-            if msg == "intel":
-                switch_to_intel(config)
-            elif msg == "nvidia":
-                switch_to_nvidia(config)
+            try:
+                # Switching
+                if msg == "intel":
+                    switch_to_intel(config)
+                elif msg == "nvidia":
+                    switch_to_nvidia(config)
 
-            # Startup modes
-            elif msg == "startup_inactive":
-                write_startup_mode("inactive")
-            elif msg == "startup_nvidia_once":
-                write_startup_mode("nvidia_once")
-            elif msg == "startup_nvidia":
-                write_startup_mode("nvidia")
-            elif msg == "startup_intel":
-                write_startup_mode("intel")
+                # Startup modes
+                elif msg == "startup_inactive":
+                    write_startup_mode("inactive")
+                elif msg == "startup_nvidia_once":
+                    write_startup_mode("nvidia_once")
+                elif msg == "startup_nvidia":
+                    write_startup_mode("nvidia")
+                elif msg == "startup_intel":
+                    write_startup_mode("intel")
+
+            except SwitchError as e:
+
+                print("Cannot switch GPU : %s" % str(e))
 
             ret = exec_bash("systemctl restart sddm")
 
