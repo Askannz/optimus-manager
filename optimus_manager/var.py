@@ -1,3 +1,4 @@
+import os
 import optimus_manager.envs as envs
 
 
@@ -23,6 +24,11 @@ def read_startup_mode():
 def write_startup_mode(mode):
 
     assert mode in ["intel", "nvidia", "inactive", "nvidia_once"]
+
+    folder_path, filename = os.path.split(envs.STARTUP_MODE_FILE_PATH)
+
+    if not os.path.isdir(folder_path):
+        os.makedirs(folder_path)
 
     try:
         with open(envs.STARTUP_MODE_FILE_PATH, 'w') as f:
