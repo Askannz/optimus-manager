@@ -11,14 +11,14 @@ def configure_xorg(config, mode):
     bus_ids = get_bus_ids()
 
     if mode == "nvidia":
-        xorg_conf_text = _generate_nvidia(bus_ids, options=config["nvidia"]["options"])
+        xorg_conf_text = _generate_nvidia(config, bus_ids)
     elif mode == "intel":
-        xorg_conf_text = _generate_intel(bus_ids, options=config["intel"]["options"])
+        xorg_conf_text = _generate_intel(config, bus_ids)
 
     _write_xorg_conf(xorg_conf_text)
 
 
-def _generate_nvidia(bus_ids, options):
+def _generate_nvidia(config, bus_ids):
 
     text = "Section \"Module\"\n" \
            "\tLoad \"modesetting\"\n" \
@@ -30,18 +30,21 @@ def _generate_nvidia(bus_ids, options):
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
     text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
 
-    if "overclocking" in options:
+    if "overclocking" in config["nvidia"]["options"]:
         text += "\tOption \"Coolbits\" \"28\"\n"
 
-    if "triple_buffer" in options:
+    if "triple_buffer" in config["nvidia"]["options"]:
         text += "\"TripleBuffer\" \"true\"\n"
+
+    dri = int(config["nvidia"]["DRI"])
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
 
     text += "EndSection\n"
 
     return text
 
 
-def _generate_intel(bus_ids, options):
+def _generate_intel(config, bus_ids):
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n" \
@@ -49,8 +52,8 @@ def _generate_intel(bus_ids, options):
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
-    if "dri_3" in options:
-        text += "\tOption \"DRI\" \"3\"\n"
+    dri = int(config["intel"]["DRI"])
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
 
     text += "EndSection\n"
 
