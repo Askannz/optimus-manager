@@ -1,4 +1,4 @@
-# prime-switcher #
+# optimus-manager #
 
 A tool aiming to solve (at least partially) the problems faced by Optimus laptop owners on Linux.
 
