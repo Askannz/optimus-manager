@@ -3,7 +3,7 @@ import os
 import socket
 import optimus_manager.envs as envs
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
-from optimus_manager.switching import switch_to_intel, switch_to_nvidia
+from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.bash import exec_bash
 
 
@@ -19,15 +19,21 @@ def main():
         startup_mode = envs.DEFAULT_STARTUP_MODE
 
     print("Startup mode :", startup_mode)
-    if startup_mode == "inactive":
+    try:
+        if startup_mode == "inactive":
+            pass
+        if startup_mode == "nvidia_once":
+            write_startup_mode("intel")
+            switch_to_nvidia()
+        elif startup_mode == "nvidia":
+            switch_to_nvidia()
+        elif startup_mode == "intel":
+            switch_to_intel()
+
+    except SwitchError as e:
+        print("Startup : cannot configure GPU : %s" % str(e))
+        print("Ignoring startup mode.")
         pass
-    if startup_mode == "nvidia_once":
-        write_startup_mode("intel")
-        switch_to_nvidia()
-    elif startup_mode == "nvidia":
-        switch_to_nvidia()
-    elif startup_mode == "intel":
-        switch_to_intel()
 
     # UNIX socket
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
