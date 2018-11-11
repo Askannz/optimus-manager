@@ -22,6 +22,10 @@ def configure_login_managers(mode):
 
         if manager_name == "sddm":
             _configure_sddm(mode)
+        elif manager_name == "lightdm":
+            _configure_lightdm(mode)
+        elif manager_name == "gdm":
+            _configure_gdm(mode)
 
 
 def _configure_sddm(mode):
@@ -49,3 +53,71 @@ def _configure_sddm(mode):
 
         except IOError:
             raise LoginManagerError("Cannot write to %s" % conf_filepath)
+
+
+def _configure_lightdm(mode):
+
+    CONF_FOLDER_PATH = "/etc/lightdm.conf.d/"
+
+    conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.LIGHTDM_CONF_NAME)
+
+    if mode == "intel":
+
+        if os.path.isfile(conf_filepath):
+            os.remove(conf_filepath)
+
+    elif mode == "nvidia":
+
+        if not os.path.isdir(CONF_FOLDER_PATH):
+            os.mkdir(CONF_FOLDER_PATH)
+
+        text = "[Seat:*]\n" \
+               "display-setup-script=%s\n" % envs.XSETUP_PATH
+
+        try:
+            with open(conf_filepath, 'w') as f:
+                f.write(text)
+
+        except IOError:
+            raise LoginManagerError("Cannot write to %s" % conf_filepath)
+
+
+def _configure_gdm(mode):
+
+    FOLDER_1_PATH = "/usr/share/gdm/greeter/autostart/"
+    FOLDER_2_PATH = "/etc/xdg/autostart/"
+
+    file_1_path = os.path.join(FOLDER_1_PATH, envs.GDM_DESKTOP_FILE_NAME)
+    file_2_path = os.path.join(FOLDER_1_PATH, envs.GDM_DESKTOP_FILE_NAME)
+
+    if mode == "intel":
+
+        if os.path.isfile(file_1_path):
+            os.remove(file_1_path)
+
+        if os.path.isfile(file_2_path):
+            os.remove(file_2_path)
+
+    elif mode == "nvidia":
+
+        if not os.path.isdir(FOLDER_1_PATH):
+            os.makedirs(FOLDER_1_PATH)
+
+        if not os.path.isdir(FOLDER_2_PATH):
+            os.makedirs(FOLDER_2_PATH)
+
+        text = "[Desktop Entry]\n" \
+               "Type=Application\n" \
+               "Name=Optimus Manager X Setup\n" \
+               "Exec=sh -c \"xrandr --setprovideroutputsource modesetting NVIDIA-0; xrandr --auto\"\n" \
+               "NoDisplay=true\n" \
+               "X-GNOME-Autostart-Phase=DisplayServer\n"
+
+        try:
+
+            for filepath in [file_1_path, file_2_path]:
+                with open(filepath, 'w') as f:
+                    f.write(text)
+
+        except IOError:
+            raise LoginManagerError("Cannot write to %s" % filepath)

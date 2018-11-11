@@ -53,6 +53,12 @@ def get_login_managers():
     if ret == 0:
         login_managers.append("sddm")
 
-    # TODO : Add support for other login managers (LightDM and GDM at least)
+    ret = exec_bash("which gdm").returncode
+    if ret == 0:
+        login_managers.append("gdm")
+
+    ret = exec_bash("which lightdm").returncode
+    if ret == 0:
+        login_managers.append("lightdm")
 
     return login_managers
