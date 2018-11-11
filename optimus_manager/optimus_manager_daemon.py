@@ -54,6 +54,8 @@ def main():
     parser.add_argument('--startup', action='store_true', help='Startup mode (configure GPU when daemon starts).')
     args = parser.parse_args()
 
+    print("Optimus Manager (Daemon) version %s" % envs.VERSION)
+
     # Config
     config = load_config()
 

@@ -23,6 +23,7 @@ def main():
 
     # Arguments parsing
     parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE (\"intel\" or \"nvidia\") and restart the display manager."
                              "WARNING : All your applications will close ! Be sure to save your work.")
@@ -32,6 +33,10 @@ def main():
     parser.add_argument('--print-startup', action='store_true',
                         help="Print the current startup mode.")
     args = parser.parse_args()
+
+    if args.version:
+        print("Optimus Manager (Client) version %s" % envs.VERSION)
+        sys.exit(0)
 
     if args.print_startup:
 

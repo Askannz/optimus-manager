@@ -1,3 +1,5 @@
+VERSION = "0.0.1"
+
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
 STARTUP_MODE_FILE_PATH = "/var/lib/optimus-manager/startup_mode"
