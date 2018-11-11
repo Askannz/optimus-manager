@@ -3,6 +3,7 @@ import sys
 import argparse
 import socket
 import optimus_manager.envs as envs
+import optimus_manager.var as var
 
 
 def send_command(cmd):
@@ -28,7 +29,19 @@ def main():
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
                              "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot")
+    parser.add_argument('--print-startup', action='store_true',
+                        help="Print the current startup mode.")
     args = parser.parse_args()
+
+    if args.print_startup:
+
+        try:
+            startup_mode = var.read_startup_mode()
+        except var.VarError as e:
+            print("Error reading startup mode : %s" % str(e))
+            sys.exit(1)
+
+        print("Current startup mode : %s" % startup_mode)
 
     if args.switch:
 
