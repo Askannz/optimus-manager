@@ -32,6 +32,8 @@ def main():
                              "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot")
     parser.add_argument('--print-startup', action='store_true',
                         help="Print the current startup mode.")
+    parser.add_argument('--no-confirm', action='store_true',
+                        help="Do not ask for confirmation before switching GPUs.")
     args = parser.parse_args()
 
     if args.version:
@@ -54,17 +56,20 @@ def main():
             print("Invalid mode : %s" % args.switch)
             sys.exit(1)
 
-        print("WARNING : You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
-              "(you can pass the --no-confirm option to disable this warning)\n"
-              "Continue ? (y/N)")
-        ans = input("> ").lower()
-
-        if ans == "y":
+        if args.no_confirm:
             send_command(args.switch)
-        elif ans == "n":
-            print("Aborting.")
         else:
-            print("Invalid choice. Aborting")
+            print("WARNING : You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
+                  "(you can pass the --no-confirm option to disable this warning)\n"
+                  "Continue ? (y/N)")
+            ans = input("> ").lower()
+
+            if ans == "y":
+                send_command(args.switch)
+            elif ans == "n":
+                print("Aborting.")
+            else:
+                print("Invalid choice. Aborting")
 
     if args.set_startup:
 
