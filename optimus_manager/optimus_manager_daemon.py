@@ -50,7 +50,8 @@ def gpu_switch(config, mode):
 def main():
 
     # Arguments parsing
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Daemon program for the Optimus Manager tool.\n"
+                                                 "https://github.com/Askannz/optimus-manager")
     parser.add_argument('--startup', action='store_true', help='Startup mode (configure GPU when daemon starts).')
     args = parser.parse_args()
 

@@ -22,7 +22,8 @@ def send_command(cmd):
 def main():
 
     # Arguments parsing
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Client program for the Optimus Manager tool.\n"
+                                                 "https://github.com/Askannz/optimus-manager")
     parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE (\"intel\" or \"nvidia\") and restart the display manager."
