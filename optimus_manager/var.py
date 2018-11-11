@@ -11,6 +11,10 @@ def read_startup_mode():
     try:
         with open(envs.STARTUP_MODE_FILE_PATH, 'r') as f:
             content = f.read()
+
+            if content[-1] == "\n":
+                content = content[:-1]
+
             if content in ["intel", "nvidia", "nvidia_once"]:
                 mode = content
             else:
