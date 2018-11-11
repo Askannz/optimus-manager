@@ -1,6 +1,9 @@
 #!/usr/bin/env python
+import sys
 import os
+import signal
 import argparse
+import select
 import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config
@@ -8,6 +11,19 @@ from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
 import optimus_manager.checks as checks
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.bash import exec_bash
+
+
+class SignalHandler:
+    def __init__(self, server):
+        self.server = server
+
+    def handler(self, signum, frame):
+        print("\nProcess stop requested")
+        print("Closing and removing the socket...")
+        self.server.close()
+        os.remove(envs.SOCKET_PATH)
+        print("Goodbye !")
+        sys.exit(0)
 
 
 def gpu_switch(config, mode):
@@ -69,11 +85,20 @@ def main():
         os.remove(envs.SOCKET_PATH)
 
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    server.settimeout(envs.SOCKET_TIMEOUT)
     server.bind(envs.SOCKET_PATH)
     os.chmod(envs.SOCKET_PATH, 0o666)
 
+    # Signal hander
+    handler = SignalHandler(server)
+    signal.signal(signal.SIGTERM, handler.handler)
+    signal.signal(signal.SIGINT, handler.handler)
+
+    print("Awaiting commands")
     while True:
 
+        r, _, _ = select.select([server], [], [])
+        print("Receiving")
         datagram = server.recv(1024)
         msg = datagram.decode('utf-8')
 
@@ -101,8 +126,6 @@ def main():
             except SwitchError as e:
 
                 print("Cannot switch GPU : %s" % str(e))
-
-    server.close()
 
 
 if __name__ == '__main__':
