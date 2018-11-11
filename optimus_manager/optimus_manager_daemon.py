@@ -47,9 +47,8 @@ def main():
         try:
             startup_mode = read_startup_mode()
         except VarError as e:
-            print("Cannot read startup mode : %s" % str(e))
-            print("Overwriting with %s" % envs.DEFAULT_STARTUP_MODE)
-            write_startup_mode(envs.DEFAULT_STARTUP_MODE)
+            print("ERROR : Cannot read startup mode : %s" % str(e))
+            print("Defaulting to %s" % envs.DEFAULT_STARTUP_MODE)
             startup_mode = envs.DEFAULT_STARTUP_MODE
 
         print("Startup mode :", startup_mode)
