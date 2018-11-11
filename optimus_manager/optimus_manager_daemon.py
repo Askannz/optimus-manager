@@ -53,8 +53,6 @@ def main():
             startup_mode = envs.DEFAULT_STARTUP_MODE
 
         print("Startup mode :", startup_mode)
-        if startup_mode == "inactive":
-            pass
         if startup_mode == "nvidia_once":
             write_startup_mode("intel")
             switch_to_nvidia(config)
@@ -80,7 +78,7 @@ def main():
         datagram = server.recv(1024)
         msg = datagram.decode('utf-8')
 
-        if msg not in ["intel", "nvidia", "startup_inactive", "startup_nvidia_once",
+        if msg not in ["intel", "nvidia", "startup_nvidia_once",
                        "startup_nvidia", "startup_intel"]:
             print("Invalid command received !")
 
@@ -94,9 +92,7 @@ def main():
                     gpu_switch(config, "nvidia")
 
                 # Startup modes
-                elif msg == "startup_inactive":
-                    write_startup_mode("inactive")
-                elif msg == "startup_nvidia_once":
+                if msg == "startup_nvidia_once":
                     write_startup_mode("nvidia_once")
                 elif msg == "startup_nvidia":
                     write_startup_mode("nvidia")
