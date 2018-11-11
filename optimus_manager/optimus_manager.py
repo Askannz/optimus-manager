@@ -57,7 +57,7 @@ def main():
             print("Invalid startup mode : %s" % args.set_startup)
             sys.exit(1)
 
-        send_command(args.set_startup)
+        send_command("startup_" + args.set_startup)
 
 
 if __name__ == '__main__':
