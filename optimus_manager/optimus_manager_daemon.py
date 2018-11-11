@@ -64,6 +64,13 @@ def main():
             switch_to_intel(config)
 
     # UNIX socket
+
+    if os.path.exists(envs.SOCKET_PATH):
+        print("Warning : the UNIX socket file %s already exists ! Either another "
+              "daemon instance is running or the daemon was not exited gracefully "
+              "last time.\nRemoving the file and moving on..." % envs.SOCKET_PATH)
+        os.remove(envs.SOCKET_PATH)
+
     server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
     server.bind(envs.SOCKET_PATH)
     os.chmod(envs.SOCKET_PATH, 0o666)
