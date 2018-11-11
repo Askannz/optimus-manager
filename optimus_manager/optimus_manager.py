@@ -54,7 +54,17 @@ def main():
             print("Invalid mode : %s" % args.switch)
             sys.exit(1)
 
-        send_command(args.switch)
+        print("WARNING : You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
+              "(you can pass the --no-confirm option to disable this warning)\n"
+              "Continue ? (y/N)")
+        ans = input("> ").lower()
+
+        if ans == "y":
+            send_command(args.switch)
+        elif ans == "n":
+            print("Aborting.")
+        else:
+            print("Invalid choice. Aborting")
 
     if args.set_startup:
 
