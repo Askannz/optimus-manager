@@ -40,7 +40,7 @@ def main():
         print("Optimus Manager (Client) version %s" % envs.VERSION)
         sys.exit(0)
 
-    if args.print_startup:
+    elif args.print_startup:
 
         try:
             startup_mode = var.read_startup_mode()
@@ -50,7 +50,7 @@ def main():
 
         print("Current startup mode : %s" % startup_mode)
 
-    if args.switch:
+    elif args.switch:
 
         if args.switch not in ["intel", "nvidia"]:
             print("Invalid mode : %s" % args.switch)
@@ -71,13 +71,17 @@ def main():
             else:
                 print("Invalid choice. Aborting")
 
-    if args.set_startup:
+    elif args.set_startup:
 
         if args.set_startup not in ["intel", "nvidia", "nvidia_once"]:
             print("Invalid startup mode : %s" % args.set_startup)
             sys.exit(1)
 
         send_command("startup_" + args.set_startup)
+
+    else:
+
+        print("Invalid arguments.")
 
 
 if __name__ == '__main__':
