@@ -7,10 +7,15 @@ import optimus_manager.envs as envs
 
 def send_command(cmd):
 
-    client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    client.connect(envs.SOCKET_PATH)
-    client.send(cmd.encode('utf-8'))
-    client.close()
+    try:
+        client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        client.connect(envs.SOCKET_PATH)
+        client.send(cmd.encode('utf-8'))
+        client.close()
+
+    except ConnectionRefusedError:
+        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?" % envs.SOCKET_PATH)
+        sys.exit(1)
 
 
 def main():
