@@ -10,6 +10,7 @@ from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.login_managers import stop_login_manager, restart_login_manager
+from optimus_manager.checks import is_xorg_running
 
 
 class SignalHandler:
@@ -57,7 +58,7 @@ def main():
     config = load_config()
 
     # Startup
-    if args.startup:
+    if args.startup and not is_xorg_running():
 
         try:
             startup_mode = read_startup_mode()
