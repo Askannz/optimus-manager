@@ -31,7 +31,9 @@ def is_gpu_powered():
     return (state == "ON")
 
 
-def is_login_manager_active():
+def is_login_manager_active(config):
 
-    state = exec_bash("systemctl is-active display-manager").stdout.decode('utf-8')[:-1]
+    login_manager_service_name = config["optimus"]["login_manager"]
+
+    state = exec_bash("systemctl is-active %s" % login_manager_service_name).stdout.decode('utf-8')[:-1]
     return (state == "active")

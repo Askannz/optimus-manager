@@ -1,10 +1,37 @@
 import os
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_login_managers
+import optimus_manager.checks as checks
+from optimus_manager.bash import exec_bash
 
 
 class LoginManagerError(Exception):
     pass
+
+
+def stop_login_manager(config):
+
+    login_manager_service_name = config["optimus"]["login_manager"]
+
+    if login_manager_service_name == "":
+        return
+
+    if checks.is_login_manager_active(config):
+        exec_bash("systemctl stop %s" % login_manager_service_name)
+        if checks.is_login_manager_active(config):
+            print("Warning : cannot stop service %s. Continuing..." % login_manager_service_name)
+
+
+def restart_login_manager(config):
+
+    login_manager_service_name = config["optimus"]["login_manager"]
+
+    if login_manager_service_name == "":
+        return
+
+    exec_bash("systemctl restart %s" % login_manager_service_name)
+    if not checks.is_login_manager_active(config):
+        print("Warning : cannot restart service %s. Continuing..." % login_manager_service_name)
 
 
 def configure_login_managers(mode):
