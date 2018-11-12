@@ -37,3 +37,11 @@ def is_login_manager_active(config):
 
     state = exec_bash("systemctl is-active %s" % login_manager_service_name).stdout.decode('utf-8')[:-1]
     return (state == "active")
+
+
+def is_xorg_running():
+
+    ret1 = exec_bash("pidof X").returncode
+    ret2 = exec_bash("pidof Xorg").returncode
+
+    return (ret1 == 0) or (ret2 == 0)
