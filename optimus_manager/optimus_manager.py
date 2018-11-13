@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 import sys
+import os
 import argparse
 import socket
 import optimus_manager.envs as envs
 import optimus_manager.var as var
+from optimus_manager.cleanup import clean_xorg, clean_login_managers
 
 
 def send_command(cmd):
@@ -35,6 +37,8 @@ def main():
                         help="Print the current startup mode.")
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation before switching GPUs.")
+    parser.add_argument('--cleanup', action='store_true',
+                        help="Remove auto-generated configuration files left over by the daemon.")
     args = parser.parse_args()
 
     if args.version:
@@ -79,6 +83,15 @@ def main():
             sys.exit(1)
 
         send_command("startup_" + args.set_startup)
+
+    elif args.cleanup:
+
+        if os.geteuid() != 0:
+            print("You need to execute the command as root for this action.")
+            sys.exit(1)
+
+        clean_xorg()
+        clean_login_managers()
 
     else:
 
