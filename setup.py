@@ -16,7 +16,7 @@ setup(
     packages=['optimus_manager'],
     entry_points={
         'console_scripts': [
-            'optimus-manager=optimus_manager.optimus_manager:main',
+            'optimus-manager=optimus_manager.optimus_manager_client:main',
             'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main',
         ],
     },
