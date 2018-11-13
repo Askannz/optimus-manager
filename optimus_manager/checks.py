@@ -45,3 +45,8 @@ def is_xorg_running():
     ret2 = exec_bash("pidof Xorg").returncode
 
     return (ret1 == 0) or (ret2 == 0)
+
+
+def is_pat_available():
+    ret = exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
+    return (ret == 0)
