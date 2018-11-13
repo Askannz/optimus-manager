@@ -84,9 +84,19 @@ def switch_to_nvidia(config):
 
     # Nvidia modules
     print("Loading Nvidia modules")
+
     modeset_value = {"yes": 1, "no": 0}[config["nvidia"]["modeset"]]
+    pat_value = {"yes": 1, "no": 0}[config["nvidia"]["PAT"]]
+
+    if not checks.is_pat_available():
+        print("Warning : Page Attribute Tables are not available on your system.\n"
+              "Disabling the PAT option for Nvidia.")
+        pat_value = 0
+
     exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
-    exec_bash("modprobe nvidia_modeset nvidia")
+    exec_bash("modprobe nvidia_modeset")
+    exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
+
     if not checks.are_nvidia_modules_loaded():
         raise SwitchError("Cannot load Nvidia modules")
 
