@@ -1,4 +1,5 @@
 import os
+import time
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_login_managers
 import optimus_manager.checks as checks
@@ -17,9 +18,15 @@ def stop_login_manager(config):
         return
 
     if checks.is_login_manager_active(config):
+
         exec_bash("systemctl stop %s" % login_manager_service_name)
+
         if checks.is_login_manager_active(config):
             print("Warning : cannot stop service %s. Continuing..." % login_manager_service_name)
+        else:
+            stopped = _wait_xorg_stop()
+            if not stopped:
+                print("Warning : Xorg server does not want to stop. Continuing...")
 
 
 def restart_login_manager(config):
@@ -30,6 +37,7 @@ def restart_login_manager(config):
         return
 
     exec_bash("systemctl restart %s" % login_manager_service_name)
+
     if not checks.is_login_manager_active(config):
         print("Warning : cannot restart service %s. Continuing..." % login_manager_service_name)
 
@@ -148,3 +156,20 @@ def _configure_gdm(mode):
 
         except IOError:
             raise LoginManagerError("Cannot write to %s" % filepath)
+
+
+def _wait_xorg_stop():
+
+    POLL_TIME = 0.5
+    TIMEOUT = 10.0
+
+    t0 = time.time()
+    t = t0
+    while abs(t-t0) < TIMEOUT:
+        if not checks.is_xorg_running():
+            return True
+        else:
+            time.sleep(POLL_TIME)
+            t = time.time()
+
+    return False
