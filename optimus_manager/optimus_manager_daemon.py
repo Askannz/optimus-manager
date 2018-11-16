@@ -9,7 +9,7 @@ import optimus_manager.envs as envs
 from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
-from optimus_manager.login_managers import stop_login_manager, restart_login_manager
+from optimus_manager.login_managers import stop_login_manager, restart_login_manager, LoginManagerError
 from optimus_manager.checks import is_xorg_running
 
 
@@ -28,10 +28,11 @@ class SignalHandler:
 
 def gpu_switch(config, mode):
 
-    print("Stopping login manager")
-    stop_login_manager(config)
-
     try:
+
+        print("Stopping login manager")
+        stop_login_manager(config)
+
         if mode == "intel":
             switch_to_intel(config)
         elif mode == "nvidia":
@@ -42,6 +43,9 @@ def gpu_switch(config, mode):
 
     except SwitchError as e:
         print("Cannot switch GPU : %s" % str(e))
+
+    except LoginManagerError as e:
+        print("Login manager error : %s" % str(e))
 
 
 def main():

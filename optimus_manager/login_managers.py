@@ -22,11 +22,11 @@ def stop_login_manager(config):
         exec_bash("systemctl stop %s" % login_manager_service_name)
 
         if checks.is_login_manager_active(config):
-            print("Warning : cannot stop service %s. Continuing..." % login_manager_service_name)
+            raise LoginManagerError("Warning : cannot stop service %s." % login_manager_service_name)
         else:
             stopped = _wait_xorg_stop()
             if not stopped:
-                print("Warning : Xorg server does not want to stop. Continuing...")
+                raise LoginManagerError("Warning : Xorg server does not want to stop.")
 
 
 def restart_login_manager(config):
@@ -39,7 +39,7 @@ def restart_login_manager(config):
     exec_bash("systemctl restart %s" % login_manager_service_name)
 
     if not checks.is_login_manager_active(config):
-        print("Warning : cannot restart service %s. Continuing..." % login_manager_service_name)
+        raise LoginManagerError("Warning : cannot restart service %s." % login_manager_service_name)
 
 
 def configure_login_managers(mode):
