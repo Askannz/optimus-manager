@@ -8,7 +8,7 @@ Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 Only Xorg is supported (no Wayland), and only Archlinux (plus derivatives like Manjaro) is supported for now.
 
 
-The Why
+The "why"
 ----------
 
 On Windows, the Optimus technology works by dynamically offloading rendering to the Nvidia GPU when running 3D-intensive applications, while the desktop session itself runs on the Intel GPU.
