@@ -153,7 +153,7 @@ Consider opening a GitHub issue about this, with logs attached.
 ### I do not use a display manager, or I do not want optimus-manager to stop/restart my display manager
 
 
-You can disable control of the login manager by setting the option `login_manager` in the section `[optimus]` of the config file to `""`. **Please note** that you will have to manually stop your X server before switching GPUs, because the rendering kernel modules cannot be unloaded while the server is running.
+You can disable control of the login manager by leaving blank the option `login_manager` in the section `[optimus]` of the config file. **Please note** that you will have to manually stop your X server before switching GPUs, because the rendering kernel modules cannot be unloaded while the server is running.
 
 If you use startx or xinitrc, you also have to add the line `/usr/bin/optimus-manager_Xsetup` to your `.xinitrc` so that this script is executed when X starts. This may necessary to set up PRIME.
 
