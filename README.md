@@ -162,7 +162,7 @@ Consider opening a GitHub issue about this, with logs attached.
 
 You can disable control of the login manager by leaving blank the option `login_manager` in the section `[optimus]` of the config file. **Please note** that you will have to manually stop your X server before switching GPUs, because the rendering kernel modules cannot be unloaded while the server is running.
 
-If you use startx or xinitrc, you also have to add the line `/usr/bin/optimus-manager_Xsetup` to your `.xinitrc` so that this script is executed when X starts. This may necessary to set up PRIME.
+If you use startx or xinitrc, you also have to add the line `/usr/bin/optimus-manager_Xsetup` to your `.xinitrc` so that this script is executed when X starts. This may be necessary to set up PRIME.
 
 
 ### When I switch to Nvidia, the built-in screen of the laptop stays black but I can use monitors plugged to the video output
