@@ -57,6 +57,7 @@ Once the package is installed, do not forget to enable the daemon so that it is 
 
 **FOR MANJARO USERS :** there are a few extra steps to take care of. Please refer to [this page](STUB).
 
+
 If you want to disable optimus-manager completely, then first disable the SystemD service :
 
 ```
@@ -99,7 +100,7 @@ The default configuration file can be found at `/usr/share/optimus-manager.conf`
 
 Any parameter not specified in your config file will take value from the default file.
 
-Please refer to the comments in the [default config file](STUB) for descriptions of the available parameter. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
+Please refer to the comments in the [default config file](STUB) for descriptions of the available parameters. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
 
 Those parameters probably do not cover all use cases (yet), but feel free to open an issue if you think something else should be added there.
 
@@ -109,11 +110,13 @@ FAQ / Troubleshooting
 
 General troubleshooting advice : you can view the logs of the optimus-manager daemon by running `journalctl -u optimus-manager.service`. Also, check `systemctl status optimus-manager.service` to see if the daemon is properly loaded and running.
 
-The Arch wiki can be a great resource for troubleshooting. Check the following pages : [NVIDIA](https://wiki.archlinux.org/index.php/NVIDIA), [NVDIA Optimus](https://wiki.archlinux.org/index.php/NVIDIA_Optimus), [Bumblebee](https://wiki.archlinux.org/index.php/Bumblebee) (even if optimus-manager does not use Bumblebee, some advices related to pwer switching can still be applicable)
+The Arch wiki can be a great resource for troubleshooting. Check the following pages : [NVIDIA](https://wiki.archlinux.org/index.php/NVIDIA), [NVDIA Optimus](https://wiki.archlinux.org/index.php/NVIDIA_Optimus), [Bumblebee](https://wiki.archlinux.org/index.php/Bumblebee) (even if optimus-manager does not use Bumblebee, some advices related to power switching can still be applicable)
 
 #### When I switch GPUs, my system completely locks up (I cannot even switch to a TTY with Ctrl+Alt+F*x*)
 
 It is very likely your laptop is plagued with one of the numerous ACPI issues associated with Optimus laptops on Linux, and due to manufacturers having their own implementations. The symptoms are often similar : a complete system lockup if you try to run any program that uses the Nvidia GPU while it is powered off. Unfortunately there is no universal fix, but the solution often involves adding a kernel parameter to your boot options. You can find more information on [this GitHub issue](https://github.com/Bumblebee-Project/Bumblebee/issues/764), where people have been reporting solutions for specific laptop models. Check [this Arch Wiki page](https://wiki.archlinux.org/index.php/Kernel_parameters) to learn how to set a kernel parameter at boot.
+
+You can also try changing the power switching backen in the configuration file (section `[optimus]`, parameter `switching`).
 
 #### GPU switching works but my system locks up if I am in Intel mode and start any of the following programs : VLC, lspci, anything that polls the PCI devices
 
@@ -139,15 +142,15 @@ Some fixes you can try :
 - Setting `modeset` to `no` in the `[intel]` and `[nvidia]` sections
 - Changing the DRI versions from 3 to 2
 
-If that does not fix your problem and you have to open a GitHub issue, please attach all both the Xorg log and the daemon log.
+If that does not fix your problem and you have to open a GitHub issue, please attach both the Xorg log and the daemon log.
 
 ### GPU switching works but I cannot run any 3D application in Intel mode (they fail to launch with some error message)
 
-Check is the `nvidia` module is still loaded in Intel mode. That should not happen, but if it is the case, then logout, stop the display manager manually, unload any Nvidia module (`nvidia`, `nvidia_modeset`,`nvidia_drm`, in that order) and restart the display manager.
+Check if the `nvidia` module is still loaded in Intel mode. That should not happen, but if it is the case, then logout, stop the display manager manually, unload all Nvidia modules (`nvidia`, `nvidia_modeset`,`nvidia_drm`, in that order) and restart the display manager.
 
 Consider opening a GitHub issue about this, with logs attached.
 
-### I don't use a display manager, or I do not want optimus-manager to stop/restart my display manager
+### I do not use a display manager, or I do not want optimus-manager to stop/restart my display manager
 
 
 You can disable control of the login manager by setting the option `login_manager` in the section `[optimus]` of the config file to `""`. **Please note** that you will have to manually stop your X server before switching GPUs, because the rendering kernel modules cannot be unloaded while the server is running.
@@ -157,7 +160,7 @@ If you use startx or xinitrc, you also have to add the line `/usr/bin/optimus-ma
 
 ### When I switch to Nvidia, the built-in screen of the laptop stays black but I can use monitors plugged to the video output
 
-It seems that PRIME is not configured. Please open a GitHub issue with logs attached, and include as much details about your login manager as you can.
+It seems that PRIME is not properly configured. Please open a GitHub issue with logs attached, and include as much details about your login manager as you can.
 
 ### Even after disabling the daemon, it is still doing something to my Xorg or login manager configuration.
 
@@ -167,6 +170,6 @@ Make sure to remove any leftover autogenerated config file by running `optimus-m
 
 Maybe. It will not work on Ubuntu because Canonical has its own tool to deal with Optimus (`prime-select`). If you are on Ubuntu you should be using that.
 
-It will not work on the default install of Fedora because Wayland is used by default (it *might* work in Xorg mode though).
+It will not work on the default install of Fedora because it uses Wayland (it *might* work in Xorg mode though).
 
 I do not know enough about the specificities of other distributions to port this tool to them. Feel free to help though :)
