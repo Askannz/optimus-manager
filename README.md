@@ -34,3 +34,6 @@ In practice, here is what happens when switching to the Intel GPU (for example) 
 2. The Nvidia modules are unloaded and `nouveau` is loaded instead to switch off the card (this can also be done with `bbswitch` if `nouveau` does not work)
 3. The configuration for X and your login manager is updated (note that the configuration is saved to dedicated files, this will *not* overwrite your own configuration files)
 4. The login manager is restarted.
+
+
+I am well-aware this is still a *hacky* solution. I will happily deprecate this tool the day Nvidia implements proper GPU offloading in their Linux driver.
