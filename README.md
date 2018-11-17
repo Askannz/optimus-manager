@@ -45,7 +45,7 @@ I am well-aware this is still a *hacky* solution. I will happily deprecate this 
 Installation
 ----------
 
-You can use this AUR package : [link](STUB)
+You can use this AUR package : [link](https://aur.archlinux.org/packages/optimus-manager/)
 
 Once the package is installed, do not forget to enable the daemon so that it is started at boot time :
 
