@@ -108,13 +108,14 @@ def main():
         while True:
 
             r, _, _ = select.select([server], [], [])
-            print("Receiving")
             datagram = server.recv(1024)
             msg = datagram.decode('utf-8')
 
+            print("Received command : %s" % msg)
+
             if msg not in ["intel", "nvidia", "startup_nvidia_once",
                            "startup_nvidia", "startup_intel"]:
-                print("Invalid command received !")
+                print("Invalid command !")
 
             else:
 

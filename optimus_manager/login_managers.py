@@ -56,10 +56,13 @@ def configure_login_managers(mode):
     for manager_name in login_managers:
 
         if manager_name == "sddm":
+            print("\tConfiguring SDDM")
             _configure_sddm(mode)
         elif manager_name == "lightdm":
+            print("\tConfiguring LightDM")
             _configure_lightdm(mode)
         elif manager_name == "gdm":
+            print("\tConfiguring GDM")
             _configure_gdm(mode)
 
 
