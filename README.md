@@ -3,6 +3,8 @@ optimus-manager (THIS IS STILL A WIP)
 
 This Linux program provides a solution for GPU switching on Optimus laptops (a.k.a laptops with dual Nvidia/Intel GPUs).
 
+Obviously this is unofficial, I am not affiliated with Nvidia in any way.
+
 Only Xorg is supported (no Wayland), and only Archlinux (plus derivatives like Manjaro) is supported for now.
 
 
