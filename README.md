@@ -117,6 +117,10 @@ General troubleshooting advice : you can view the logs of the optimus-manager da
 
 The Arch wiki can be a great resource for troubleshooting. Check the following pages : [NVIDIA](https://wiki.archlinux.org/index.php/NVIDIA), [NVDIA Optimus](https://wiki.archlinux.org/index.php/NVIDIA_Optimus), [Bumblebee](https://wiki.archlinux.org/index.php/Bumblebee) (even if optimus-manager does not use Bumblebee, some advices related to power switching can still be applicable)
 
+#### How can I check which GPU my X session is running on ?
+
+You can run `glxinfo | grep "server glx vendor string"`. If you see `SGI`, you are running on the Intel GPU. If you see `NVIDIA Corporation`, you are running on the Nvidia GPU.
+
 #### When I switch GPUs, my system completely locks up (I cannot even switch to a TTY with Ctrl+Alt+F*x*)
 
 It is very likely your laptop is plagued by one of the numerous ACPI issues associated with Optimus laptops on Linux, and caused by manufacturers having their own implementations. The symptoms are often similar : a complete system lockup if you try to run any program that uses the Nvidia GPU while it is powered off. Unfortunately there is no universal fix, but the solution often involves adding a kernel parameter to your boot options. You can find more information on [this GitHub issue](https://github.com/Bumblebee-Project/Bumblebee/issues/764), where people have been reporting solutions for specific laptop models. Check [this Arch Wiki page](https://wiki.archlinux.org/index.php/Kernel_parameters) to learn how to set a kernel parameter at boot.
