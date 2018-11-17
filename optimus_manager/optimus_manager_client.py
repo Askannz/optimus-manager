@@ -5,7 +5,7 @@ import argparse
 import socket
 import optimus_manager.envs as envs
 import optimus_manager.var as var
-from optimus_manager.cleanup import clean_xorg, clean_login_managers
+from optimus_manager.cleanup import clean_all
 
 
 def send_command(cmd):
@@ -90,8 +90,7 @@ def main():
             print("You need to execute the command as root for this action.")
             sys.exit(1)
 
-        clean_xorg()
-        clean_login_managers()
+        clean_all()
 
     else:
 

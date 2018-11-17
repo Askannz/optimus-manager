@@ -2,6 +2,11 @@ import os
 import optimus_manager.envs as envs
 
 
+def clean_all():
+    clean_xorg()
+    clean_login_managers()
+
+
 def clean_xorg():
 
     try:

@@ -11,6 +11,7 @@ from optimus_manager.var import read_startup_mode, write_startup_mode, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.login_managers import stop_login_manager, restart_login_manager, LoginManagerError
 from optimus_manager.checks import is_xorg_running
+from optimus_manager.cleanup import clean_all
 
 
 class SignalHandler:
@@ -23,6 +24,7 @@ class SignalHandler:
         self.server.close()
         os.remove(envs.SOCKET_PATH)
         print("Goodbye !")
+        clean_all()
         sys.exit(0)
 
 
@@ -60,6 +62,9 @@ def main():
 
     # Config
     config = load_config()
+
+    # Cleanup
+    clean_all()
 
     # Startup
     if args.startup and not is_xorg_running():
@@ -99,37 +104,40 @@ def main():
     signal.signal(signal.SIGINT, handler.handler)
 
     print("Awaiting commands")
-    while True:
+    try:
+        while True:
 
-        r, _, _ = select.select([server], [], [])
-        print("Receiving")
-        datagram = server.recv(1024)
-        msg = datagram.decode('utf-8')
+            r, _, _ = select.select([server], [], [])
+            print("Receiving")
+            datagram = server.recv(1024)
+            msg = datagram.decode('utf-8')
 
-        if msg not in ["intel", "nvidia", "startup_nvidia_once",
-                       "startup_nvidia", "startup_intel"]:
-            print("Invalid command received !")
+            if msg not in ["intel", "nvidia", "startup_nvidia_once",
+                           "startup_nvidia", "startup_intel"]:
+                print("Invalid command received !")
 
-        else:
+            else:
 
-            try:
-                # Switching
-                if msg == "intel":
-                    gpu_switch(config, "intel")
-                elif msg == "nvidia":
-                    gpu_switch(config, "nvidia")
+                try:
+                    # Switching
+                    if msg == "intel":
+                        gpu_switch(config, "intel")
+                    elif msg == "nvidia":
+                        gpu_switch(config, "nvidia")
 
-                # Startup modes
-                if msg == "startup_nvidia_once":
-                    write_startup_mode("nvidia_once")
-                elif msg == "startup_nvidia":
-                    write_startup_mode("nvidia")
-                elif msg == "startup_intel":
-                    write_startup_mode("intel")
+                    # Startup modes
+                    if msg == "startup_nvidia_once":
+                        write_startup_mode("nvidia_once")
+                    elif msg == "startup_nvidia":
+                        write_startup_mode("nvidia")
+                    elif msg == "startup_intel":
+                        write_startup_mode("intel")
 
-            except SwitchError as e:
+                except SwitchError as e:
 
-                print("Cannot switch GPU : %s" % str(e))
+                    print("Cannot switch GPU : %s" % str(e))
+    finally:
+        clean_all()
 
 
 if __name__ == '__main__':
