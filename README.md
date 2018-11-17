@@ -7,6 +7,8 @@ Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 
 Only Xorg is supported (no Wayland), and only Archlinux (plus derivatives like Manjaro) is supported for now.
 
+Supported display managers are : SDDM, LightDM, GDM. The program may still work with other but you have to configure them manually.
+
 
 The "why"
 ----------
@@ -125,6 +127,10 @@ This is due to ACPI problems, see the previous question.
 #### Nothing happens when I ask to switch GPUs (the display manager does not stop)
 
 By default, the daemon assumes that your display manager service has the name alias `display-manager` (should be the default on Arch and Manjaro). If it isn't, you have to specify the name manually so that optimus-manager can find it. See the `login_manager` parameter in the configuration file, in the `[optimus]` section.
+
+#### My display manager is not SDDM, LightDM or SDDM
+
+Set the `login_manager` parameter in the configuration file to the name of your login manager service. You must also configure it manually so that it executes the script `/usr/bin/optimus-manager_Xsetup` on startup. The X server may still work without that last step but you will see a black screen on your built-in monitor instead of the login window.
 
 #### The display manager stops but does not restart (a.k.a I am stuck in TTY mode)
 
