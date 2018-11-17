@@ -28,6 +28,7 @@ Unfortunately the X server configuration is set-up in a permanent manner with co
 
 The present tool does that for you : it dynamically writes the X configuration at boot time, rewrites it every time you need to switch GPUs, and also loads the appropriate kernel modules to make sure your GPUs are properly turned on/off.
 
+Note that this is nothing new : Ubuntu has been using that method for years with their `prime-select` script.
 
 In practice, here is what happens when switching to the Intel GPU (for example) :
 1. Your login manager is automatically stopped, which also stops the X server (warning : this closes all opened applications)
