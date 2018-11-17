@@ -32,7 +32,7 @@ def main():
                              "WARNING : All your applications will close ! Be sure to save your work.")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot")
+                             "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot)")
     parser.add_argument('--print-startup', action='store_true',
                         help="Print the current startup mode.")
     parser.add_argument('--no-confirm', action='store_true',
