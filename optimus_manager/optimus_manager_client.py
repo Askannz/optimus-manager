@@ -16,7 +16,7 @@ def send_command(cmd):
         client.send(cmd.encode('utf-8'))
         client.close()
 
-    except ConnectionRefusedError:
+    except (ConnectionRefusedError, OSError):
         print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?" % envs.SOCKET_PATH)
         sys.exit(1)
 
