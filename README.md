@@ -1,4 +1,4 @@
-optimus-manager (THIS IS STILL A WIP)
+optimus-manager
 ==================
 
 This Linux program provides a solution for GPU switching on Optimus laptops (a.k.a laptops with dual Nvidia/Intel GPUs).
