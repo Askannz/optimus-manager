@@ -48,5 +48,5 @@ def is_xorg_running():
 
 
 def is_pat_available():
-    ret = exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
+    ret = exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo").returncode
     return (ret == 0)
