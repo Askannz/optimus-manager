@@ -131,6 +131,10 @@ You can also try changing the power switching backend in the configuration file 
 
 This is due to ACPI problems, see the previous question.
 
+#### I think my Nvidia GPU stays powered on even in Intel mode (my battery drains too fast)
+
+Maybe there is a problem with `nouveau` not handling power switching properly. Check `dmesg` for errors related to `nouveau` or PCI power management. You can also try switching the power switching backend to `bbswitch` (option `switching`, Section `[optimus]`)
+
 #### Nothing happens when I ask to switch GPUs (the display manager does not stop)
 
 By default, the daemon assumes that your display manager service has the name alias `display-manager` (should be the default on Arch and Manjaro). If it isn't the case, you have to specify the name manually so that optimus-manager can find it. See the `login_manager` parameter in the configuration file, in the `[optimus]` section.
