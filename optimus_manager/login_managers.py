@@ -80,7 +80,7 @@ def _configure_sddm(mode):
     elif mode == "nvidia":
 
         if not os.path.isdir(CONF_FOLDER_PATH):
-            os.mkdir(CONF_FOLDER_PATH)
+            os.makedirs(CONF_FOLDER_PATH)
 
         text = "[X11]\n" \
                "DisplayCommand=%s\n" % envs.XSETUP_PATH
@@ -107,7 +107,7 @@ def _configure_lightdm(mode):
     elif mode == "nvidia":
 
         if not os.path.isdir(CONF_FOLDER_PATH):
-            os.mkdir(CONF_FOLDER_PATH)
+            os.makedirs(CONF_FOLDER_PATH)
 
         text = "[Seat:*]\n" \
                "display-setup-script=%s\n" % envs.XSETUP_PATH
