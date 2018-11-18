@@ -173,7 +173,7 @@ You can disable control of the login manager by leaving blank the option `login_
 
 If you use startx or xinitrc, you also have to add the line `/usr/bin/optimus-manager_Xsetup` to your `.xinitrc` so that this script is executed when X starts. This may be necessary to set up PRIME.
 
-#### When I switch to Nvidia, the built-in screen of the laptop stays black but I can use monitors plugged to the video output
+#### When I switch to Nvidia, the built-in screen of the laptop stays black but I can still input my password or use monitors plugged to the video output
 
 It seems that PRIME is not properly configured. Please open a GitHub issue with logs attached, and include as much details about your login manager as you can.
 
