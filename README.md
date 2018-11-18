@@ -8,7 +8,9 @@ Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 **Only Archlinux (plus derivatives like Manjaro) is supported for now.**
 Only Xorg sessions are supported (no Wayland).
 
-Supported display managers are : SDDM, LightDM, GDM. The program may still work with others but you have to configure them manually (see [this section](#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
+Supported display managers are : SDDM, LightDM, ~~GDM~~. The program may still work with others but you have to configure them manually (see [this section](#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
+
+**Update :** GDM support is currently broken (see this issue : https://github.com/Askannz/optimus-manager/issues/4). You can still use optimus-manager but you will have to manually logout and stop the X server before switching GPUs.
 
 
 The "why"
