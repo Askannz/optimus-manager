@@ -68,29 +68,23 @@ def configure_login_managers(mode):
 
 def _configure_sddm(mode):
 
-    CONF_FOLDER_PATH = "/etc/sddm.conf.d/"
+    XSETUP_SDDM_PATH = "/usr/share/sddm/scripts/Xsetup"
 
-    conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.SDDM_CONF_NAME)
+    header = "#!/bin/sh\n" \
+             "# Xsetup - run as root before the login dialog appears\n"
 
     if mode == "intel":
-
-        if os.path.isfile(conf_filepath):
-            os.remove(conf_filepath)
+        text = header
 
     elif mode == "nvidia":
+        text = header + "exec %s\n" % envs.XSETUP_PATH
 
-        if not os.path.isdir(CONF_FOLDER_PATH):
-            os.makedirs(CONF_FOLDER_PATH)
+    try:
+        with open(XSETUP_SDDM_PATH, 'w') as f:
+            f.write(text)
 
-        text = "[X11]\n" \
-               "DisplayCommand=%s\n" % envs.XSETUP_PATH
-
-        try:
-            with open(conf_filepath, 'w') as f:
-                f.write(text)
-
-        except IOError:
-            raise LoginManagerError("Cannot write to %s" % conf_filepath)
+    except IOError:
+        raise LoginManagerError("Cannot write to %s" % XSETUP_SDDM_PATH)
 
 
 def _configure_lightdm(mode):

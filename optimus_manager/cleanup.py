@@ -20,14 +20,18 @@ def clean_login_managers():
 
     def _clean_sddm():
 
-        CONF_FOLDER_PATH = "/etc/sddm.conf.d/"
-        conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.SDDM_CONF_NAME)
+        XSETUP_SDDM_PATH = "/usr/share/sddm/scripts/Xsetup"
+
+        text = "#!/bin/sh\n" \
+               "# Xsetup - run as root before the login dialog appears\n"
 
         try:
-            os.remove(conf_filepath)
-            print("Removed %s" % conf_filepath)
-        except FileNotFoundError:
-            pass
+            with open(XSETUP_SDDM_PATH, 'w') as f:
+                f.write(text)
+                print("Reverted %s" % XSETUP_SDDM_PATH)
+
+        except IOError:
+            print("Error : Cannot find %s" % XSETUP_SDDM_PATH)
 
     def _clean_lightdm():
 
