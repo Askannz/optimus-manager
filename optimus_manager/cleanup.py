@@ -30,8 +30,8 @@ def clean_login_managers():
                 f.write(text)
                 print("Reverted %s" % XSETUP_SDDM_PATH)
 
-        except IOError:
-            print("Error : Cannot find %s" % XSETUP_SDDM_PATH)
+        except FileNotFoundError:
+            pass
 
     def _clean_lightdm():
 
