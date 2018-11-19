@@ -89,7 +89,7 @@ def _configure_sddm(mode):
 
 def _configure_lightdm(mode):
 
-    CONF_FOLDER_PATH = "/etc/lightdm/lightdm.conf.d/"  # /!\ There's one more folder level than SDDM
+    CONF_FOLDER_PATH = "/etc/lightdm/lightdm.conf.d/"
 
     conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.LIGHTDM_CONF_NAME)
 
