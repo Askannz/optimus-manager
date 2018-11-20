@@ -30,8 +30,11 @@ def main():
     parser = argparse.ArgumentParser(description="Client program for the Optimus Manager tool.\n"
                                                  "https://github.com/Askannz/optimus-manager")
     parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
+    parser.add_argument('--print-mode', action='store_true',
+                        help="Print the current mode.")
     parser.add_argument('--switch', metavar='MODE', action='store',
-                        help="Set the GPU mode to MODE (\"intel\" or \"nvidia\") and restart the display manager."
+                        help="Set the GPU mode to MODE and restart the display manager."
+                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other"
                              "WARNING : All your applications will close ! Be sure to save your work.")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
@@ -48,6 +51,16 @@ def main():
         print("Optimus Manager (Client) version %s" % envs.VERSION)
         sys.exit(0)
 
+    elif args.print_mode:
+
+        try:
+            mode = var.read_mode()
+        except var.VarError as e:
+            print("Error reading mode : %s" % str(e))
+            sys.exit(1)
+
+        print("Current mode : %s" % mode)
+
     elif args.print_startup:
 
         try:
@@ -60,9 +73,22 @@ def main():
 
     elif args.switch:
 
-        if args.switch not in ["intel", "nvidia"]:
+        if args.switch not in ["auto", "intel", "nvidia"]:
             print("Invalid mode : %s" % args.switch)
             sys.exit(1)
+        
+        if args.switch == "auto":
+            try:
+                mode = var.read_mode()
+            except var.VarError as e:
+                print("Error reading mode: %s" % str(e))
+                sys.exit(1)
+            
+            if mode == "nvidia":
+                args.switch = "intel"
+            else:
+                args.switch = "nvidia"
+            print("Switching to : %s" % args.switch)
 
         if args.no_confirm:
             send_command(args.switch)
@@ -74,7 +100,7 @@ def main():
 
             if ans == "y":
                 send_command(args.switch)
-            elif ans == "n":
+            elif ans == "n" or ans == "N":
                 print("Aborting.")
             else:
                 print("Invalid choice. Aborting")
