@@ -1,9 +1,22 @@
 import os
 import optimus_manager.envs as envs
+from optimus_manager.bash import exec_bash
 
 
 class VarError(Exception):
     pass
+
+
+def read_mode():
+    ret = exec_bash("glxinfo").returncode
+    if ret != 0:
+        raise VarError("Cannot find current mode because mesa_demos is not installed")
+    else:
+        ret = exec_bash("glxinfo | grep NVIDIA").returncode
+        if ret == 0:
+            return "nvidia"
+        else:
+            return "intel"
 
 
 def read_startup_mode():
