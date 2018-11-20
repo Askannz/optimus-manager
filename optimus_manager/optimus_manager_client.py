@@ -33,8 +33,8 @@ def main():
     parser.add_argument('--print-mode', action='store_true',
                         help="Print the current mode.")
     parser.add_argument('--switch', metavar='MODE', action='store',
-                        help="Set the GPU mode to MODE and restart the display manager."
-                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other"
+                        help="Set the GPU mode to MODE and restart the display manager. "
+                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other) "
                              "WARNING : All your applications will close ! Be sure to save your work.")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
