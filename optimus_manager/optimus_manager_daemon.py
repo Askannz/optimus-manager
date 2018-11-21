@@ -42,7 +42,7 @@ def gpu_switch(config, mode):
 def set_startup(mode):
 
     try:
-        write_startup_mode("nvidia")
+        write_startup_mode(mode)
 
     except VarError as e:
         print("Cannot write startup mode : %s" % str(e))
@@ -87,22 +87,21 @@ def main():
 
         print("Received command : %s" % msg)
 
-        if msg not in ["intel", "nvidia", "startup_nvidia", "startup_intel"]:
-            print("Invalid command !")
+        # Switching
+        if msg == "intel":
+            gpu_switch(config, "intel")
+        elif msg == "nvidia":
+            gpu_switch(config, "nvidia")
 
+        # Startup modes
+        elif msg == "startup_nvidia":
+            set_startup("nvidia")
+        elif msg == "startup_intel":
+            set_startup("intel")
+        elif msg == "startup_nvidia_once":
+            set_startup("nvidia_once")
         else:
-
-            # Switching
-            if msg == "intel":
-                gpu_switch(config, "intel")
-            elif msg == "nvidia":
-                gpu_switch(config, "nvidia")
-
-            # Startup modes
-            elif msg == "startup_nvidia":
-                set_startup("nvidia")
-            elif msg == "startup_intel":
-                set_startup("intel")
+            print("Invalid command !")
 
 
 if __name__ == '__main__':
