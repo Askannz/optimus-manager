@@ -67,23 +67,31 @@ def main():
     clean_all()
 
     # Startup
-    if args.startup and not is_xorg_running():
+    if args.startup:
 
-        try:
-            startup_mode = read_startup_mode()
-        except VarError as e:
-            print("ERROR : Cannot read startup mode : %s" % str(e))
-            print("Defaulting to %s" % envs.DEFAULT_STARTUP_MODE)
-            startup_mode = envs.DEFAULT_STARTUP_MODE
+        print("Starting up")
 
-        print("Startup mode :", startup_mode)
-        if startup_mode == "nvidia_once":
-            write_startup_mode("intel")
-            switch_to_nvidia(config)
-        elif startup_mode == "nvidia":
-            switch_to_nvidia(config)
-        elif startup_mode == "intel":
-            switch_to_intel(config)
+        if not is_xorg_running():
+
+            try:
+                startup_mode = read_startup_mode()
+            except VarError as e:
+                print("ERROR : Cannot read startup mode : %s" % str(e))
+                print("Defaulting to %s" % envs.DEFAULT_STARTUP_MODE)
+                startup_mode = envs.DEFAULT_STARTUP_MODE
+
+            print("Startup mode :", startup_mode)
+            if startup_mode == "nvidia_once":
+                write_startup_mode("intel")
+                switch_to_nvidia(config)
+            elif startup_mode == "nvidia":
+                switch_to_nvidia(config)
+            elif startup_mode == "intel":
+                switch_to_intel(config)
+
+        else:
+
+            print("Xorg server is running, skipping startup")
 
     # UNIX socket
 
