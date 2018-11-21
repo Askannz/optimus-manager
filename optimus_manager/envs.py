@@ -3,6 +3,7 @@ VERSION = "0.2"
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
 STARTUP_MODE_FILE_PATH = "/var/lib/optimus-manager/startup_mode"
+REQUESTED_MODE_FILE_PATH = "/var/lib/optimus-manager/requested_mode"
 DEFAULT_STARTUP_MODE = "intel"
 SYSTEM_CONFIGS_PATH = "/etc/optimus-manager/configs/"
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
