@@ -3,7 +3,7 @@ import sys
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config
-from optimus_manager.var import read_startup_mode, read_requested_mode, remove_request_mode_var, VarError
+from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_request_mode_var, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.checks import is_xorg_running
 from optimus_manager.cleanup import clean_all
@@ -46,7 +46,11 @@ def main():
                     startup_mode = envs.DEFAULT_STARTUP_MODE
 
                 print("Startup mode :", startup_mode)
-                requested_mode = startup_mode
+                if startup_mode == "nvidia_once":
+                    requested_mode = "nvidia"
+                    write_startup_mode("intel")
+                else:
+                    requested_mode = startup_mode
 
             # We are done reading the command
             remove_request_mode_var()
