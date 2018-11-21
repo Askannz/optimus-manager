@@ -1,0 +1,7 @@
+[Unit]
+Description=Optimus Manager Commands Daemon
+
+[Service]
+ExecStart=/usr/bin/python -u /usr/bin/optimus-manager-daemon
+
+ 
