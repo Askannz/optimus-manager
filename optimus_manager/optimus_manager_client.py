@@ -5,6 +5,7 @@ import argparse
 import socket
 import optimus_manager.envs as envs
 import optimus_manager.var as var
+import optimus_manager.checks as checks
 from optimus_manager.cleanup import clean_all
 
 
@@ -79,8 +80,8 @@ def main():
         
         if args.switch == "auto":
             try:
-                mode = var.read_mode()
-            except var.VarError as e:
+                mode = checks.read_mode()
+            except checks.CheckError as e:
                 print("Error reading mode: %s" % str(e))
                 sys.exit(1)
             
