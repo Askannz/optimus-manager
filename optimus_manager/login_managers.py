@@ -12,17 +12,18 @@ class LoginManagerError(Exception):
 
 def restart_login_manager(config):
 
-    login_manager_service_name = config["optimus"]["login_manager"]
+    login_manager_control = config["optimus"]["login_manager_control"]
 
-    if login_manager_service_name == "":
+    if login_manager_control != "yes":
+        print("Login manager control is disabled, not restarting it.")
         return
 
-    exec_bash("systemctl stop %s" % login_manager_service_name)
+    exec_bash("systemctl stop display-manager")
     _wait_xorg_stop()
-    exec_bash("systemctl start %s" % login_manager_service_name)
+    exec_bash("systemctl startdisplay-manager")
 
     if not checks.is_login_manager_active(config):
-        raise LoginManagerError("Warning : cannot restart service %s." % login_manager_service_name)
+        raise LoginManagerError("Warning : cannot restart service display-manager.")
 
 
 def configure_login_managers(mode):
