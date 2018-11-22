@@ -86,13 +86,16 @@ def main():
                 sys.exit(1)
 
             if gpu_mode == "nvidia":
-                args.switch = "intel"
+                switch_mode = "intel"
             else:
-                args.switch = "nvidia"
-            print("Switching to : %s" % args.switch)
+                switch_mode = "nvidia"
+            print("Switching to : %s" % switch_mode)
+
+        else:
+            switch_mode = args.switch
 
         if args.no_confirm:
-            send_command(args.switch)
+            send_command(switch_mode)
         else:
             print("WARNING : You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
@@ -100,7 +103,7 @@ def main():
             ans = input("> ").lower()
 
             if ans == "y":
-                send_command(args.switch)
+                send_command(switch_mode)
             elif ans == "n" or ans == "N":
                 print("Aborting.")
             else:
