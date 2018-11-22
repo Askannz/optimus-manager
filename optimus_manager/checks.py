@@ -1,6 +1,10 @@
 from optimus_manager.bash import exec_bash
 
 
+class CheckError(Exception):
+    pass
+
+
 def is_bbswitch_loaded():
     ret = exec_bash("lsmod | grep bbswitch").returncode
     return (ret == 0)
@@ -50,3 +54,16 @@ def is_xorg_running():
 def is_pat_available():
     ret = exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo").returncode
     return (ret == 0)
+
+
+def read_gpu_mode():
+
+    ret = exec_bash("glxinfo").returncode
+    if ret != 0:
+        raise CheckError("Cannot find current mode because mesa_demos is not installed")
+    else:
+        ret = exec_bash("glxinfo | grep NVIDIA").returncode
+        if ret == 0:
+            return "nvidia"
+        else:
+            return "intel"
