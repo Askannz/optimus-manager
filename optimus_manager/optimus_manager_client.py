@@ -55,7 +55,7 @@ def main():
     elif args.print_mode:
 
         try:
-            mode = var.read_mode()
+            mode = var.read_gpu_mode()
         except var.VarError as e:
             print("Error reading mode : %s" % str(e))
             sys.exit(1)
