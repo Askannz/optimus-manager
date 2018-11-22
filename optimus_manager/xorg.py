@@ -47,8 +47,9 @@ def _generate_nvidia(config, bus_ids):
 def _generate_intel(config, bus_ids):
 
     text = "Section \"Device\"\n" \
-           "\tIdentifier \"intel\"\n" \
-           "\tDriver \"modesetting\"\n"
+           "\tIdentifier \"intel\"\n"
+
+    text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
