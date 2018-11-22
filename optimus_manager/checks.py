@@ -56,7 +56,7 @@ def is_pat_available():
     return (ret == 0)
 
 
-def read_mode():
+def read_gpu_mode():
 
     ret = exec_bash("glxinfo").returncode
     if ret != 0:
