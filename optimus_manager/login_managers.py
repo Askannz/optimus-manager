@@ -20,7 +20,7 @@ def restart_login_manager(config):
 
     exec_bash("systemctl stop display-manager")
     _wait_xorg_stop()
-    exec_bash("systemctl startdisplay-manager")
+    exec_bash("systemctl start display-manager")
 
     if not checks.is_login_manager_active(config):
         raise LoginManagerError("Warning : cannot restart service display-manager.")
