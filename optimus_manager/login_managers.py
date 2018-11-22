@@ -10,25 +10,6 @@ class LoginManagerError(Exception):
     pass
 
 
-def stop_login_manager(config):
-
-    login_manager_service_name = config["optimus"]["login_manager"]
-
-    if login_manager_service_name == "":
-        return
-
-    if checks.is_login_manager_active(config):
-
-        exec_bash("systemctl stop %s" % login_manager_service_name)
-
-        if checks.is_login_manager_active(config):
-            raise LoginManagerError("Warning : cannot stop service %s." % login_manager_service_name)
-        else:
-            stopped = _wait_xorg_stop()
-            if not stopped:
-                raise LoginManagerError("Warning : Xorg server does not want to stop.")
-
-
 def restart_login_manager(config):
 
     login_manager_service_name = config["optimus"]["login_manager"]
@@ -36,7 +17,9 @@ def restart_login_manager(config):
     if login_manager_service_name == "":
         return
 
-    exec_bash("systemctl restart %s" % login_manager_service_name)
+    exec_bash("systemctl stop %s" % login_manager_service_name)
+    _wait_xorg_stop()
+    exec_bash("systemctl start %s" % login_manager_service_name)
 
     if not checks.is_login_manager_active(config):
         raise LoginManagerError("Warning : cannot restart service %s." % login_manager_service_name)
