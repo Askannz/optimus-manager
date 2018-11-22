@@ -56,6 +56,9 @@ def _generate_intel(config, bus_ids):
     if config["intel"]["accel"] != "":
         text += "\tOption \"AccelMethod\" \"%d\"\n" % config["intel"]["accel"]
 
+    if config["intel"]["tearfree"] != "":
+        text += "\tOption \"TearFree\" \"%d\"\n" % config["intel"]["tearfree"]
+
     dri = int(config["intel"]["DRI"])
     text += "\tOption \"DRI\" \"%d\"\n" % dri
 
