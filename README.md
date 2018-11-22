@@ -26,8 +26,8 @@ Currently, if you have Linux installed on an Optimus laptop, there are three met
 
 - **Use [nvidia-xrun](https://github.com/Witko/nvidia-xrun) to have the Nvidia GPU run on its own X server in another virtual terminal**. You have to keep two X servers running at the same time, which can be detrimental to performance. Also, you do not have acess to your normal desktop environment while in the virtual terminal of the Nvidia GPU, and in my own experience, the nvidia driver is prone to crashing when switching between virtual terminals.
 
-- **Run your whole X session on the Nvidia GPU and disable rendering on the Intel GPU.** This allows you to run your applications at full performance, with Vulkan support, and with access to all video outputs. However, since your power-hungry Nvidia GPU is turned on at all times, so it has a massive impact on your battery life.
-This method is often called Nvidia PRIME, although technically PRIME is just the technology that allows your Nvidia GPU to send its frame to the built-in display of your laptop *via* the Intel GPU.
+- **Run your whole X session on the Nvidia GPU and disable rendering on the Intel GPU.** This allows you to run your applications at full performance, with Vulkan support, and with access to all video outputs. However, since your power-hungry Nvidia GPU is turned on at all times, it has a massive impact on your battery life.
+This method is often called Nvidia PRIME, although technically PRIME is just the technology that allows your Nvidia GPU to send its frames to the built-in display of your laptop *via* the Intel GPU.
 
 An acceptable middle ground could be to use the third method *on demand* : switching the X session to the Nvidia GPU when you need extra rendering power, and then switching it back to Intel when you are done, to save battery life.
 
