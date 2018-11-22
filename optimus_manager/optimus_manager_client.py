@@ -77,15 +77,15 @@ def main():
         if args.switch not in ["auto", "intel", "nvidia"]:
             print("Invalid mode : %s" % args.switch)
             sys.exit(1)
-        
+
         if args.switch == "auto":
             try:
-                mode = checks.read_mode()
+                gpu_mode = checks.read_gpu_mode()
             except checks.CheckError as e:
                 print("Error reading mode: %s" % str(e))
                 sys.exit(1)
-            
-            if mode == "nvidia":
+
+            if gpu_mode == "nvidia":
                 args.switch = "intel"
             else:
                 args.switch = "nvidia"
