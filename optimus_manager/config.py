@@ -22,3 +22,44 @@ def load_config():
         config.read(envs.DEFAULT_CONFIG_PATH)
 
     return config
+
+
+def load_extra_xorg_options():
+
+    xorg_extra = {}
+
+    try:
+        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_INTEL_PATH)
+        print("Loaded extra Intel Xorg options (%d lines)" % len(config_lines))
+        xorg_extra["intel"] = config_lines
+    except FileNotFoundError:
+        pass
+
+    try:
+        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_NVIDIA_PATH)
+        print("Loaded extra Nvidia Xorg options (%d lines)" % len(config_lines))
+        xorg_extra["nvidia"] = config_lines
+    except FileNotFoundError:
+        pass
+
+    return xorg_extra
+
+
+def _load_extra_xorg_file(path):
+
+    with open(path, 'r') as f:
+
+        config_lines = []
+
+        for line in f:
+
+            line = line.strip()
+            line_nospaces = line.replace(" ", "")
+
+            if len(line_nospaces) == 0 or line_nospaces[0] == "#":
+                continue
+
+            else:
+                config_lines.append(line)
+
+        return config_lines
