@@ -71,14 +71,12 @@ def read_gpu_mode():
     nvidia_used = _does_xorg_use_card(bus_ids["nvidia"])
     intel_used = _does_xorg_use_card(bus_ids["intel"])
 
-    if nvidia_used and intel_used:
-        raise CheckError("Both GPUs are in use by Xorg")
-    elif not nvidia_used and not intel_used:
-        raise CheckError("No GPUs is in use by Xorg")
+    if intel_used:
+        return "intel"
     elif nvidia_used:
         return "nvidia"
-    elif intel_used:
-        return "intel"
+    else:
+        raise CheckError("No GPUs is in use by Xorg")
 
 
 def is_daemon_active():
