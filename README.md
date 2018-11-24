@@ -113,7 +113,7 @@ The Arch wiki can be a great resource for troubleshooting. Check the following p
 
 #### How can I check which GPU my X session is running on ?
 
-You can run `optimus-manager --print-mode`. Alternatively, you can run `glxinfo | grep "server glx vendor string"`. If you see `SGI`, you are running on the Intel GPU. If you see `NVIDIA Corporation`, you are running on the Nvidia GPU.
+Run `optimus-manager --print-mode`.
 
 #### When I switch GPUs, my system completely locks up (I cannot even switch to a TTY with Ctrl+Alt+F*x*)
 
