@@ -64,6 +64,10 @@ Usage
 
 Make sure the SystemD service `optimus-manager.service` is running, then run
 ```
+optimus-manager --switch auto
+```
+to switch to the not-using GPU,
+```
 optimus-manager --switch nvidia
 ```
 to switch to the Nvidia GPU, and
@@ -109,7 +113,7 @@ The Arch wiki can be a great resource for troubleshooting. Check the following p
 
 #### How can I check which GPU my X session is running on ?
 
-You can run `glxinfo | grep "server glx vendor string"`. If you see `SGI`, you are running on the Intel GPU. If you see `NVIDIA Corporation`, you are running on the Nvidia GPU.
+You can run `optimus-manager --print-mode`. Alternatively, you can run `glxinfo | grep "server glx vendor string"`. If you see `SGI`, you are running on the Intel GPU. If you see `NVIDIA Corporation`, you are running on the Nvidia GPU.
 
 #### When I switch GPUs, my system completely locks up (I cannot even switch to a TTY with Ctrl+Alt+F*x*)
 
@@ -153,7 +157,7 @@ If that does not fix your problem and you have to open a GitHub issue, please at
 
 #### GPU switching works but I cannot run any 3D application in Intel mode (they fail to launch with some error message)
 
-Check if the `nvidia` module is still loaded in Intel mode. That should not happen, but if it is the case, then logout, stop the display manager manually, unload all Nvidia modules (`nvidia`, `nvidia_modeset`,`nvidia_drm`, in that order) and restart the display manager.
+Check if the `nvidia` module is still loaded in Intel mode. That should not happen, but if it is the case, then logout, stop the display manager manually, unload all Nvidia modules (`nvidia_drm`, `nvidia_modeset`, `nvidia-uvm`, and `nvidia`, in that order) and restart the display manager.
 
 Consider opening a GitHub issue about this, with logs attached.
 

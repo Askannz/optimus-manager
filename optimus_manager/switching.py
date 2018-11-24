@@ -17,7 +17,7 @@ def switch_to_intel(config):
 
     # Nvidia modules
     print("Unloading Nvidia modules")
-    exec_bash("rmmod nvidia_drm nvidia_modeset nvidia")
+    exec_bash("rmmod nvidia_drm nvidia_modeset nvidia_uvm nvidia")
     if not checks.are_nvidia_modules_unloaded():
         raise SwitchError("Cannot unload Nvidia modules")
 
@@ -93,9 +93,9 @@ def switch_to_nvidia(config):
               "Disabling the PAT option for Nvidia.")
         pat_value = 0
 
-    exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
-    exec_bash("modprobe nvidia_modeset")
     exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
+    exec_bash("modprobe nvidia_uvm nvidia_modeset")
+    exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
 
     if not checks.are_nvidia_modules_loaded():
         raise SwitchError("Cannot load Nvidia modules")

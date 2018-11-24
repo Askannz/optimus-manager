@@ -1,5 +1,4 @@
 import os
-import time
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_login_managers
 import optimus_manager.checks as checks
@@ -18,9 +17,7 @@ def restart_login_manager(config):
         print("Login manager control is disabled, not restarting it.")
         return
 
-    exec_bash("systemctl stop display-manager")
-    _wait_xorg_stop()
-    exec_bash("systemctl start display-manager")
+    exec_bash("systemctl restart display-manager")
 
     if not checks.is_login_manager_active(config):
         raise LoginManagerError("Warning : cannot restart service display-manager.")
@@ -137,20 +134,3 @@ def _configure_gdm(mode):
 
         except IOError:
             raise LoginManagerError("Cannot write to %s" % filepath)
-
-
-def _wait_xorg_stop():
-
-    POLL_TIME = 0.5
-    TIMEOUT = 10.0
-
-    t0 = time.time()
-    t = t0
-    while abs(t-t0) < TIMEOUT:
-        if not checks.is_xorg_running():
-            return True
-        else:
-            time.sleep(POLL_TIME)
-            t = time.time()
-
-    return False
