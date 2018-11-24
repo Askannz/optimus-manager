@@ -30,10 +30,12 @@ def _generate_nvidia(config, bus_ids):
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
     text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
 
-    if "overclocking" in config["nvidia"]["options"]:
+    options = config["nvidia"]["options"].replace(" ", "").split(",")
+
+    if "overclocking" in options:
         text += "\tOption \"Coolbits\" \"28\"\n"
 
-    if "triple_buffer" in config["nvidia"]["options"]:
+    if "triple_buffer" in options:
         text += "\"TripleBuffer\" \"true\"\n"
 
     dri = int(config["nvidia"]["DRI"])
