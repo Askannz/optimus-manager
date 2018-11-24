@@ -31,7 +31,7 @@ def main():
 
         # Kill Xorg servers
         exec_bash("for pid in $(pidof Xorg); do kill $pid; done;")
-        time.sleep(0.5)
+        time.sleep(envs.XORG_KILL_DELAY)
 
         # Cleanup
         clean_all()
