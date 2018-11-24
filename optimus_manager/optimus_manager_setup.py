@@ -8,6 +8,24 @@ from optimus_manager.var import read_startup_mode, write_startup_mode, read_requ
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.cleanup import clean_all
 from optimus_manager.bash import exec_bash
+import optimus_manager.checks as checks
+
+
+def _wait_xorg_stop():
+
+    POLL_TIME = 0.5
+    TIMEOUT = 10.0
+
+    t0 = time.time()
+    t = t0
+    while abs(t-t0) < TIMEOUT:
+        if not checks.is_xorg_running():
+            return True
+        else:
+            time.sleep(POLL_TIME)
+            t = time.time()
+
+    return False
 
 
 def main():
@@ -32,6 +50,10 @@ def main():
         # Kill Xorg servers
         exec_bash("for pid in $(pidof Xorg); do kill $pid; done;")
         time.sleep(envs.XORG_KILL_DELAY)
+        stopped = _wait_xorg_stop()
+        if not stopped:
+            print("Cannot stop the X server !")
+            sys.exit(1)
 
         # Cleanup
         clean_all()
