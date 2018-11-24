@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 import sys
+import time
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config
 from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_request_mode_var, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
-from optimus_manager.checks import is_xorg_running
 from optimus_manager.cleanup import clean_all
+from optimus_manager.bash import exec_bash
 
 
 def main():
@@ -28,47 +29,45 @@ def main():
         # Config
         config = load_config()
 
-        if not is_xorg_running():
+        # Kill Xorg servers
+        exec_bash("for pid in $(pidof Xorg); do kill $pid; done;")
+        time.sleep(0.5)
 
-            # Cleanup
-            clean_all()
+        # Cleanup
+        clean_all()
+
+        try:
+            requested_mode = read_requested_mode()
+        except VarError as e:
+
+            print("Cannot read requested mode : %s.\nUsing startup mode instead." % str(e))
 
             try:
-                requested_mode = read_requested_mode()
+                startup_mode = read_startup_mode()
             except VarError as e:
+                print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+                startup_mode = envs.DEFAULT_STARTUP_MODE
 
-                print("Cannot read requested mode : %s.\nUsing startup mode instead." % str(e))
+            print("Startup mode :", startup_mode)
+            if startup_mode == "nvidia_once":
+                requested_mode = "nvidia"
+                write_startup_mode("intel")
+            else:
+                requested_mode = startup_mode
 
-                try:
-                    startup_mode = read_startup_mode()
-                except VarError as e:
-                    print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-                    startup_mode = envs.DEFAULT_STARTUP_MODE
+        # We are done reading the command
+        remove_request_mode_var()
 
-                print("Startup mode :", startup_mode)
-                if startup_mode == "nvidia_once":
-                    requested_mode = "nvidia"
-                    write_startup_mode("intel")
-                else:
-                    requested_mode = startup_mode
+        print("Requested mode :", requested_mode)
 
-            # We are done reading the command
-            remove_request_mode_var()
-
-            print("Requested mode :", requested_mode)
-
-            try:
-                if requested_mode == "nvidia":
-                    switch_to_nvidia(config)
-                elif requested_mode == "intel":
-                    switch_to_intel(config)
-            except SwitchError as e:
-                print("Cannot switch GPUS : %s" % str(e))
-                sys.exit(0)
-
-        else:
-
-            print("Xorg server is already running, aborting setup !")
+        try:
+            if requested_mode == "nvidia":
+                switch_to_nvidia(config)
+            elif requested_mode == "intel":
+                switch_to_intel(config)
+        except SwitchError as e:
+            print("Cannot switch GPUS : %s" % str(e))
+            sys.exit(0)
 
     elif args.setup_stop:
 
