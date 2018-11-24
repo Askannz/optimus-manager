@@ -67,3 +67,9 @@ def read_gpu_mode():
             return "nvidia"
         else:
             return "intel"
+
+
+def is_daemon_active():
+
+    state = exec_bash("systemctl is-active optimus-manager").stdout.decode('utf-8')[:-1]
+    return (state == "active")

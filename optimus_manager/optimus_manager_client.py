@@ -78,6 +78,12 @@ def main():
             print("Invalid mode : %s" % args.switch)
             sys.exit(1)
 
+        if not checks.is_daemon_active():
+            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                  "sudo systemctl enable optimus-manager\n"
+                  "sudo systemctl start optimus-manager\n")
+            sys.exit(1)
+
         if args.switch == "auto":
             try:
                 gpu_mode = checks.read_gpu_mode()
