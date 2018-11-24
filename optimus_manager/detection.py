@@ -8,7 +8,7 @@ class DetectionError(Exception):
     pass
 
 
-def get_bus_ids():
+def get_bus_ids(notation_fix=True):
 
     # TODO : Return code error checking
     lspci_output = exec_bash("lspci -n").stdout.decode('utf-8')
@@ -18,7 +18,13 @@ def get_bus_ids():
     for line in lspci_output.splitlines():
 
         items = line.split(" ")
-        bus_id = items[0].replace(".", ":")  # Notation quirk
+
+        bus_id = items[0]
+
+        # Notation quirk
+        if notation_fix:
+            bus_id = bus_id.replace(".", ":")
+
         pci_class = items[1]
         vendor_id, product_id = items[2].split(":")
 
