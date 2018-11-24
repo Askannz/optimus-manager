@@ -56,7 +56,7 @@ def main():
 
         try:
             mode = checks.read_gpu_mode()
-        except var.VarError as e:
+        except checks.CheckError as e:
             print("Error reading mode : %s" % str(e))
             sys.exit(1)
 
