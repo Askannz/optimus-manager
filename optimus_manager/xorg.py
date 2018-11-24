@@ -1,5 +1,6 @@
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_bus_ids
+from optimus_manager.config import load_extra_xorg_options
 
 
 class XorgError(Exception):
@@ -9,16 +10,17 @@ class XorgError(Exception):
 def configure_xorg(config, mode):
 
     bus_ids = get_bus_ids()
+    xorg_extra = load_extra_xorg_options()
 
     if mode == "nvidia":
-        xorg_conf_text = _generate_nvidia(config, bus_ids)
+        xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
     elif mode == "intel":
-        xorg_conf_text = _generate_intel(config, bus_ids)
+        xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
 
     _write_xorg_conf(xorg_conf_text)
 
 
-def _generate_nvidia(config, bus_ids):
+def _generate_nvidia(config, bus_ids, xorg_extra):
 
     text = "Section \"Module\"\n" \
            "\tLoad \"modesetting\"\n" \
@@ -41,12 +43,16 @@ def _generate_nvidia(config, bus_ids):
     dri = int(config["nvidia"]["DRI"])
     text += "\tOption \"DRI\" \"%d\"\n" % dri
 
+    if "nvidia" in xorg_extra.keys():
+        for line in xorg_extra["nvidia"]:
+            text += ("\t" + line + "\n")
+
     text += "EndSection\n"
 
     return text
 
 
-def _generate_intel(config, bus_ids):
+def _generate_intel(config, bus_ids, xorg_extra):
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n"
@@ -63,6 +69,10 @@ def _generate_intel(config, bus_ids):
 
     dri = int(config["intel"]["DRI"])
     text += "\tOption \"DRI\" \"%d\"\n" % dri
+
+    if "intel" in xorg_extra.keys():
+        for line in xorg_extra["intel"]:
+            text += ("\t" + line + "\n")
 
     text += "EndSection\n"
 
