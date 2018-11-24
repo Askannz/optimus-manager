@@ -14,6 +14,7 @@ LIGHTDM_CONF_NAME = "10-optimus-manager.conf"
 GDM_DESKTOP_FILE_NAME = "optimus-manager-xsetup.desktop"
 
 DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
-USER_CONFIG_PATH = "/etc/optimus-manager.conf"
+DEPRECATED_USER_CONFIG_PATH = "/etc/optimus-manager.conf"
+USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
 XORG_KILL_DELAY = 0.5
