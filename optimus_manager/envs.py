@@ -17,7 +17,7 @@ DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
 DEPRECATED_USER_CONFIG_PATH = "/etc/optimus-manager.conf"
 USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
-EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/intel.conf"
-EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/nvidia.conf"
+EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/xorg-intel.conf"
+EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
 
 XORG_KILL_DELAY = 0.5
