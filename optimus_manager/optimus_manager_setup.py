@@ -38,7 +38,7 @@ def main():
 
     args = parser.parse_args()
 
-    print("Optimus Manager (DM setup service) version %s" % envs.VERSION)
+    print("Optimus Manager (DM setup) version %s" % envs.VERSION)
 
     if args.setup_start:
 
