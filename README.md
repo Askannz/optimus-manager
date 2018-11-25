@@ -66,10 +66,6 @@ Usage
 
 Make sure the SystemD service `optimus-manager.service` is running, then run
 ```
-optimus-manager --switch auto
-```
-to switch to the not-using GPU,
-```
 optimus-manager --switch nvidia
 ```
 to switch to the Nvidia GPU, and
@@ -77,6 +73,8 @@ to switch to the Nvidia GPU, and
 optimus-manager --switch intel
 ```
 to switch to the Intel GPU.
+
+(you can also use `optimus-manager --switch intel` to automatically switch to the other mode)
 
 *WARNING :* Switching GPUs automatically restarts your display manager, so make sure you save your work and close all your applications before doing so.
 
