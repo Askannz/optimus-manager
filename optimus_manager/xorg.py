@@ -62,10 +62,11 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
     if config["intel"]["accel"] != "":
-        text += "\tOption \"AccelMethod\" \"%d\"\n" % config["intel"]["accel"]
+        text += "\tOption \"AccelMethod\" \"%s\"\n" % config["intel"]["accel"]
 
     if config["intel"]["tearfree"] != "":
-        text += "\tOption \"TearFree\" \"%d\"\n" % config["intel"]["tearfree"]
+        bool_str = {"yes": "true", "no": "false"}[config["intel"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % bool_str
 
     dri = int(config["intel"]["DRI"])
     text += "\tOption \"DRI\" \"%d\"\n" % dri
