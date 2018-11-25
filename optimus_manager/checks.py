@@ -60,37 +60,18 @@ def is_pat_available():
 
 def read_gpu_mode():
 
-    if not is_xorg_running():
-        raise CheckError("Xorg is not running")
-
-    try:
-        bus_ids = get_bus_ids(notation_fix=False)
-    except DetectionError as e:
-        raise CheckError("PCI detection error : %s" % str(e))
-
-    nvidia_used = _does_xorg_use_card(bus_ids["nvidia"])
-    intel_used = _does_xorg_use_card(bus_ids["intel"])
-
-    if intel_used:
-        return "intel"
-    elif nvidia_used:
-        return "nvidia"
+    ret = exec_bash("glxinfo").returncode
+    if ret != 0:
+        raise CheckError("Cannot find the current mode : command glxinfo fails")
     else:
-        raise CheckError("No GPUs is in use by Xorg")
+        ret = exec_bash("glxinfo | grep NVIDIA").returncode
+        if ret == 0:
+            return "nvidia"
+        else:
+            return "intel"
 
 
 def is_daemon_active():
 
     state = exec_bash("systemctl is-active optimus-manager").stdout.decode('utf-8')[:-1]
     return (state == "active")
-
-
-def _does_xorg_use_card(bus_id):
-
-    dri_pci_filename = "pci-0000:" + bus_id + "-card"
-
-    dri_path = os.path.join("/dev", "dri", "by-path", dri_pci_filename)
-
-    ret = exec_bash("lsof %s | grep Xorg" % dri_path).returncode
-
-    return (ret == 0)
