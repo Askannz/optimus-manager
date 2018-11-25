@@ -1,6 +1,4 @@
-import os
 from optimus_manager.bash import exec_bash
-from optimus_manager.detection import get_bus_ids, DetectionError
 
 
 class CheckError(Exception):
