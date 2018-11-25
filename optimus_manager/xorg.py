@@ -38,7 +38,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
         text += "\tOption \"Coolbits\" \"28\"\n"
 
     if "triple_buffer" in options:
-        text += "\"TripleBuffer\" \"true\"\n"
+        text += "\tOption \"TripleBuffer\" \"true\"\n"
 
     dri = int(config["nvidia"]["DRI"])
     text += "\tOption \"DRI\" \"%d\"\n" % dri
