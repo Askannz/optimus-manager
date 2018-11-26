@@ -1,10 +1,7 @@
 import optimus_manager.checks as checks
-from optimus_manager.bash import exec_bash
+from optimus_manager.bash import exec_bash, BashError
 from optimus_manager.xorg import configure_xorg
 from optimus_manager.login_managers import configure_login_managers
-
-
-# TODO : Add some error checking on exec_bash
 
 
 class SwitchError(Exception):
@@ -17,18 +14,20 @@ def switch_to_intel(config):
 
     # Nvidia modules
     print("Unloading Nvidia modules")
-    exec_bash("rmmod nvidia_drm nvidia_modeset nvidia_uvm nvidia")
-    if not checks.are_nvidia_modules_unloaded():
-        raise SwitchError("Cannot unload Nvidia modules")
+    try:
+        exec_bash("rmmod nvidia_drm nvidia_modeset nvidia_uvm nvidia")
+    except BashError as e:
+        raise SwitchError("Cannot unload Nvidia modules : %s" % str(e))
 
     if config["optimus"]["switching"] == "bbswitch":
 
         # Load bbswitch
         if not checks.is_bbswitch_loaded():
             print("bbswitch not loaded, loading it...")
-            exec_bash("modprobe bbswitch")
-        if not checks.is_bbswitch_loaded():
-            raise SwitchError("Cannot load bbswitch")
+            try:
+                exec_bash("modprobe bbswitch")
+            except BashError as e:
+                raise SwitchError("Cannot load bbswitch : %s" % str(e))
 
         # bbswitch switching
         print("Ordering OFF via bbswitch")
@@ -42,9 +41,10 @@ def switch_to_intel(config):
 
         # Loading nouveau
         if not checks.is_nouveau_loaded():
-            exec_bash("modprobe nouveau")
-            if not checks.is_nouveau_loaded():
-                raise SwitchError("Cannot load nouveau")
+            try:
+                exec_bash("modprobe nouveau")
+            except BashError as e:
+                raise SwitchError("Cannot load nouveau : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
@@ -64,9 +64,10 @@ def switch_to_nvidia(config):
         # bbswitch module
         if not checks.is_bbswitch_loaded():
             print("bbswitch not loaded, loading it...")
-            exec_bash("modprobe bbswitch")
-        if not checks.is_bbswitch_loaded():
-            raise SwitchError("Cannot load bbswitch")
+            try:
+                exec_bash("modprobe bbswitch")
+            except BashError as e:
+                raise SwitchError("Cannot load bbswitch : %s" % str(e))
 
         # bbswitch switching
         print("Ordering ON via bbswitch")
@@ -78,9 +79,10 @@ def switch_to_nvidia(config):
 
     # Unloading nouveau
     if checks.is_nouveau_loaded():
-        exec_bash("rmmod nouveau")
-        if checks.is_nouveau_loaded():
-            raise SwitchError("Cannot unload nouveau")
+        try:
+            exec_bash("rmmod nouveau")
+        except BashError as e:
+            raise SwitchError("Cannot unload nouveau : %s" % str(e))
 
     # Nvidia modules
     print("Loading Nvidia modules")
@@ -93,12 +95,13 @@ def switch_to_nvidia(config):
               "Disabling the PAT option for Nvidia.")
         pat_value = 0
 
-    exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
-    exec_bash("modprobe nvidia_uvm nvidia_modeset")
-    exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
+    try:
+        exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
+        exec_bash("modprobe nvidia_uvm nvidia_modeset")
+        exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
 
-    if not checks.are_nvidia_modules_loaded():
-        raise SwitchError("Cannot load Nvidia modules")
+    except BashError as e:
+        raise SwitchError("Cannot load Nvidia modules : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
