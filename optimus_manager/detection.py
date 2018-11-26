@@ -1,4 +1,4 @@
-from optimus_manager.bash import exec_bash
+from optimus_manager.bash import exec_bash, BashError
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"
@@ -55,16 +55,11 @@ def get_login_managers():
 
     login_managers = []
 
-    ret = exec_bash("which sddm").returncode
-    if ret == 0:
-        login_managers.append("sddm")
-
-    ret = exec_bash("which gdm").returncode
-    if ret == 0:
-        login_managers.append("gdm")
-
-    ret = exec_bash("which lightdm").returncode
-    if ret == 0:
-        login_managers.append("lightdm")
+    for manager in ["sddm", "gdm", "lightdm"]:
+        try:
+            exec_bash("which %s" % manager)
+            login_managers.append(manager)
+        except BashError:
+            pass
 
     return login_managers
