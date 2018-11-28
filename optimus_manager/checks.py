@@ -5,16 +5,6 @@ class CheckError(Exception):
     pass
 
 
-def is_bbswitch_loaded():
-    ret = exec_bash("lsmod | grep bbswitch").returncode
-    return ret == 0
-
-
-def is_nouveau_loaded():
-    ret = exec_bash("lsmod | grep nouveau").returncode
-    return ret == 0
-
-
 def is_gpu_powered():
 
     state = exec_bash("cat /proc/acpi/bbswitch | cut -d' ' -f 2").stdout.decode('utf-8')[:-1]
@@ -28,25 +18,39 @@ def is_login_manager_active(config):
 
 
 def is_xorg_running():
+    try:
+        exec_bash("pidof X")
+        return True
+    except BashError:
+        pass
 
-    ret1 = exec_bash("pidof X").returncode
-    ret2 = exec_bash("pidof Xorg").returncode
-    return ret1 == 0 or ret2 == 0
+    try:
+        exec_bash("pidof Xorg")
+        return True
+    except BashError:
+        pass
+
+    return False
 
 
 def is_pat_available():
-    ret = exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo").returncode
-    return ret == 0
+    try:
+        exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
+        return True
+    except BashError:
+        return False
 
 
 def read_gpu_mode():
     try:
-        ret = exec_bash("glxinfo | grep NVIDIA").returncode
+        exec_bash("glxinfo")
     except BashError as e:
         raise CheckError("Cannot find the current mode : %s" % str(e))
-    if ret == 0:
+    
+    try:
+        exec_bash("glxinfo | grep NVIDIA")
         return "nvidia"
-    else:
+    except BashError:
         return "intel"
 
 

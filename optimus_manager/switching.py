@@ -23,12 +23,11 @@ def switch_to_intel(config):
     if config["optimus"]["switching"] == "bbswitch":
 
         # Load bbswitch
-        if not checks.is_bbswitch_loaded():
-            print("bbswitch not loaded, loading it...")
-            try:
-                exec_bash("modprobe bbswitch")
-            except BashError as e:
-                raise SwitchError("Cannot load bbswitch : %s" % str(e))
+        print("Loading bbswitch module")
+        try:
+            exec_bash("modprobe bbswitch")
+        except BashError as e:
+            raise SwitchError("Cannot load bbswitch : %s" % str(e))
 
         # bbswitch switching
         print("Ordering OFF via bbswitch")
@@ -41,11 +40,11 @@ def switch_to_intel(config):
     elif config["optimus"]["switching"] == "nouveau":
 
         # Loading nouveau
-        if not checks.is_nouveau_loaded():
-            try:
-                exec_bash("modprobe nouveau")
-            except BashError as e:
-                raise SwitchError("Cannot load nouveau : %s" % str(e))
+        print("Loading nouveau module")
+        try:
+            exec_bash("modprobe nouveau")
+        except BashError as e:
+            raise SwitchError("Cannot load nouveau : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
@@ -63,12 +62,11 @@ def switch_to_nvidia(config):
     if config["optimus"]["switching"] == "bbswitch":
 
         # bbswitch module
-        if not checks.is_bbswitch_loaded():
-            print("bbswitch not loaded, loading it...")
-            try:
-                exec_bash("modprobe bbswitch")
-            except BashError as e:
-                raise SwitchError("Cannot load bbswitch : %s" % str(e))
+        print("Loading bbswitch module")
+        try:
+            exec_bash("modprobe bbswitch")
+        except BashError as e:
+            raise SwitchError("Cannot load bbswitch : %s" % str(e))
 
         # bbswitch switching
         print("Ordering ON via bbswitch")
@@ -79,11 +77,11 @@ def switch_to_nvidia(config):
             print("bbswitch reports that the GPU is ON")
 
     # Unloading nouveau
-    if checks.is_nouveau_loaded():
-        try:
-            exec_bash("modprobe -r nouveau")
-        except BashError as e:
-            raise SwitchError("Cannot unload nouveau : %s" % str(e))
+    print("Unloading nouveau module")
+    try:
+        exec_bash("modprobe -r nouveau")
+    except BashError as e:
+        raise SwitchError("Cannot unload nouveau : %s" % str(e))
 
     # Nvidia modules
     print("Loading Nvidia modules")
