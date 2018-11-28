@@ -14,8 +14,9 @@ def switch_to_intel(config):
 
     # Nvidia modules
     print("Unloading Nvidia modules")
+
     try:
-        exec_bash("rmmod nvidia_drm nvidia_modeset nvidia_uvm nvidia")
+        exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia")
     except BashError as e:
         raise SwitchError("Cannot unload Nvidia modules : %s" % str(e))
 
@@ -80,7 +81,7 @@ def switch_to_nvidia(config):
     # Unloading nouveau
     if checks.is_nouveau_loaded():
         try:
-            exec_bash("rmmod nouveau")
+            exec_bash("modprobe -r nouveau")
         except BashError as e:
             raise SwitchError("Cannot unload nouveau : %s" % str(e))
 
