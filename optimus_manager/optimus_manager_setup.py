@@ -90,7 +90,7 @@ def main():
 
         # Kill Xorg servers
         print("Stopping X servers")
-        exec_bash("for pid in $(pidof Xorg); do kill $pid; done;")
+        exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
