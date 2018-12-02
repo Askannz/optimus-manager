@@ -1,6 +1,11 @@
 import os
+import json
 import configparser
 import optimus_manager.envs as envs
+
+
+class ConfigError(Exception):
+    pass
 
 
 def load_config():
@@ -16,12 +21,65 @@ def load_config():
 
     config = configparser.ConfigParser()
 
-    if user_config_path is not None:
-        config.read([envs.DEFAULT_CONFIG_PATH, user_config_path])
-    else:
-        config.read(envs.DEFAULT_CONFIG_PATH)
+    try:
+        if user_config_path is not None:
+            config.read([envs.DEFAULT_CONFIG_PATH, user_config_path])
+        else:
+            config.read(envs.DEFAULT_CONFIG_PATH)
+
+    except configparser.ParsingError as e:
+        raise ConfigError("Parsing error : %s" % str(e))
+
+    validate_config(config)
 
     return config
+
+
+def validate_config(config):
+
+    folder_path = os.path.dirname(os.path.abspath(__file__))
+    schema_path = os.path.join(folder_path, "config_schema.json")
+
+    with open(schema_path, "r") as f:
+        schema = json.load(f)
+
+    # Checking if the config file has the required sections and options
+    for section in schema.keys():
+
+        if section not in config.keys():
+            raise ConfigError("Cannot find header for section [%s]" % section)
+
+        for option in schema[section].keys():
+
+            if option not in config[section].keys():
+                raise ConfigError("Cannot find option \"%s\" in section [%s]" % (option, section))
+
+            multi_values, possible_values = schema[section][option]
+
+            if multi_values:
+                values = config[section][option].replace(" ", "").split(",")
+                for val in values:
+                    if val not in possible_values:
+                        raise ConfigError("Invalid value \"%s\" for option \"%s\" in section [%s]" % (val, option, section))
+
+            else:
+                val = config[section][option]
+                if val not in possible_values:
+                    raise ConfigError("Invalid value \"%s\" for option \"%s\" in section [%s]" % (val, option, section))
+
+    # Checking if the config file has no unknown section or option
+    for section in config.keys():
+
+        if section == "DEFAULT":
+            continue
+
+        if section not in schema.keys():
+            raise ConfigError("Unknown section %s" % section)
+
+        for option in config[section].keys():
+
+            if option not in schema[section].keys():
+                raise ConfigError("Unknown option %s in section %s" % (option, section))
 
 
 def load_extra_xorg_options():

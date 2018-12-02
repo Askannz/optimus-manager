@@ -6,7 +6,7 @@ import argparse
 import select
 import socket
 import optimus_manager.envs as envs
-from optimus_manager.config import load_config
+from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
 from optimus_manager.login_managers import restart_login_manager, LoginManagerError
 
@@ -58,7 +58,10 @@ def main():
     print("Optimus Manager (Daemon) version %s" % envs.VERSION)
 
     # Config
-    config = load_config()
+    try:
+        config = load_config()
+    except ConfigError as e:
+        print("Error loading config file : %s" % str(e))
 
     # UNIX socket
 

@@ -1,0 +1,24 @@
+{
+	"optimus":
+	{
+		"switching": ["False", ["nouveau", "bbswitch"]],
+		"login_manager_control": ["False", ["yes", "no"]]
+	},
+
+	"intel":
+	{
+		"driver": ["False", ["modesetting", "intel"]],
+		"accel": ["False", ["", "sna", "xna"]],
+		"tearfree": ["False", ["", "yes", "no"]],
+		"dri": ["False", ["2", "3"]],
+		"modeset": ["False", ["yes", "no"]]
+	},
+
+	"nvidia":
+	{
+		"dri": ["False", ["2", "3"]],
+		"modeset": ["False", ["yes", "no"]],
+		"pat": ["False", ["yes", "no"]],
+		"options": ["True", ["overclocking", "triple_buffer"]]
+	}
+}

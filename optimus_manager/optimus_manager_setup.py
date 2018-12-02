@@ -3,7 +3,7 @@ import sys
 import time
 import argparse
 import optimus_manager.envs as envs
-from optimus_manager.config import load_config
+from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_request_mode_var, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.cleanup import clean_all
@@ -45,7 +45,10 @@ def main():
         print("Setting up Optimus configuration")
 
         # Config
-        config = load_config()
+        try:
+            config = load_config()
+        except ConfigError as e:
+                print("Error loading config file : %s" % str(e))
 
         # Cleanup
         clean_all()

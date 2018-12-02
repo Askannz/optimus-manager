@@ -21,6 +21,7 @@ setup(
             'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main',
         ],
     },
+    package_data={'optimus_manager': ['config_schema.json']},
     keywords=['optimus', 'nvidia', 'bbswitch', 'prime', 'gpu'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
