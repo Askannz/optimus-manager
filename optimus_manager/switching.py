@@ -39,10 +39,12 @@ def switch_to_intel(config):
 
     elif config["optimus"]["switching"] == "nouveau":
 
+        modeset_value = {"yes": 1, "no": 0}[config["intel"]["modeset"]]
+
         # Loading nouveau
         print("Loading nouveau module")
         try:
-            exec_bash("modprobe nouveau")
+            exec_bash("modprobe nouveau modeset=%d" % modeset_value)
         except BashError as e:
             raise SwitchError("Cannot load nouveau : %s" % str(e))
 
