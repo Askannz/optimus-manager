@@ -19,6 +19,6 @@
 		"dri": ["False", ["2", "3"]],
 		"modeset": ["False", ["yes", "no"]],
 		"pat": ["False", ["yes", "no"]],
-		"options": ["True", ["overclocking", "triple_buffer"]]
+		"options": ["True", ["", "overclocking", "triple_buffer"]]
 	}
 }
