@@ -157,6 +157,12 @@ Check if the `nvidia` module is still loaded in Intel mode. That should not happ
 
 Consider opening a GitHub issue about this, with logs attached.
 
+#### After switching GPUs, I experience poor CPU performance or heavy stuttering, or my external video outputs do not work
+
+If the problem occurs after switching to Nvidia, try setting `modeset` to `no` in the `[nvidia]` section of the configuration file.
+
+If the problem occurs after switching to Intel, try setting `modeset` to `no` in the `[intel]` section of the configuration file, or you can also try disabling nouveau by setting the `switching` option in the `[optimus]` section to `bbswitch`. Note that those two fixes may prevent you from using your video outputs (such as HDMI) in Intel mode.
+
 #### I do not want optimus-manager to stop/restart my display manager
 
 You can disable control of the login manager by setting the option `login_manager_control` to `no` in the section `[optimus]` of the config file. With that configuration, the GPU switch will happen the next time you restart the display manager service after calling `optimus-manager --switch`.
@@ -167,7 +173,7 @@ First, you have to add the line `/usr/bin/optimus-manager_Xsetup` to your `.xini
 
 Switching GPUs is also a little different in that case. First, the X server **must not be running while switching** (because the rendering kernel modules need to be unloaded), so you have do it from a TTY for example. Call `optimus-manager --switch`, then `/usr/bin/optimus-manager-setup --setup-start`, then start the X server. After you close the X server, it is recommended you also do `/usr/bin/optimus-manager-setup --setup-stop` to remove leftover configuration files.
 
-#### When I switch to Nvidia, the built-in screen of the laptop stays black but I can still input my password or use monitors plugged to the video output
+#### When I switch to Nvidia, the built-in screen of the laptop stays black but I can still input my password or use monitors plugged to a video output
 
 It seems that PRIME is not properly configured. Please open a GitHub issue with logs attached, and include as much details about your login manager as you can.
 
