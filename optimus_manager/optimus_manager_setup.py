@@ -18,7 +18,7 @@ def _wait_xorg_stop():
 
     t0 = time.time()
     t = t0
-    while abs(t-t0) < TIMEOUT:
+    while abs(t - t0) < TIMEOUT:
         if not checks.is_xorg_running():
             return True
         else:
