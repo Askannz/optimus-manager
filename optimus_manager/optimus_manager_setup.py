@@ -47,14 +47,6 @@ def main():
         # Config
         config = load_config()
 
-        # Kill Xorg servers
-        exec_bash("for pid in $(pidof Xorg); do kill $pid; done;")
-        time.sleep(envs.XORG_KILL_DELAY)
-        stopped = _wait_xorg_stop()
-        if not stopped:
-            print("Cannot stop the X server !")
-            sys.exit(1)
-
         # Cleanup
         clean_all()
 
@@ -95,6 +87,14 @@ def main():
 
         print("Cleaning up Optimus configuration")
         clean_all()
+
+        # Kill Xorg servers
+        print("Stopping X servers")
+        exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
+        stopped = _wait_xorg_stop()
+        if not stopped:
+            print("Cannot stop X servers !")
+            sys.exit(1)
 
     else:
 
