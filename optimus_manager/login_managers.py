@@ -2,7 +2,7 @@ import os
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_login_managers
 import optimus_manager.checks as checks
-from optimus_manager.bash import exec_bash
+from optimus_manager.bash import exec_bash, BashError
 
 
 class LoginManagerError(Exception):
@@ -17,7 +17,10 @@ def restart_login_manager(config):
         print("Login manager control is disabled, not restarting it.")
         return
 
-    exec_bash("systemctl restart display-manager")
+    try:
+        exec_bash("systemctl restart display-manager")
+    except BashError as e:
+        raise LoginManagerError("Warning : cannot restart service display-manager : %s" % str(e))
 
     if not checks.is_login_manager_active(config):
         raise LoginManagerError("Warning : cannot restart service display-manager.")
