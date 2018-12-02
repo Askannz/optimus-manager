@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import socket
+from optimus_manager.config import load_config, ConfigError
 import optimus_manager.envs as envs
 import optimus_manager.var as var
 import optimus_manager.checks as checks
@@ -47,6 +48,19 @@ def main():
     parser.add_argument('--cleanup', action='store_true',
                         help="Remove auto-generated configuration files left over by the daemon.")
     args = parser.parse_args()
+
+    # Config loading
+    # Even if the client does not need any option from it (yet), we parse the config file.
+    # That way the user can see parsing errors without opening a systemd log.
+    if not args.version:
+        try:
+            load_config()
+        except ConfigError as e:
+            print("Error loading config file : %s" % str(e))
+            sys.exit(1)
+
+    #
+    # Arguments switch
 
     if args.version:
         print("Optimus Manager (Client) version %s" % envs.VERSION)
