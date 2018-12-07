@@ -31,8 +31,8 @@ def configure_login_managers(mode):
     login_managers = get_login_managers()
 
     if len(login_managers) == 0:
-        msg = "No supported login manager detected. Please manually configure" \
-              "your login manager to use the display setup script at %s. If you" \
+        msg = "No supported login manager detected. Please manually configure " \
+              "your login manager to use the display setup script at %s. If you " \
               "use xinit, add this script to your .xinitrc" % envs.XSETUP_PATH
         print(msg)
         return
