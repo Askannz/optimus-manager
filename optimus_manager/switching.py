@@ -88,7 +88,6 @@ def switch_to_nvidia(config):
     # Nvidia modules
     print("Loading Nvidia modules")
 
-    modeset_value = {"yes": 1, "no": 0}[config["nvidia"]["modeset"]]
     pat_value = {"yes": 1, "no": 0}[config["nvidia"]["PAT"]]
 
     if not checks.is_pat_available():
@@ -98,8 +97,10 @@ def switch_to_nvidia(config):
 
     try:
         exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
-        exec_bash("modprobe nvidia_modeset")
-        exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
+        if config["nvidia"]["modeset"] == "yes":
+            exec_bash("modprobe nvidia_drm modeset=1")
+        else:
+            exec_bash("modprobe nvidia_drm modeset=0")
 
     except BashError as e:
         raise SwitchError("Cannot load Nvidia modules : %s" % str(e))
