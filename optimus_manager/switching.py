@@ -98,7 +98,7 @@ def switch_to_nvidia(config):
 
     try:
         exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
-        exec_bash("modprobe nvidia_uvm nvidia_modeset")
+        exec_bash("modprobe nvidia_modeset")
         exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
 
     except BashError as e:
