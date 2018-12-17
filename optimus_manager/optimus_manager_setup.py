@@ -7,7 +7,7 @@ from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_request_mode_var, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.cleanup import clean_all
-from optimus_manager.bash import exec_bash
+from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.checks as checks
 
 
@@ -97,6 +97,14 @@ def main():
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
+            sys.exit(1)
+
+        # Unload all GPU modules
+        print("Unloading kernel modules")
+        try:
+            exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia nouveau")
+        except BashError as e:
+            print("Cannot unload modules : %s" % str(e))
             sys.exit(1)
 
     else:
