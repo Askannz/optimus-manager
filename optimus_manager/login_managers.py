@@ -2,6 +2,7 @@ import os
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_login_managers
 import optimus_manager.checks as checks
+from optimus_manager.var import write_dpi_var
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -26,9 +27,16 @@ def restart_login_manager(config):
         raise LoginManagerError("Warning : cannot restart service display-manager.")
 
 
-def configure_login_managers(mode):
+def configure_login_managers(config, mode):
 
     login_managers = get_login_managers()
+
+    # Writing DPI value to var file
+    # (to be read by the Xsetup script)
+    if mode == "nvidia":
+        dpi_str = config["nvidia"]["dpi"]
+        if dpi_str != "":
+            write_dpi_var(int(dpi_str))
 
     if len(login_managers) == 0:
         msg = "No supported login manager detected. Please manually configure " \
