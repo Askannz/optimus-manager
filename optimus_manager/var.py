@@ -9,7 +9,7 @@ class VarError(Exception):
 def read_requested_mode():
 
     try:
-        with open(envs.REQUESTED_MODE_FILE_PATH, 'r') as f:
+        with open(envs.REQUESTED_MODE_VAR_PATH, 'r') as f:
             content = f.read()
 
             if content[-1] == "\n":
@@ -21,9 +21,9 @@ def read_requested_mode():
                 raise VarError("Invalid mode request : %s" % content)
 
     except FileNotFoundError:
-        raise VarError("File %s not found." % envs.REQUESTED_MODE_FILE_PATH)
+        raise VarError("File %s not found." % envs.REQUESTED_MODE_VAR_PATH)
     except IOError:
-        raise VarError("Cannot open or read %s" % envs.REQUESTED_MODE_FILE_PATH)
+        raise VarError("Cannot open or read %s" % envs.REQUESTED_MODE_VAR_PATH)
 
     return mode
 
@@ -32,22 +32,22 @@ def write_requested_mode(mode):
 
     assert mode in ["intel", "nvidia"]
 
-    folder_path, filename = os.path.split(envs.REQUESTED_MODE_FILE_PATH)
+    folder_path, filename = os.path.split(envs.REQUESTED_MODE_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
 
     try:
-        with open(envs.REQUESTED_MODE_FILE_PATH, 'w') as f:
+        with open(envs.REQUESTED_MODE_VAR_PATH, 'w') as f:
             f.write(mode)
     except IOError:
-        raise VarError("Cannot open or write to %s" % envs.REQUESTED_MODE_FILE_PATH)
+        raise VarError("Cannot open or write to %s" % envs.REQUESTED_MODE_VAR_PATH)
 
 
 def remove_request_mode_var():
 
     try:
-        os.remove(envs.REQUESTED_MODE_FILE_PATH)
+        os.remove(envs.REQUESTED_MODE_VAR_PATH)
     except FileNotFoundError:
         pass
 
@@ -55,7 +55,7 @@ def remove_request_mode_var():
 def read_startup_mode():
 
     try:
-        with open(envs.STARTUP_MODE_FILE_PATH, 'r') as f:
+        with open(envs.STARTUP_MODE_VAR_PATH, 'r') as f:
             content = f.read()
 
             if content[-1] == "\n":
@@ -66,7 +66,7 @@ def read_startup_mode():
             else:
                 raise VarError("Invalid value : %s" % content)
     except IOError:
-        raise VarError("Cannot open or read %s" % envs.STARTUP_MODE_FILE_PATH)
+        raise VarError("Cannot open or read %s" % envs.STARTUP_MODE_VAR_PATH)
 
     return mode
 
@@ -75,35 +75,35 @@ def write_startup_mode(mode):
 
     assert mode in ["intel", "nvidia", "nvidia_once"]
 
-    folder_path, filename = os.path.split(envs.STARTUP_MODE_FILE_PATH)
+    folder_path, filename = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
 
     try:
-        with open(envs.STARTUP_MODE_FILE_PATH, 'w') as f:
+        with open(envs.STARTUP_MODE_VAR_PATH, 'w') as f:
             f.write(mode)
     except IOError:
-        raise VarError("Cannot open or write to %s" % envs.STARTUP_MODE_FILE_PATH)
+        raise VarError("Cannot open or write to %s" % envs.STARTUP_MODE_VAR_PATH)
 
 
 def write_dpi_var(dpi):
 
-    folder_path, filename = os.path.split(envs.DPI_FILE_PATH)
+    folder_path, filename = os.path.split(envs.DPI_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
 
     try:
-        with open(envs.DPI_FILE_PATH, 'w') as f:
+        with open(envs.DPI_VAR_PATH, 'w') as f:
             f.write(str(dpi))
     except IOError:
-        raise VarError("Cannot open or write to %s" % envs.DPI_FILE_PATH)
+        raise VarError("Cannot open or write to %s" % envs.DPI_VAR_PATH)
 
 
 def remove_dpi_var():
 
     try:
-        os.remove(envs.DPI_FILE_PATH)
+        os.remove(envs.DPI_VAR_PATH)
     except FileNotFoundError:
         pass
