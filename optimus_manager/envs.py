@@ -2,9 +2,9 @@ VERSION = "0.5"
 
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
-STARTUP_MODE_FILE_PATH = "/var/lib/optimus-manager/startup_mode"
-REQUESTED_MODE_FILE_PATH = "/var/lib/optimus-manager/requested_mode"
-DPI_FILE_PATH = "/var/lib/optimus-manager/dpi"
+STARTUP_MODE_VAR_PATH = "/var/lib/optimus-manager/startup_mode"
+REQUESTED_MODE_VAR_PATH = "/var/lib/optimus-manager/requested_mode"
+DPI_VAR_PATH = "/var/lib/optimus-manager/dpi"
 DEFAULT_STARTUP_MODE = "intel"
 SYSTEM_CONFIGS_PATH = "/etc/optimus-manager/configs/"
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
