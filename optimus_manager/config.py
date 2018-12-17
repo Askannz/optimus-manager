@@ -54,18 +54,56 @@ def validate_config(config):
             if option not in config[section].keys():
                 raise ConfigError("Cannot find option \"%s\" in section [%s]" % (option, section))
 
-            multi_values, possible_values = schema[section][option]
+            parameter_type = schema[section][option][0]
 
-            if multi_values:
+            # Multiple-words parameters
+            if parameter_type == "multi_words":
+                allowed_values = schema[section][option][1]
+                can_be_blank = schema[section][option][2]
+
                 values = config[section][option].replace(" ", "").split(",")
-                for val in values:
-                    if val not in possible_values:
+
+                if len(values) == ['']:
+                    if not can_be_blank:
+                        raise ConfigError("Option \"%s\" in section [%s] requires at least one parameter" % (option, section))
+
+                else:
+                    for val in values:
+                        if val not in allowed_values:
+                            raise ConfigError("Invalid value \"%s\" for option \"%s\" in section [%s]" % (val, option, section))
+
+            # Single-word parameters
+            elif parameter_type == "single_word":
+                allowed_values = schema[section][option][1]
+                can_be_blank = schema[section][option][2]
+
+                val = config[section][option].replace(" ", "")
+
+                if val == "":
+                    if not can_be_blank:
+                        raise ConfigError("Option \"%s\" in section [%s] requires a non-blank value" % (option, section))
+
+                else:
+                    if val not in allowed_values:
                         raise ConfigError("Invalid value \"%s\" for option \"%s\" in section [%s]" % (val, option, section))
 
-            else:
-                val = config[section][option]
-                if val not in possible_values:
-                    raise ConfigError("Invalid value \"%s\" for option \"%s\" in section [%s]" % (val, option, section))
+            # Integer parameter
+            elif parameter_type == "integer":
+                can_be_blank = schema[section][option][1]
+
+                val = config[section][option].replace(" ", "")
+
+                if val == "":
+                    if not can_be_blank:
+                        raise ConfigError("Option \"%s\" in section [%s] requires a non-blank integer value" % (option, section))
+
+                else:
+                    try:
+                        v = int(val)
+                        if v <= 0:
+                            raise ValueError
+                    except ValueError:
+                        raise ConfigError("Option \"%s\" in section [%s] requires a non-blank integer value" % (option, section))
 
     # Checking if the config file has no unknown section or option
     for section in config.keys():

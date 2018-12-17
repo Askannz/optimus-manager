@@ -1,24 +1,25 @@
 {
 	"optimus":
 	{
-		"switching": ["False", ["nouveau", "bbswitch"]],
-		"login_manager_control": ["False", ["yes", "no"]]
+		"switching": ["single_word", ["nouveau", "bbswitch"], false],
+		"login_manager_control": ["False", ["yes", "no"], false]
 	},
 
 	"intel":
 	{
-		"driver": ["False", ["modesetting", "intel"]],
-		"accel": ["False", ["", "sna", "xna"]],
-		"tearfree": ["False", ["", "yes", "no"]],
-		"dri": ["False", ["2", "3"]],
-		"modeset": ["False", ["yes", "no"]]
+		"driver": ["single_word", ["modesetting", "intel"], false],
+		"accel": ["single_word", ["", "sna", "xna"], true],
+		"tearfree": ["single_word", ["", "yes", "no"], true],
+		"dri": ["single_word", ["2", "3"], false],
+		"modeset": ["single_word", ["yes", "no"], false]
 	},
 
 	"nvidia":
 	{
-		"dri": ["False", ["2", "3"]],
-		"modeset": ["False", ["yes", "no"]],
-		"pat": ["False", ["yes", "no"]],
-		"options": ["True", ["", "overclocking", "triple_buffer"]]
+		"dri": ["single_word", ["2", "3"], false],
+		"modeset": ["single_word", ["yes", "no"], false],
+		"pat": ["single_word", ["yes", "no"], false],
+		"dpi": ["integer", true],
+		"options": ["multi_words", ["overclocking", "triple_buffer"], true]
 	}
 }
