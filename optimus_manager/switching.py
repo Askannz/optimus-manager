@@ -54,7 +54,7 @@ def switch_to_intel(config):
 
     # Login managers configuration
     print("Configuring login managers..")
-    configure_login_managers(mode="intel")
+    configure_login_managers(config, mode="intel")
 
 
 def switch_to_nvidia(config):
@@ -111,4 +111,4 @@ def switch_to_nvidia(config):
 
     # Login managers configuration
     print("Configuring login managers..")
-    configure_login_managers(mode="nvidia")
+    configure_login_managers(config, mode="nvidia")

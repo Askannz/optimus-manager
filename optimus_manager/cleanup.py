@@ -1,10 +1,12 @@
 import os
 import optimus_manager.envs as envs
+import optimus_manager.var as var
 
 
 def clean_all():
     clean_xorg()
     clean_login_managers()
+    var.remove_dpi_var()
 
 
 def clean_xorg():

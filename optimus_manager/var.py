@@ -85,3 +85,25 @@ def write_startup_mode(mode):
             f.write(mode)
     except IOError:
         raise VarError("Cannot open or write to %s" % envs.STARTUP_MODE_FILE_PATH)
+
+
+def write_dpi_var(dpi):
+
+    folder_path, filename = os.path.split(envs.DPI_FILE_PATH)
+
+    if not os.path.isdir(folder_path):
+        os.makedirs(folder_path)
+
+    try:
+        with open(envs.DPI_FILE_PATH, 'w') as f:
+            f.write(str(dpi))
+    except IOError:
+        raise VarError("Cannot open or write to %s" % envs.DPI_FILE_PATH)
+
+
+def remove_dpi_var():
+
+    try:
+        os.remove(envs.DPI_FILE_PATH)
+    except FileNotFoundError:
+        pass
