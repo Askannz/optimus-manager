@@ -96,6 +96,9 @@ def main():
         exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl terminate-user $user; done;")
         exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl kill-user $user -s SIGKILL; done;")
 
+        # Stopping systemd-logind service
+        exec_bash("systemctl stop systemd-logind")
+
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
