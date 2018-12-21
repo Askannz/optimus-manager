@@ -91,10 +91,10 @@ def main():
         print("Cleaning up Optimus configuration")
         clean_all()
 
-        # Terminate login sessions
+        # Terminate user processes
         print("Terminating login sessions")
-        exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl terminate-session $session; done;")
-        exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl kill-session $session -s SIGKILL; done;")
+        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl terminate-user $user; done;")
+        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl kill-user $user -s SIGKILL; done;")
 
         # Stopping systemd-logind service
         exec_bash("systemctl stop systemd-logind")
