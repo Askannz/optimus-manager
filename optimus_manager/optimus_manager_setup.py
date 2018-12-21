@@ -96,6 +96,9 @@ def main():
         exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl terminate-session $session; done;")
         exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl kill-session $session -s SIGKILL; done;")
 
+        # Stopping systemd-logind service
+        exec_bash("systemctl stop systemd-logind")
+
         # Kill Xorg servers
         print("Stopping X servers")
         exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
