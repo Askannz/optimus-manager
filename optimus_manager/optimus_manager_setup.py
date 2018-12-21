@@ -91,6 +91,11 @@ def main():
         print("Cleaning up Optimus configuration")
         clean_all()
 
+        # Terminate login sessions
+        print("Terminating login sessions")
+        exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl terminate-session $session; done;")
+        exec_bash("for session in $(loginctl --no-legend | awk '{print $1}'); do loginctl kill-session $session -s SIGKILL; done;")
+
         # Kill Xorg servers
         print("Stopping X servers")
         exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
