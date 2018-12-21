@@ -91,9 +91,11 @@ def main():
         print("Cleaning up Optimus configuration")
         clean_all()
 
-        # Kill Xorg servers
-        print("Stopping X servers")
-        exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
+        # Terminate user processes
+        print("Terminating user processes")
+        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl terminate-user $user; done;")
+        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl kill-user $user -s SIGKILL; done;")
+
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
