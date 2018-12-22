@@ -48,6 +48,9 @@ def switch_to_intel(config):
         except BashError as e:
             raise SwitchError("Cannot load nouveau : %s" % str(e))
 
+    else:
+        print("Power switching backend is disabled.")
+
     # Xorg configuration
     print("Configuring Xorg...")
     configure_xorg(config, mode="intel")
