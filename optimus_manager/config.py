@@ -56,6 +56,8 @@ def validate_config(config):
 
             parameter_type = schema[section][option][0]
 
+            assert parameter_type in ["multi_words", "single_word", "integer"]
+
             # Multiple-words parameters
             if parameter_type == "multi_words":
                 allowed_values = schema[section][option][1]
