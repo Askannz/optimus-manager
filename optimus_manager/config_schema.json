@@ -1,7 +1,7 @@
 {
 	"optimus":
 	{
-		"switching": ["single_word", ["nouveau", "bbswitch"], false],
+		"switching": ["single_word", ["nouveau", "bbswitch", "none"], false],
 		"login_manager_control": ["single_word", ["yes", "no"], false]
 	},
 
