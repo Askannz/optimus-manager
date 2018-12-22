@@ -93,11 +93,18 @@ def main():
 
         # Terminate user processes
         print("Terminating user processes")
-        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl terminate-user $user; done;")
-        exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl kill-user $user -s SIGKILL; done;")
+        try:
+            exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl terminate-user $user; done;")
+            exec_bash("for user in $(loginctl list-users --no-legend | awk '{print $2}'); do loginctl kill-user $user -s SIGKILL; done;")
+        except BashError:
+            print("Cannot terminate user processes. Skipping ...")
+            pass
 
         # Stopping systemd-logind service
-        exec_bash("systemctl stop systemd-logind")
+        try:
+            exec_bash("systemctl stop systemd-logind")
+        except BashError:
+            pass
 
         stopped = _wait_xorg_stop()
         if not stopped:
