@@ -2,7 +2,8 @@
 	"optimus":
 	{
 		"switching": ["single_word", ["nouveau", "bbswitch"], false],
-		"login_manager_control": ["False", ["yes", "no"], false]
+		"login_manager_control": ["False", ["yes", "no"], false],
+		"pci_power_control": ["single_word", ["yes", "no"], false]
 	},
 
 	"intel":
