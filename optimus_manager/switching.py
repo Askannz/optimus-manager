@@ -22,10 +22,11 @@ def switch_to_intel(config):
         raise SwitchError("Cannot unload Nvidia modules : %s" % str(e))
 
     # Reset the PCI device corresponding to the Nvidia GPU
-    try:
-        pci.reset_gpu()
-    except pci.PCIError as e:
-        raise SwitchError("Error resetting the PCI device : %s" % str(e))
+    if config["optimus"]["pci_reset"] == "yes":
+        try:
+            pci.reset_gpu()
+        except pci.PCIError as e:
+            raise SwitchError("Error resetting the PCI device : %s" % str(e))
 
     if config["optimus"]["switching"] == "bbswitch":
 
@@ -100,10 +101,11 @@ def switch_to_nvidia(config):
         raise SwitchError("Cannot unload nouveau : %s" % str(e))
 
     # Reset the PCI device corresponding to the Nvidia GPU
-    try:
-        pci.reset_gpu()
-    except pci.PCIError as e:
-        raise SwitchError("Error resetting the PCI device : %s" % str(e))
+    if config["optimus"]["pci_reset"] == "yes":
+        try:
+            pci.reset_gpu()
+        except pci.PCIError as e:
+            raise SwitchError("Error resetting the PCI device : %s" % str(e))
 
     # Nvidia modules
     print("Loading Nvidia modules")
