@@ -3,7 +3,8 @@
 	{
 		"switching": ["single_word", ["nouveau", "bbswitch"], false],
 		"login_manager_control": ["False", ["yes", "no"], false],
-		"pci_power_control": ["single_word", ["yes", "no"], false]
+		"pci_power_control": ["single_word", ["yes", "no"], false],
+		"pci_reset": ["single_word", ["yes", "no"], false]
 	},
 
 	"intel":
