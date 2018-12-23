@@ -21,6 +21,12 @@ def switch_to_intel(config):
     except BashError as e:
         raise SwitchError("Cannot unload Nvidia modules : %s" % str(e))
 
+    # Reset the PCI device corresponding to the Nvidia GPU
+    try:
+        pci.reset_gpu()
+    except pci.PCIError as e:
+        raise SwitchError("Error resetting the PCI device : %s" % str(e))
+
     if config["optimus"]["switching"] == "bbswitch":
 
         # Load bbswitch
@@ -92,6 +98,12 @@ def switch_to_nvidia(config):
         exec_bash("modprobe -r nouveau")
     except BashError as e:
         raise SwitchError("Cannot unload nouveau : %s" % str(e))
+
+    # Reset the PCI device corresponding to the Nvidia GPU
+    try:
+        pci.reset_gpu()
+    except pci.PCIError as e:
+        raise SwitchError("Error resetting the PCI device : %s" % str(e))
 
     # Nvidia modules
     print("Loading Nvidia modules")
