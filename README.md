@@ -133,7 +133,7 @@ Maybe there is a problem with `nouveau` not handling power switching properly. C
 
 #### My display manager is not SDDM, LightDM nor SDDM
 
-You must configure it manually so that it executes the script `/usr/bin/optimus-manager_Xsetup` on startup. The X server may still work without that last step but you will see a black screen on your built-in monitor instead of the login window.
+You must configure it manually so that it executes the script `/usr/bin/optimus-manager_Xsetup` on startup. The X server may still work without that step but your login manager will show a black screen on the built-in monitor instead of the login window. You can set up autologin to avoid that.
 
 #### The display manager stops but does not restart (a.k.a I am stuck in TTY mode)
 
