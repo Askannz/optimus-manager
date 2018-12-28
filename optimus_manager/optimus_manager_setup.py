@@ -28,6 +28,28 @@ def _wait_xorg_stop():
     return False
 
 
+def _terminate_sessions():
+
+    print("Terminating X11 sessions")
+    try:
+        exec_bash("for session in $(loginctl list-sessions --no-legend | awk '{print $1}'); do "
+                  "if loginctl show-session $session | grep -q x11; "
+                  "then loginctl terminate-session $session; "
+                  "fi; done;")
+
+        exec_bash("for session in $(loginctl list-sessions --no-legend | awk '{print $1}'); do "
+                  "if loginctl show-session $session | grep -q x11; "
+                  "then loginctl kill-session $session -s SIGKILL; "
+                  "fi; done;")
+    except BashError:
+        print("Cannot terminate user processes. Skipping ...")
+        pass
+    
+    print("Stopping the remaining X servers")
+    exec_bash("for pid in $(pidof X); do kill -9 $pid; done;")
+    exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
+
+
 def main():
 
     # Arguments parsing
@@ -91,9 +113,15 @@ def main():
         print("Cleaning up Optimus configuration")
         clean_all()
 
-        # Kill Xorg servers
-        print("Stopping X servers")
-        exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
+        # Terminate X11 sessions and closing X servers
+        _terminate_sessions()
+
+        # Stopping systemd-logind service
+        try:
+            exec_bash("systemctl stop systemd-logind")
+        except BashError:
+            pass
+
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
