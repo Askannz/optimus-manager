@@ -45,7 +45,7 @@ def _terminate_sessions():
     except BashError:
         print("Cannot terminate user processes. Skipping ...")
         pass
-    
+
     print("Stopping the remaining X servers")
     exec_bash("for pid in $(pidof X); do kill -9 $pid; done;")
     exec_bash("for pid in $(pidof Xorg); do kill -9 $pid; done;")
@@ -63,15 +63,15 @@ def main():
 
     print("Optimus Manager (DM setup) version %s" % envs.VERSION)
 
+    # Config
+    try:
+        config = load_config()
+    except ConfigError as e:
+            print("Error loading config file : %s" % str(e))
+
     if args.setup_start:
 
         print("Setting up Optimus configuration")
-
-        # Config
-        try:
-            config = load_config()
-        except ConfigError as e:
-                print("Error loading config file : %s" % str(e))
 
         # Cleanup
         clean_all()
@@ -141,7 +141,7 @@ def main():
             try:
                 pci.reset_gpu()
             except pci.PCIError as e:
-                raise SwitchError("Error resetting the PCI device : %s" % str(e))
+                print("Error resetting the PCI device : %s" % str(e))
 
     else:
 
