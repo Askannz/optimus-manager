@@ -54,10 +54,13 @@ def switch_to_intel(config):
 
     # PCI power management
     if config["optimus"]["pci_power_control"] == "yes":
-        try:
-            pci.set_power_management(True)
-        except pci.PCIError as e:
-            print("WARNING : Cannot set PCI power management : %s" % str(e))
+        if config["optimus"]["switching"] == "bbswitch":
+            print("bbswitch is enabled, pci_power_control option ignored.")
+        else:
+            try:
+                pci.set_power_management(True)
+            except pci.PCIError as e:
+                print("WARNING : Cannot set PCI power management : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
@@ -118,10 +121,13 @@ def switch_to_nvidia(config):
 
     # PCI power management
     if config["optimus"]["pci_power_control"] == "yes":
-        try:
-            pci.set_power_management(False)
-        except pci.PCIError as e:
-            print("WARNING : Cannot set PCI power management : %s" % str(e))
+        if config["optimus"]["switching"] == "bbswitch":
+            print("bbswitch is enabled, pci_power_control option ignored.")
+        else:
+            try:
+                pci.set_power_management(False)
+            except pci.PCIError as e:
+                print("WARNING : Cannot set PCI power management : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
