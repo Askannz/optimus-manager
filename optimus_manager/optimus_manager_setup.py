@@ -9,6 +9,7 @@ from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchE
 from optimus_manager.cleanup import clean_all
 from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.checks as checks
+import optimus_manager.pci as pci
 
 
 def _wait_xorg_stop():
@@ -134,6 +135,13 @@ def main():
         except BashError as e:
             print("Cannot unload modules : %s" % str(e))
             sys.exit(1)
+
+        # Reset the PCI device corresponding to the Nvidia GPU
+        if config["optimus"]["pci_reset"] == "yes":
+            try:
+                pci.reset_gpu()
+            except pci.PCIError as e:
+                raise SwitchError("Error resetting the PCI device : %s" % str(e))
 
     else:
 
