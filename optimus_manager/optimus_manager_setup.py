@@ -67,7 +67,8 @@ def main():
     try:
         config = load_config()
     except ConfigError as e:
-            print("Error loading config file : %s" % str(e))
+        print("Error loading config file : %s" % str(e))
+        sys.exit(1)
 
     if args.setup_start:
 
