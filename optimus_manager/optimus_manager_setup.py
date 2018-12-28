@@ -124,6 +124,7 @@ def main():
         except BashError:
             pass
 
+        print("Waiting for Xorg servers to stop")
         stopped = _wait_xorg_stop()
         if not stopped:
             print("Cannot stop X servers !")
@@ -138,6 +139,7 @@ def main():
             sys.exit(1)
 
         # Reset the PCI device corresponding to the Nvidia GPU
+        print("Resetting the GPU")
         if config["optimus"]["pci_reset"] == "yes":
             try:
                 pci.reset_gpu()
