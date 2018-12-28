@@ -2,6 +2,7 @@ import optimus_manager.checks as checks
 from optimus_manager.bash import exec_bash, BashError
 from optimus_manager.xorg import configure_xorg
 from optimus_manager.login_managers import configure_login_managers
+import optimus_manager.pci as pci
 
 
 class SwitchError(Exception):
@@ -19,6 +20,13 @@ def switch_to_intel(config):
         exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia")
     except BashError as e:
         raise SwitchError("Cannot unload Nvidia modules : %s" % str(e))
+
+    # Reset the PCI device corresponding to the Nvidia GPU
+    if config["optimus"]["pci_reset"] == "yes":
+        try:
+            pci.reset_gpu()
+        except pci.PCIError as e:
+            raise SwitchError("Error resetting the PCI device : %s" % str(e))
 
     if config["optimus"]["switching"] == "bbswitch":
 
@@ -50,6 +58,13 @@ def switch_to_intel(config):
 
     else:
         print("Power switching backend is disabled.")
+
+    # PCI power management
+    if config["optimus"]["pci_power_control"] == "yes":
+        try:
+            pci.set_power_management(True)
+        except pci.PCIError as e:
+            print("WARNING : Cannot set PCI power management : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
@@ -88,6 +103,13 @@ def switch_to_nvidia(config):
     except BashError as e:
         raise SwitchError("Cannot unload nouveau : %s" % str(e))
 
+    # Reset the PCI device corresponding to the Nvidia GPU
+    if config["optimus"]["pci_reset"] == "yes":
+        try:
+            pci.reset_gpu()
+        except pci.PCIError as e:
+            raise SwitchError("Error resetting the PCI device : %s" % str(e))
+
     # Nvidia modules
     print("Loading Nvidia modules")
 
@@ -107,6 +129,13 @@ def switch_to_nvidia(config):
 
     except BashError as e:
         raise SwitchError("Cannot load Nvidia modules : %s" % str(e))
+
+    # PCI power management
+    if config["optimus"]["pci_power_control"] == "yes":
+        try:
+            pci.set_power_management(False)
+        except pci.PCIError as e:
+            print("WARNING : Cannot set PCI power management : %s" % str(e))
 
     # Xorg configuration
     print("Configuring Xorg...")
