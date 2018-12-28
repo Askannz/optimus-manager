@@ -118,12 +118,6 @@ def main():
         # Terminate X11 sessions and closing X servers
         _terminate_sessions()
 
-        # Stopping systemd-logind service
-        try:
-            exec_bash("systemctl stop systemd-logind")
-        except BashError:
-            pass
-
         print("Waiting for Xorg servers to stop")
         stopped = _wait_xorg_stop()
         if not stopped:
