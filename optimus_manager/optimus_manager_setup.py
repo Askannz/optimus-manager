@@ -118,6 +118,13 @@ def main():
         # Terminate X11 sessions and closing X servers
         _terminate_sessions()
 
+        # Killing systemd-logind (there is a known bug causing it to keep ownership of the GPU
+        # and prevents module unloading)
+        try:
+            exec_bash("pkill systemd-logind")
+        except BashError:
+            pass
+
         print("Waiting for Xorg servers to stop")
         stopped = _wait_xorg_stop()
         if not stopped:
