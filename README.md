@@ -60,6 +60,8 @@ Then, reboot (it is necessary for the new Systemd configuration to take effect).
 
 Also, if you have bumblebee installed on your system, uninstall it or at least make sure the `bumblebeed` service is disabled. Finally, make sure the `bbswitch` module is not loaded at boot time (check `/etc/modules-load.d/`).
 
+Someone made a Gnome Shell extension for this program, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+
 
 Uninstallation
 ----------
@@ -93,8 +95,6 @@ optimus-manager --set-startup MODE
 ```
 
 Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a special mode which makes your system use the Nvidia GPU at boot, but for one boot only. After that it reverts to `intel` mode. This can be useful to test your Nvidia configuration and make sure you do not end up with an unusable X server.
-
-Someone made a Gnome Shell extension for this program, you can find it here : [optimus-manager-argos}(https://github.com/inzar98/optimus-manager-argos).
 
 Configuration
 ----------
