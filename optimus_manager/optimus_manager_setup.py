@@ -120,6 +120,7 @@ def main():
 
         # Killing systemd-logind (there is a known bug causing it to keep ownership of the GPU
         # and prevents module unloading)
+        print("Killing systemd-logind")
         try:
             exec_bash("pkill systemd-logind")
         except BashError:
