@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=optimus-manager-systray
+Type=Application
+Exec=/usr/bin/python -u /usr/bin/optimus-manager-systray
+Terminal=false
