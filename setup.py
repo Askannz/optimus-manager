@@ -19,6 +19,7 @@ setup(
             'optimus-manager=optimus_manager.optimus_manager_client:main',
             'optimus-manager-setup=optimus_manager.optimus_manager_setup:main',
             'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main',
+            'optimus-manager-systray=optimus_manager.optimus_manager_systray:main',
         ],
     },
     package_data={'optimus_manager': ['config_schema.json']},
