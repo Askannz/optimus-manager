@@ -96,6 +96,14 @@ optimus-manager --set-startup MODE
 
 Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a special mode which makes your system use the Nvidia GPU at boot, but for one boot only. After that it reverts to `intel` mode. This can be useful to test your Nvidia configuration and make sure you do not end up with an unusable X server.
 
+#### System Tray Icon
+optimus-manager includes a system tray icon that makes it easy to switch GPUs. It should work on most desktop environments.
+
+To make the tray icon automatically launch with your DE, it is usually enough to do:
+```
+ln -s /usr/share/applications/optimus-manager-systray.desktop ~/.config/autostart/optimus-manager-systray.desktop
+```
+
 Configuration
 ----------
 
