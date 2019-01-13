@@ -1,4 +1,5 @@
 import argparse
+import os
 import socket
 import sys
 import signal
@@ -14,8 +15,7 @@ import optimus_manager.envs as envs
 NVIDIA = 'nvidia'
 INTEL = 'intel'
 
-NVIDIA_ICON = QIcon.fromTheme('nvidia', QIcon('../icon/nvidia.svg'))
-INTEL_ICON = QIcon.fromTheme('intel', QIcon('../icon/intel.svg'))
+ICON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon")
 
 
 # Next 3 funcs courtesy of https://coldfix.eu/2016/11/08/pyqt-boilerplate
@@ -69,15 +69,21 @@ def send_command(cmd, parent=None):
 class SystemTrayIcon(QSystemTrayIcon):
     def __init__(self, mode, parent=None):
         self.parent = parent
-        QSystemTrayIcon.__init__(self, NVIDIA_ICON if mode == NVIDIA else INTEL_ICON, self.parent)
+
+        self.NVIDIA_ICON = QIcon.fromTheme('nvidia', QIcon(os.path.join(ICON_PATH, 'nvidia.png')))
+        self.INTEL_ICON = QIcon.fromTheme('intel', QIcon(os.path.join(ICON_PATH, 'intel.png')))
+
+        QSystemTrayIcon.__init__(self, self.NVIDIA_ICON if mode == NVIDIA else self.INTEL_ICON, self.parent)
         menu = QMenu(self.parent)
 
+        self.setVisible(True)
+
         # Nvidia menu item bound to self.switch('nvidia')
-        nvidia_action = menu.addAction(NVIDIA_ICON, "Switch to nvidia" if mode == INTEL else "Reload nvidia")
+        nvidia_action = menu.addAction(self.NVIDIA_ICON, "Switch to nvidia" if mode == INTEL else "Reload nvidia")
         nvidia_action.triggered.connect(partial(self.switch, NVIDIA))
 
         # Intel menu item bound to self.switch('intel')
-        intel_action = menu.addAction(INTEL_ICON, "Switch to intel" if mode == NVIDIA else "Reload intel")
+        intel_action = menu.addAction(self.INTEL_ICON, "Switch to intel" if mode == NVIDIA else "Reload intel")
         intel_action.triggered.connect(partial(self.switch, INTEL))
 
         # Provide an easy menu item to close the "app"
@@ -97,7 +103,7 @@ class SystemTrayIcon(QSystemTrayIcon):
         msg = QMessageBox(self.parent)
 
         # Make a pixmap out of the proper icon and use it as the icon
-        msg.setIconPixmap((NVIDIA_ICON if to == NVIDIA else INTEL_ICON).pixmap(64, 64))
+        msg.setIconPixmap((self.NVIDIA_ICON if to == NVIDIA else self.INTEL_ICON).pixmap(64, 64))
 
         msg.setWindowTitle('WARNING: You are about to switch GPUs')
         msg.setText("You are about to switch to the {to} GPU. "
