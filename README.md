@@ -60,8 +60,6 @@ Then, reboot (it is necessary for the new Systemd configuration to take effect).
 
 Also, if you have bumblebee installed on your system, uninstall it or at least make sure the `bumblebeed` service is disabled. Finally, make sure the `bbswitch` module is not loaded at boot time (check `/etc/modules-load.d/`).
 
-Someone made a Gnome Shell extension for this program, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
-
 
 Uninstallation
 ----------
@@ -103,6 +101,8 @@ To make the tray icon automatically launch with your DE, it is usually enough to
 ```
 ln -s /usr/share/applications/optimus-manager-systray.desktop ~/.config/autostart/optimus-manager-systray.desktop
 ```
+
+Someone also made a Gnome Shell extension for this program, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
 
 Configuration
 ----------
@@ -199,3 +199,7 @@ Maybe. It will not work on Ubuntu because Canonical has its own tool to deal wit
 It will not work on the default install of Fedora because it uses Wayland (it *might* work in Xorg mode though).
 
 I do not know enough about the specificities of other distributions to port this tool to them. Feel free to help though :)
+
+Credit
+----------
+The Intel and Nvidia logos are from the [FlatWoken project](https://github.com/alecive/FlatWoken) created by Alessandro Roncone.
