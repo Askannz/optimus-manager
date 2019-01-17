@@ -12,7 +12,7 @@ def read_requested_mode():
         with open(envs.REQUESTED_MODE_VAR_PATH, 'r') as f:
             content = f.read()
 
-            if content[-1] == "\n":
+            if len(content) > 0 and content[-1] == "\n":
                 content = content[:-1]
 
             if content in ["intel", "nvidia"]:
@@ -58,7 +58,7 @@ def read_startup_mode():
         with open(envs.STARTUP_MODE_VAR_PATH, 'r') as f:
             content = f.read()
 
-            if content[-1] == "\n":
+            if len(content) > 0 and content[-1] == "\n":
                 content = content[:-1]
 
             if content in ["intel", "nvidia", "nvidia_once"]:
