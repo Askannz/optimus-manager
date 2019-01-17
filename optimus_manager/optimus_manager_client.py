@@ -117,7 +117,7 @@ def main():
             print("WARNING : bbswitch is enabled in the configuration file but the bbswitch module does"
                   " not seem to be available for the current kernel. Power switching will not work.\n"
                   "You can install bbswitch for the default kernel with \"sudo pacman -S bbswitch\" or"
-                  " for all kernels with \"sudo pacman -S bbswitch\".\n")
+                  " for all kernels with \"sudo pacman -S bbswitch-dkms\".\n")
 
         if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
             print("WARNING : the nvidia module does not seem to be available for the current kernel."
