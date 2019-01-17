@@ -50,11 +50,9 @@ def main():
     args = parser.parse_args()
 
     # Config loading
-    # Even if the client does not need any option from it (yet), we parse the config file.
-    # That way the user can see parsing errors without opening a systemd log.
     if not args.version:
         try:
-            load_config()
+            config = load_config()
         except ConfigError as e:
             print("Error loading config file : %s" % str(e))
             sys.exit(1)
@@ -114,10 +112,32 @@ def main():
         else:
             switch_mode = args.switch
 
+        # Printing warnings if something is wrong
+        if config["optimus"]["switching"] == "bbswitch" and not checks.is_module_available("bbswitch"):
+            print("WARNING : bbswitch is enabled in the configuration file but the bbswitch module does"
+                  " not seem to be available for the current kernel. Power switching will not work.\n"
+                  "You can install bbswitch for the default kernel with \"sudo pacman -S bbswitch\" or"
+                  " for all kernels with \"sudo pacman -S bbswitch\".\n")
+
+        if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
+            print("WARNING : the nvidia module does not seem to be available for the current kernel."
+                  " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,"
+                  " continue anyway ? (y/N)")
+            ans = input("> ").lower()
+
+            if ans == "y":
+                pass
+            elif ans == "n" or ans == "N":
+                print("Aborting.")
+                sys.exit(0)
+            else:
+                print("Invalid choice. Aborting")
+                sys.exit(0)
+
         if args.no_confirm:
             send_command(switch_mode)
         else:
-            print("WARNING : You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
+            print("You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
             ans = input("> ").lower()
@@ -126,8 +146,10 @@ def main():
                 send_command(switch_mode)
             elif ans == "n" or ans == "N":
                 print("Aborting.")
+                sys.exit(0)
             else:
                 print("Invalid choice. Aborting")
+                sys.exit(0)
 
     elif args.set_startup:
 
