@@ -46,7 +46,7 @@ def read_gpu_mode():
         exec_bash("glxinfo")
     except BashError as e:
         raise CheckError("Cannot find the current mode : %s" % str(e))
-    
+
     try:
         exec_bash("glxinfo | grep NVIDIA")
         return "nvidia"
@@ -57,3 +57,13 @@ def read_gpu_mode():
 def is_daemon_active():
     state = exec_bash("systemctl is-active optimus-manager").stdout.decode('utf-8')[:-1]
     return state == "active"
+
+
+def is_module_available(module_name):
+
+    try:
+        exec_bash("modinfo %s" % module_name)
+    except BashError:
+        return False
+    else:
+        return True
