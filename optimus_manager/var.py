@@ -87,6 +87,14 @@ def write_startup_mode(mode):
         raise VarError("Cannot open or write to %s" % envs.STARTUP_MODE_VAR_PATH)
 
 
+def remove_startup_mode_var():
+
+    try:
+        os.remove(envs.STARTUP_MODE_VAR_PATH)
+    except FileNotFoundError:
+        pass
+
+
 def write_dpi_var(dpi):
 
     folder_path, filename = os.path.split(envs.DPI_VAR_PATH)
