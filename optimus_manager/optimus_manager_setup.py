@@ -4,7 +4,7 @@ import time
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_request_mode_var, VarError
+from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, remove_requested_mode_var, VarError
 from optimus_manager.switching import switch_to_intel, switch_to_nvidia, SwitchError
 from optimus_manager.cleanup import clean_all
 from optimus_manager.bash import exec_bash, BashError
@@ -97,7 +97,7 @@ def main():
                 requested_mode = startup_mode
 
         # We are done reading the command
-        remove_request_mode_var()
+        remove_requested_mode_var()
 
         print("Requested mode :", requested_mode)
 

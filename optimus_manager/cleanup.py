@@ -8,7 +8,7 @@ def clean_all():
     clean_login_managers()
     var.remove_dpi_var()
     var.remove_startup_mode_var()
-    var.remove_request_mode_var()
+    var.remove_requested_mode_var()
 
 
 def clean_xorg():

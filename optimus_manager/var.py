@@ -44,7 +44,7 @@ def write_requested_mode(mode):
         raise VarError("Cannot open or write to %s" % envs.REQUESTED_MODE_VAR_PATH)
 
 
-def remove_request_mode_var():
+def remove_requested_mode_var():
 
     try:
         os.remove(envs.REQUESTED_MODE_VAR_PATH)
