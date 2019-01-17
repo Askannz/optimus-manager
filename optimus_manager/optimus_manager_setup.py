@@ -141,12 +141,15 @@ def main():
             sys.exit(1)
 
         # Reset the PCI device corresponding to the Nvidia GPU
-        print("Resetting the GPU")
         if config["optimus"]["pci_reset"] == "yes":
-            try:
-                pci.reset_gpu()
-            except pci.PCIError as e:
-                print("Error resetting the PCI device : %s" % str(e))
+            if config["optimus"]["switching"] == "bbswitch":
+                print("bbswitch is enabled, pci_reset option ignored.")
+            else:
+                print("Resetting the GPU")
+                try:
+                    pci.reset_gpu()
+                except pci.PCIError as e:
+                    print("Error resetting the PCI device : %s" % str(e))
 
     else:
 
