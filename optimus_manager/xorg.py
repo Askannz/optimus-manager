@@ -1,6 +1,7 @@
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
+from optimus_manager.bash import exec_bash, BashError
 
 
 class XorgError(Exception):
@@ -18,6 +19,23 @@ def configure_xorg(config, mode):
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
 
     _write_xorg_conf(xorg_conf_text)
+
+
+def get_xorg_servers_pids():
+
+    try:
+        x_pids = exec_bash("pidof X")
+    except BashError:
+        x_pids = ""
+
+    try:
+        xorg_pids = exec_bash("pidof Xorg")
+    except BashError:
+        xorg_pids = ""
+
+    pids_str_list = (x_pids.split() + xorg_pids.split())
+
+    return [int(p_str) for p_str in pids_str_list]
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):

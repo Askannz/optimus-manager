@@ -28,7 +28,7 @@ def _is_x11_session(session):
 
     try:
 
-        session_info = exec_bash("loginctl show-session %s").stdout.decode('utf-8')[:-1]
+        session_info = exec_bash("loginctl show-session %s" % session).stdout.decode('utf-8')[:-1]
         return ("Type=x11" in session_info)
 
     except BashError as e:
