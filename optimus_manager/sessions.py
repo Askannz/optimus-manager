@@ -1,8 +1,27 @@
 from optimus_manager.bash import exec_bash, BashError
+from optimus_manager.polling import poll_block
 
 
 class SessionError(Exception):
     pass
+
+
+def terminate_current_x11_sessions():
+
+    x11_sessions = get_x11_sessions()
+
+    if len(x11_sessions) > 0:
+        print("%d open sessions found, terminating them manually" % len(x11_sessions))
+
+    for session in x11_sessions:
+        terminate_session(session)
+
+    def any_session_left(): return (len(get_x11_sessions()) != 0)
+
+    success = poll_block(any_session_left)
+
+    if not success:
+        raise SessionError("Failed to terminate loginctl x11 sessions")
 
 
 def get_x11_sessions():
