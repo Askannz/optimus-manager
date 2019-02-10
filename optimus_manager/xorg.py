@@ -1,7 +1,6 @@
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
-from optimus_manager.checks import is_xorg_running
 from optimus_manager.bash import exec_bash, BashError
 from optimus_manager.polling import poll_block
 
@@ -53,10 +52,26 @@ def kill_current_xorg_servers():
         except BashError:
             pass
 
-    success = poll_block(is_xorg_running)
+    success = poll_block(_is_xorg_running)
 
     if not success:
         raise XorgError("Failed to kill all X11 servers")
+
+
+def _is_xorg_running():
+    try:
+        exec_bash("pidof X")
+        return True
+    except BashError:
+        pass
+
+    try:
+        exec_bash("pidof Xorg")
+        return True
+    except BashError:
+        pass
+
+    return False
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
