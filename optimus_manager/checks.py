@@ -17,22 +17,6 @@ def is_login_manager_active(config):
     return state == "active"
 
 
-def is_xorg_running():
-    try:
-        exec_bash("pidof X")
-        return True
-    except BashError:
-        pass
-
-    try:
-        exec_bash("pidof Xorg")
-        return True
-    except BashError:
-        pass
-
-    return False
-
-
 def is_pat_available():
     try:
         exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
