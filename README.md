@@ -106,6 +106,8 @@ Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a speci
 
 #### System Tray Icon
 
+![optimus-manager systray screenshot](systray.png "optimus-manager systray")
+
 optimus-manager includes a system tray icon that makes it easy to switch GPUs. It should work on most desktop environments.
 
 To make the tray icon automatically launch with your DE, it is usually enough to do:
