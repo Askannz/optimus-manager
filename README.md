@@ -8,20 +8,22 @@ Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 **Only Archlinux (plus derivatives like Manjaro) is supported for now.**
 Only Xorg sessions are supported (no Wayland).
 
-Supported display managers are : SDDM, LightDM, GDM. The program *might* still work with others but you have to configure them manually (see [this section](#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
+Supported display managers are : SDDM, LightDM, GDM.
+
+optimus-manager *might* still work with other display managers but you have to configure them manually (see [this section](#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
 
 The "why"
 ----------
 
 On Windows, the Optimus technology works by dynamically offloading rendering to the Nvidia GPU when running 3D-intensive applications, while the desktop session itself runs on the Intel GPU.
 
-However, on Linux, the Nvidia driver does not provide such offloading capabilities ([yet](https://devtalk.nvidia.com/default/topic/957981/linux/prime-render-offloading-on-nvidia-optimus/post/5276481/#5276481)), which makes it difficult to use the full potential of your machine while keeping a reasonable battery life.
+However, on Linux, the Nvidia driver does not provide such offloading capabilities ([yet](https://devtalk.nvidia.com/default/topic/957981/linux/prime-render-offloading-on-nvidia-optimus/post/5276481/#5276481)), which difficult for us to use the full potential of our machines without destroying their battery life.
 
 Currently, if you have Linux installed on an Optimus laptop, there are three methods to use your Nvidia GPU :
 
-- **Run your whole X session on the Intel GPU and use [Bumblebee](https://github.com/Bumblebee-Project/Bumblebee) to offload rendering to the Nvidia GPU.** While this mimic the behavior of Optimus on Windows, this is an unofficial, hacky solution with three major drawbacks : 1. a noticeable performance hit (because Bumblebee has to use your CPU to copy frames over to the display) 2. no support for Vulkan (therefore, it is incompatible with DXVK and any native game using Vulkan, like Shadow of the Tomb Raider for instance) 3. you will be unable to use any video output (like HDMI ports) connected to the Nvidia GPU, unless you have the open-source `nouveau` driver loaded to this GPU at the same time.
+- **Run your whole X session on the Intel GPU and use [Bumblebee](https://github.com/Bumblebee-Project/Bumblebee) to offload rendering to the Nvidia GPU.** While this mimic the behavior of Optimus on Windows, this is an unofficial, hacky solution with three major drawbacks : 1. a noticeable performance hit (because Bumblebee has to use your CPU to copy frames over to the display) 2. no support for Vulkan (therefore, it is incompatible with DXVK and any native game using Vulkan, like Shadow of the Tomb Raider for instance) 3. you will be unable to use any video output (like HDMI ports) connected to the Nvidia GPU, unless you have the open-source `nouveau` driver loaded to this GPU at the same time (or use some solution like intel-virtual-output).
 
-- **Use [nvidia-xrun](https://github.com/Witko/nvidia-xrun) to have the Nvidia GPU run on its own X server in another virtual terminal**. You have to keep two X servers running at the same time, which can be detrimental to performance. Also, you do not have acess to your normal desktop environment while in the virtual terminal of the Nvidia GPU, and in my own experience, the nvidia driver is prone to crashing when switching between virtual terminals.
+- **Use [nvidia-xrun](https://github.com/Witko/nvidia-xrun) to have the Nvidia GPU run on its own X server in another virtual terminal**. You still have to run two X servers at the same time, and you do not have acess to your normal desktop environment while in the virtual terminal of the Nvidia GPU. Also, in my own experience, desktop environments are prone prone to crashing when switching between virtual terminals while the nvidia driver is running.
 
 - **Run your whole X session on the Nvidia GPU and disable rendering on the Intel GPU.** This allows you to run your applications at full performance, with Vulkan support, and with access to all video outputs. However, since your power-hungry Nvidia GPU is turned on at all times, it has a massive impact on your battery life.
 This method is often called Nvidia PRIME, although technically PRIME is just the technology that allows your Nvidia GPU to send its frames to the built-in display of your laptop *via* the Intel GPU.
@@ -36,12 +38,14 @@ Note that this is nothing new : Ubuntu has been using that method for years with
 
 In practice, here is what happens when switching to the Intel GPU (for example) :
 1. Your login manager is automatically stopped, which also stops the X server (warning : this closes all opened applications)
-2. The Nvidia modules are unloaded and `nouveau` is loaded instead to switch off the card (this can also be done with `bbswitch` if `nouveau` does not work)
+2. The Nvidia modules are unloaded and either `bbswitch` or `nouveau` are loaded instead. `bbswitch` is used to turn off the card on machines which do not support power management from the kernel, while `nouveau` is the open-source driver for Nvidia cards, which allows you to use external outputs even in Intel mode.
 3. The configuration for X and your login manager is updated (note that the configuration is saved to dedicated files, this will *not* overwrite any of your own configuration files)
 4. The login manager is restarted.
 
 
-I am well-aware this is still a *hacky* solution. I will happily deprecate this tool the day Nvidia implements proper GPU offloading in their Linux driver.
+Before using optimus-manager, be aware that this is still a *hacky* solution and may have stability issues with some desktop environments/display managers.
+
+I will happily deprecate this tool the day Nvidia implements proper GPU offloading in their Linux driver.
 
 
 Installation
@@ -56,20 +60,24 @@ $ sudo systemctl enable optimus-manager.service
 ```
 Then, reboot (it is necessary for the new Systemd configuration to take effect).
 
-**IMPORTANT :** make sure you do not have any configuration file conflicting with the ones autogenerated by optimus-manager. In particular, remove everything related to displays or GPUs in `/etc/X11/xorg.conf` and `/etc/X11/xorg.conf.d/` (and also in `/etc/X11/mhwd.d/` for Manjaro users). Also, avoid running `nvidia-xconfig` or using the `Save to X Configuration file` in the Nvidia control panel. If you need to apply specific options to your Xorg config, see the [Configuration](#configuration) section.
+**IMPORTANT :** make sure you do not have any configuration file conflicting with the ones autogenerated by optimus-manager. In particular, remove everything related to displays or GPUs in `/etc/X11/xorg.conf` and `/etc/X11/xorg.conf.d/`. Also, avoid running `nvidia-xconfig` or using the `Save to X Configuration file` in the Nvidia control panel. If you need to apply specific options to your Xorg config, see the [Configuration](#configuration) section.
+
+**For Manjaro users** : In addition to the above, do *not* install your GPU drivers through MHWD. It will autogenerate Xorg configuration files which conflicts with optimus-manager. If you have already done it, be sure to remove anything GPU-related in `/etc/X11/xorg.conf.d/`. Also, Manjaro comes with bumblebee enabled by default so remember to disable it (see the next paragraph).
 
 Also, if you have bumblebee installed on your system, uninstall it or at least make sure the `bumblebeed` service is disabled. Finally, make sure the `bbswitch` module is not loaded at boot time (check `/etc/modules-load.d/`).
+
+Finally, make sure the nvidia driver is installed. On Archlinux, you can use the packages `nvidia` ir `nvidia-dkms`. On Manjaro, the packages have names like `linuxXXX-nvidia` (where `XXX` is the kernel version). For games, it is also recommended to install `nvidia-utils` and `lib32-nvidia-utils`.
 
 
 Uninstallation
 ----------
 
-If you do not want to use `optimus-manager` anymore, you need to run `optimus-manager --cleanup` to clear any leftover autogrenerated configuration file, then uninstall the program. Just disabling the daemon is not enough because the Sytemd scripts will still be executed.
+If you do not want to use `optimus-manager` anymore, you need to run `optimus-manager --cleanup` to clear any leftover autogenerated configuration file, then uninstall the program. Just disabling the daemon is not enough because the Sytemd scripts will still be executed.
 
 Usage
 ----------
 
-Make sure the SystemD service `optimus-manager.service` is running, then run
+Make sure the systemd service `optimus-manager.service` is running, then run
 ```
 optimus-manager --switch nvidia
 ```
@@ -94,7 +102,10 @@ optimus-manager --set-startup MODE
 
 Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a special mode which makes your system use the Nvidia GPU at boot, but for one boot only. After that it reverts to `intel` mode. This can be useful to test your Nvidia configuration and make sure you do not end up with an unusable X server.
 
+**For GNOME users** : for now, optimus-manager has some random issues with restarting the GNOME desktop environment, so you may experience issues after a GPU switch. If you want to go the safe way, use the `--set-startup` option to set the GPU you want and reboot your computer.
+
 #### System Tray Icon
+
 optimus-manager includes a system tray icon that makes it easy to switch GPUs. It should work on most desktop environments.
 
 To make the tray icon automatically launch with your DE, it is usually enough to do:
@@ -102,7 +113,7 @@ To make the tray icon automatically launch with your DE, it is usually enough to
 ln -s /usr/share/applications/optimus-manager-systray.desktop ~/.config/autostart/optimus-manager-systray.desktop
 ```
 
-Someone also made a Gnome Shell extension for this program, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+A Gnome Shell extension was also made, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
 
 Configuration
 ----------
@@ -120,7 +131,7 @@ You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf`
 FAQ / Troubleshooting
 ----------
 
-General troubleshooting advice : you can view the logs of the optimus-manager daemon by running `journalctl -u optimus-manager.service`, but the most important log is the one from your display manager : `journalctl -u display-manager.service`. Please include both if you have to open a GitHub issue. Add `-b0` if you want to see the logs for the current boot, `-b-1` for the previous boot, and add `--no-pager` if you need to copy-paste the whole log.
+General troubleshooting advice : you can view the logs of the optimus-manager daemon by running `journalctl -u optimus-manager.service`, but the most important log is the one from your display manager : `journalctl -u display-manager.service`. Please include both if you have to open a GitHub issue. Add `-b0` if you want to see the logs for the current boot (`-b-1` for the previous boot, etc) and add `--no-pager` if you need to copy-paste the whole log.
 
 The Arch wiki can be a great resource for troubleshooting. Check the following pages : [NVIDIA](https://wiki.archlinux.org/index.php/NVIDIA), [NVDIA Optimus](https://wiki.archlinux.org/index.php/NVIDIA_Optimus), [Bumblebee](https://wiki.archlinux.org/index.php/Bumblebee) (even if optimus-manager does not use Bumblebee, some advices related to power switching can still be applicable)
 
@@ -134,7 +145,7 @@ Run `optimus-manager --print-mode`. Alternatively, you can run `glxinfo | grep "
 
 It is very likely your laptop is plagued by one of the numerous ACPI issues associated with Optimus laptops on Linux, and caused by manufacturers having their own implementations. The symptoms are often similar : a complete system lockup if you try to run any program that uses the Nvidia GPU while it is powered off. Unfortunately there is no universal fix, but the solution often involves adding a kernel parameter to your boot options. You can find more information on [this GitHub issue](https://github.com/Bumblebee-Project/Bumblebee/issues/764), where people have been reporting solutions for specific laptop models. Check [this Arch Wiki page](https://wiki.archlinux.org/index.php/Kernel_parameters) to learn how to set a kernel parameter at boot.
 
-You can also try changing the power switching backend in the configuration file (section `[optimus]`, parameter `switching`).
+You can also try changing the power switching backend in the configuration file (section `[optimus]`, parameter `switching`). If that fails, also try disabling `pci_reset` or `pci_power_control`.
 
 #### GPU switching works but my system locks up if I am in Intel mode and start any of the following programs : VLC, lspci, anything that polls the PCI devices
 
@@ -142,11 +153,11 @@ This is due to ACPI problems, see the previous question.
 
 #### I think my Nvidia GPU stays powered on even in Intel mode (my battery drains too fast)
 
-Maybe there is a problem with `nouveau` not handling power switching properly. Check `dmesg` for errors related to `nouveau` or PCI power management. You can also try switching the power switching backend to `bbswitch` (option `switching`, Section `[optimus]`)
+The default PCI power management does not work for some laptop models. Try switching the power switching backend to `bbswitch` (option `switching`, Section `[optimus]`). You can also check `dmesg` for errors related to `nouveau` or PCI power management.  
 
 #### My display manager is not SDDM, LightDM nor SDDM
 
-You must configure it manually so that it executes the script `/usr/bin/optimus-manager_Xsetup` on startup. The X server may still work without that step but your login manager will show a black screen on the built-in monitor instead of the login window. You can set up autologin to avoid that.
+You must configure it manually so that it executes the script `/usr/bin/optimus-manager_Xsetup` on startup. The X server may still work without that step but your login manager will show a black screen on the built-in monitor instead of the login window. You can also set up autologin to avoid that.
 
 #### The display manager stops but does not restart (a.k.a I am stuck in TTY mode)
 
@@ -157,7 +168,7 @@ This is generally a problem with the X server not restarting. Refer to the next 
 
 First, make sure your system is not completely locked up and you can still switch between TTYs with Ctrl+Alt+F1,F2,etc. If you cannot, [refer to this question](#when-i-switch-gpus-my-system-completely-locks-up-i-cannot-even-switch-to-a-tty-with-ctrlaltfx).
 
-If you can, it generally means that the X server failed to restart. In addition to the optimus-manager logs, you can check the Xorg logs at `/var/log/Xorg.0.log` for more information.
+If you can still switch between TTYs, it generally means that the X server failed to restart. In addition to the optimus-manager logs, you can check the Xorg logs at for more information. Those logs are usually at `/var/log/Xorg.0.log` or `~/.local/share/xorg/Xorg.0.log` (they may have a different number than `0`). If you managed to return to a graphical session, be sure to include the log from the server that failed and not the running one (the logs from the previous attempt end with the `.old` extension).
 
 Some fixes you can try :
 - Setting the power switching backend to `bbswitch` in the configuration file (section `[optimus]`, parameter `switching`)
