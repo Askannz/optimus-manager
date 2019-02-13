@@ -25,12 +25,12 @@ def configure_xorg(config, mode):
 def get_xorg_servers_pids():
 
     try:
-        x_pids = exec_bash("pidof X")
+        x_pids = exec_bash("pidof X").stdout
     except BashError:
         x_pids = ""
 
     try:
-        xorg_pids = exec_bash("pidof Xorg")
+        xorg_pids = exec_bash("pidof Xorg").stdout
     except BashError:
         xorg_pids = ""
 
