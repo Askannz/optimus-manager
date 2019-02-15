@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='optimus-manager',
-    version='0.7',
+    version='0.7.1',
     description='Management utility for Optimus laptops on Linux.',
     long_description=open(
         join(dirname(__file__), 'README.md')).read(),
