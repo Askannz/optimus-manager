@@ -21,7 +21,12 @@ However, on Linux, the Nvidia driver does not provide such offloading capabiliti
 
 Currently, if you have Linux installed on an Optimus laptop, there are three methods to use your Nvidia GPU :
 
-- **Run your whole X session on the Intel GPU and use [Bumblebee](https://github.com/Bumblebee-Project/Bumblebee) to offload rendering to the Nvidia GPU.** While this mimic the behavior of Optimus on Windows, this is an unofficial, hacky solution with two major drawbacks : 1. a noticeable performance hit (because Bumblebee has to use your CPU to copy frames over to the display) 2. you will be unable to use any video output (like HDMI ports) connected to the Nvidia GPU, unless you have the open-source `nouveau` driver loaded to this GPU at the same time (or use some solution like intel-virtual-output).
+- **Run your whole X session on the Intel GPU and use [Bumblebee](https://github.com/Bumblebee-Project/Bumblebee) to offload rendering to the Nvidia GPU.** While this mimic the behavior of Optimus on Windows, this is an unofficial, hacky solution with three major drawbacks :
+
+  1. a noticeable performance hit (because Bumblebee has to use your CPU to copy frames over to the display)
+  2. no native support for Vulkan (therefore, it is incompatible with DXVK and any native game using Vulkan, like Rise of the Tomb Raider for instance)
+    - [primus_vk](https://github.com/felixdoerre/primus_vk) (a Vulkan offloading layer) exists but has some technical difficulties
+  3. you will be unable to use any video output (like HDMI ports) connected to the Nvidia GPU, unless you have the open-source `nouveau` driver loaded to this GPU at the same time (or use some solution like intel-virtual-output).
 
 - **Use [nvidia-xrun](https://github.com/Witko/nvidia-xrun) to have the Nvidia GPU run on its own X server in another virtual terminal**. You still have to run two X servers at the same time, and you do not have acess to your normal desktop environment while in the virtual terminal of the Nvidia GPU. Also, in my own experience, desktop environments are prone prone to crashing when switching between virtual terminals while the nvidia driver is running.
 
@@ -66,7 +71,7 @@ Then, reboot (it is necessary for the new Systemd configuration to take effect).
 
 If you have bumblebee installed on your system, uninstall it or at least make sure the `bumblebeed` service is disabled. For extra safety, make sure the `bbswitch` module is not loaded at boot time (check `/etc/modules-load.d/`).
 
-Finally, don't forget to install the nvidia driver. On Archlinux, you can use the packages `nvidia` ir `nvidia-dkms`. On Manjaro, the packages have names like `linuxXXX-nvidia` (where `XXX` is the kernel version). For games, it is also recommended to install `nvidia-utils` and `lib32-nvidia-utils`.
+Finally, don't forget to install the nvidia driver. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`. On Manjaro, the packages have names like `linuxXXX-nvidia` (where `XXX` is the kernel version). For games, it is also recommended to install `nvidia-utils` and `lib32-nvidia-utils`.
 
 
 Uninstallation
