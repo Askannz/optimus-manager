@@ -70,7 +70,7 @@ Then, reboot (it is necessary for the new Systemd configuration to take effect).
 
 If you have bumblebee installed on your system, uninstall it or at least make sure the `bumblebeed` service is disabled. For extra safety, make sure the `bbswitch` module is not loaded at boot time (check `/etc/modules-load.d/`).
 
-Finally, don't forget to install the nvidia driver. On Archlinux, you can use the packages `nvidia` ir `nvidia-dkms`. On Manjaro, the packages have names like `linuxXXX-nvidia` (where `XXX` is the kernel version). For games, it is also recommended to install `nvidia-utils` and `lib32-nvidia-utils`.
+Finally, don't forget to install the nvidia driver. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`. On Manjaro, the packages have names like `linuxXXX-nvidia` (where `XXX` is the kernel version). For games, it is also recommended to install `nvidia-utils` and `lib32-nvidia-utils`.
 
 
 Uninstallation
