@@ -43,16 +43,26 @@ def kill_current_xorg_servers():
 
     pids_list = get_xorg_servers_pids()
 
-    if len(pids_list) > 0:
-        print("There are %d X11 servers remaining, terminating them manually" % len(pids_list))
+    if len(pids_list) == 0:
+        return
 
-    for pid in pids_list:
-        try:
-            exec_bash("kill -9 %d" % pid)
-        except BashError:
-            pass
+    for signal in ["SIGTERM", "SIGKILL"]:
 
-    success = poll_block(_is_xorg_running)
+        if len(pids_list) > 0:
+            print("There are %d X11 servers remaining, terminating them manually with %s" % (len(pids_list), signal))
+
+        for pid in pids_list:
+            try:
+                exec_bash("kill -s %s %d" % (signal, pid))
+            except BashError:
+                pass
+
+        success = poll_block(_is_xorg_running)
+
+        if success:
+            return
+        else:
+            pids_list = get_xorg_servers_pids()
 
     if not success:
         raise XorgError("Failed to kill all X11 servers")
