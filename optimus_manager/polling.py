@@ -1,7 +1,7 @@
 import time
 
 
-def poll_block(f, poll_interval=0.5, timeout=10):
+def poll_block(f, poll_interval=0.2, timeout=2):
 
     t0 = time.time()
     t = t0
