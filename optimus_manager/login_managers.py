@@ -65,11 +65,7 @@ def _configure_sddm(mode):
     header = "#!/bin/sh\n" \
              "# Xsetup - run as root before the login dialog appears\n"
 
-    if mode == "intel":
-        text = header
-
-    elif mode == "nvidia":
-        text = header + "exec %s\n" % envs.XSETUP_PATH
+    text = header + "exec %s %s\n" % (envs.XSETUP_PATH, mode)
 
     try:
         with open(XSETUP_SDDM_PATH, 'w') as f:
@@ -85,25 +81,18 @@ def _configure_lightdm(mode):
 
     conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.LIGHTDM_CONF_NAME)
 
-    if mode == "intel":
+    if not os.path.isdir(CONF_FOLDER_PATH):
+        os.makedirs(CONF_FOLDER_PATH)
 
-        if os.path.isfile(conf_filepath):
-            os.remove(conf_filepath)
+    text = "[Seat:*]\n" \
+           "display-setup-script=%s %s\n" % (envs.XSETUP_PATH, mode)
 
-    elif mode == "nvidia":
+    try:
+        with open(conf_filepath, 'w') as f:
+            f.write(text)
 
-        if not os.path.isdir(CONF_FOLDER_PATH):
-            os.makedirs(CONF_FOLDER_PATH)
-
-        text = "[Seat:*]\n" \
-               "display-setup-script=%s\n" % envs.XSETUP_PATH
-
-        try:
-            with open(conf_filepath, 'w') as f:
-                f.write(text)
-
-        except IOError:
-            raise LoginManagerError("Cannot write to %s" % conf_filepath)
+    except IOError:
+        raise LoginManagerError("Cannot write to %s" % conf_filepath)
 
 
 def _configure_gdm(mode):
@@ -114,34 +103,25 @@ def _configure_gdm(mode):
     file_1_path = os.path.join(FOLDER_1_PATH, envs.GDM_DESKTOP_FILE_NAME)
     file_2_path = os.path.join(FOLDER_1_PATH, envs.GDM_DESKTOP_FILE_NAME)
 
-    if mode == "intel":
+    if not os.path.isdir(FOLDER_1_PATH):
+        os.makedirs(FOLDER_1_PATH)
 
-        if os.path.isfile(file_1_path):
-            os.remove(file_1_path)
+    if not os.path.isdir(FOLDER_2_PATH):
+        os.makedirs(FOLDER_2_PATH)
 
-        if os.path.isfile(file_2_path):
-            os.remove(file_2_path)
+    text = "[Desktop Entry]\n" \
+           "Type=Application\n" \
+           "Name=Optimus Manager X Setup\n" \
+           "Exec=%s %s" \
+           "NoDisplay=true\n" \
+           "X-GNOME-Autostart-Phase=DisplayServer\n" % (envs.XSETUP_PATH, mode)
 
-    elif mode == "nvidia":
+    try:
 
-        if not os.path.isdir(FOLDER_1_PATH):
-            os.makedirs(FOLDER_1_PATH)
+        for filepath in [file_1_path, file_2_path]:
+            with open(filepath, 'w') as f:
+                f.write(text)
 
-        if not os.path.isdir(FOLDER_2_PATH):
-            os.makedirs(FOLDER_2_PATH)
+    except IOError:
+        raise LoginManagerError("Cannot write to %s" % filepath)
 
-        text = "[Desktop Entry]\n" \
-               "Type=Application\n" \
-               "Name=Optimus Manager X Setup\n" \
-               "Exec=%s" \
-               "NoDisplay=true\n" \
-               "X-GNOME-Autostart-Phase=DisplayServer\n" % envs.XSETUP_PATH
-
-        try:
-
-            for filepath in [file_1_path, file_2_path]:
-                with open(filepath, 'w') as f:
-                    f.write(text)
-
-        except IOError:
-            raise LoginManagerError("Cannot write to %s" % filepath)
