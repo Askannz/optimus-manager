@@ -1,7 +1,21 @@
 #!/bin/sh
 
-xrandr --setprovideroutputsource modesetting NVIDIA-0
-xrandr --auto
+if [ "$1" == "nvidia" ]; then
+
+    if [ -r /etc/optimus-manager/xsetup-nvidia.sh ]; then
+        /etc/optimus-manager/xsetup-nvidia.sh
+    fi
+
+    xrandr --setprovideroutputsource modesetting NVIDIA-0
+    xrandr --auto
+
+else
+
+    if [ -r /etc/optimus-manager/xsetup-intel.sh ]; then
+        /etc/optimus-manager/xsetup-intel.sh
+    fi
+
+fi
 
 DPI_FILE=/var/lib/optimus-manager/dpi
 if [ -f $DPI_FILE ]; then
