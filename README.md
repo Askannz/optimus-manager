@@ -137,7 +137,7 @@ You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf`
 FAQ / Troubleshooting
 ----------
 
-General troubleshooting advice : you can view the logs of the optimus-manager daemon by running `journalctl -u optimus-manager.service`, but the most important log is the one from your display manager : `journalctl -u display-manager.service`. Please include both if you have to open a GitHub issue. Add `-b0` if you want to see the logs for the current boot (`-b-1` for the previous boot, etc) and add `--no-pager` if you need to copy-paste the whole log.
+General troubleshooting advice : you can view the logs of the optimus-manager daemon by running `journalctl -u optimus-manager.service`, but the most important log is the one from your display manager : `journalctl -u <service name>.service`, where `<service name>` is `sddm` for SDDM (KDE), `gdm` for GDM (Gnome), `lightdm` for LightDM (XFCE). Please include both logs if you have to open a GitHub issue. Add `-b0` if you want to see the logs for the current boot (`-b-1` for the previous boot, etc) and add `--no-pager` if you need to copy-paste the whole log.
 
 The Arch wiki can be a great resource for troubleshooting. Check the following pages : [NVIDIA](https://wiki.archlinux.org/index.php/NVIDIA), [NVDIA Optimus](https://wiki.archlinux.org/index.php/NVIDIA_Optimus), [Bumblebee](https://wiki.archlinux.org/index.php/Bumblebee) (even if optimus-manager does not use Bumblebee, some advices related to power switching can still be applicable)
 
