@@ -4,7 +4,10 @@
 		"switching": ["single_word", ["nouveau", "bbswitch", "none"], false],
 		"login_manager_control": ["single_word", ["yes", "no"], false],
 		"pci_power_control": ["single_word", ["yes", "no"], false],
-		"pci_reset": ["single_word", ["yes", "no"], false]
+		"pci_reset": ["single_word", ["yes", "no"], false],
+		"terminate_sessions": ["single_word", ["yes", "no"], false],
+		"kill_x11": ["single_word", ["yes", "no"], false],
+		"kill_logind": ["single_word", ["yes", "no"], false]
 	},
 
 	"intel":
