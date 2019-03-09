@@ -133,9 +133,9 @@ def _configure_gdm(mode):
         text = "[Desktop Entry]\n" \
                "Type=Application\n" \
                "Name=Optimus Manager X Setup\n" \
-               "Exec=sh -c \"xrandr --setprovideroutputsource modesetting NVIDIA-0; xrandr --auto\"\n" \
+               "Exec=%s" \
                "NoDisplay=true\n" \
-               "X-GNOME-Autostart-Phase=DisplayServer\n"
+               "X-GNOME-Autostart-Phase=DisplayServer\n" % envs.XSETUP_PATH
 
         try:
 
