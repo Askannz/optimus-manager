@@ -140,6 +140,19 @@ def main():
     # Make sure it doesn't quit after cancelling a confirm prompt
     app.setQuitOnLastWindowClosed(False)
 
+    # Warning message : this app is deprecated
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Warning)
+    msg.setText("optimus-manager-systray is deprecated")
+    msg.setText("The current tray app bundled in optimus-manager is deprecated"
+                " and will be removed in a future release. Please install the program"
+                " <b>optimus-manager-qt</b> instead.<br><br>"
+                "Github : <a href=\"https://github.com/Shatur95/optimus-manager-qt\">"
+                "https://github.com/Shatur95/optimus-manager-qt</a><br>"
+                "AUR : <a href=\"https://aur.archlinux.org/packages/optimus-manager-qt/\">"
+                "https://aur.archlinux.org/packages/optimus-manager-qt/</a><br>")
+    msg.exec()
+
     # Check current mode
     try:
         mode = checks.read_gpu_mode()
