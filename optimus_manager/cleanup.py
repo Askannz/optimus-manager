@@ -20,7 +20,11 @@ def clean_xorg():
 
 def clean_login_managers():
 
-    def _clean_sddm():
+    def _clean_old_sddm():
+
+        # Reverting old Xsetup script for SDDM. This script is not used by optimus-manager,
+        # but we revert it just in case the user has just upgraded.
+        # This function will be removed in a future version.
 
         XSETUP_SDDM_PATH = "/usr/share/sddm/scripts/Xsetup"
 
@@ -32,6 +36,17 @@ def clean_login_managers():
                 f.write(text)
                 print("Reverted %s" % XSETUP_SDDM_PATH)
 
+        except FileNotFoundError:
+            pass
+
+    def _clean_sddm():
+
+        CONF_FOLDER_PATH = "/etc/sddm.conf.d/"
+        conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.SDDM_CONF_NAME)
+
+        try:
+            os.remove(conf_filepath)
+            print("Removed %s" % conf_filepath)
         except FileNotFoundError:
             pass
 
@@ -68,6 +83,7 @@ def clean_login_managers():
 
     # -----------
 
+    _clean_old_sddm()
     _clean_sddm()
     _clean_lightdm()
     _clean_gdm()

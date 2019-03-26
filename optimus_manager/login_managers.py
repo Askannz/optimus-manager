@@ -60,19 +60,22 @@ def configure_login_managers(config, mode):
 
 def _configure_sddm(mode):
 
-    XSETUP_SDDM_PATH = "/usr/share/sddm/scripts/Xsetup"
+    CONF_FOLDER_PATH = "/etc/sddm.conf.d/"
 
-    header = "#!/bin/sh\n" \
-             "# Xsetup - run as root before the login dialog appears\n"
+    conf_filepath = os.path.join(CONF_FOLDER_PATH, envs.SDDM_CONF_NAME)
 
-    text = header + "exec %s %s\n" % (envs.XSETUP_PATH, mode)
+    if not os.path.isdir(CONF_FOLDER_PATH):
+        os.makedirs(CONF_FOLDER_PATH)
+
+    text = "[X11]\n" \
+           "DisplayCommand=%s %s\n" % (envs.XSETUP_PATH, mode)
 
     try:
-        with open(XSETUP_SDDM_PATH, 'w') as f:
+        with open(conf_filepath, 'w') as f:
             f.write(text)
 
     except IOError:
-        raise LoginManagerError("Cannot write to %s" % XSETUP_SDDM_PATH)
+        raise LoginManagerError("Cannot write to %s" % conf_filepath)
 
 
 def _configure_lightdm(mode):
@@ -124,4 +127,3 @@ def _configure_gdm(mode):
 
     except IOError:
         raise LoginManagerError("Cannot write to %s" % filepath)
-
