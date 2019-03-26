@@ -112,14 +112,12 @@ Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a speci
 
 ![optimus-manager systray screenshot](systray.png "optimus-manager systray")
 
-optimus-manager includes a system tray icon that makes it easy to switch GPUs. It should work on most desktop environments.
+The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
+AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
-To make the tray icon automatically launch with your DE, it is usually enough to do:
-```
-ln -s /usr/share/applications/optimus-manager-systray.desktop ~/.config/autostart/optimus-manager-systray.desktop
-```
+A Gnome Shell extension is also available here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
 
-A Gnome Shell extension was also made, you can find it here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+*Note :* optimus-manager also includes a built-in tray app that can be launched with the command `optimus-manager-systray`. This app is deprecated and will be removed in a future version. Please install `optimus-manager-qt` instead.
 
 Configuration
 ----------
