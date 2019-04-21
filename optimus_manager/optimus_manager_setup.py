@@ -3,7 +3,7 @@ import sys
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, VarError
+from optimus_manager.var import read_requested_mode, VarError
 from optimus_manager.prime import enable_PRIME
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, XorgSetupError
@@ -50,21 +50,8 @@ def _get_requested_mode():
     try:
         requested_mode = read_requested_mode()
     except VarError as e:
-
-        print("Cannot read requested mode : %s.\nAssuming startup mode instead." % str(e))
-
-        try:
-            startup_mode = read_startup_mode()
-        except VarError as e:
-            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-            startup_mode = envs.DEFAULT_STARTUP_MODE
-
-        print("Startup mode :", startup_mode)
-        if startup_mode == "nvidia_once":
-            requested_mode = "nvidia"
-            write_startup_mode("intel")
-        else:
-            requested_mode = startup_mode
+        print("Cannot read requested mode : %s" % str(e))
+        sys.exit(1)
 
     return requested_mode
 
