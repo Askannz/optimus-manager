@@ -7,8 +7,8 @@ import select
 import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
-from optimus_manager.login_managers import restart_login_manager, LoginManagerError
+from optimus_manager.var import read_startup_mode, write_startup_mode, write_requested_mode, VarError
+import optimus_manager.optimus_manager_setup as optimus_manager_setup
 
 
 class SignalHandler:
@@ -24,22 +24,17 @@ class SignalHandler:
         sys.exit(0)
 
 
-def gpu_switch(config, mode):
+def _write_gpu_mode(config, mode):
 
     try:
         print("Writing requested mode")
         write_requested_mode(mode)
-        print("Restarting login manager")
-        restart_login_manager(config)
 
     except VarError as e:
         print("Cannot write requested mode : %s" % str(e))
 
-    except LoginManagerError as e:
-        print("Cannot restart login manager : %s" % str(e))
 
-
-def set_startup(mode):
+def _write_startup_mode(mode):
 
     try:
         write_startup_mode(mode)
@@ -62,6 +57,18 @@ def main():
         config = load_config()
     except ConfigError as e:
         print("Error loading config file : %s" % str(e))
+
+    # GPU setup at boot
+
+    try:
+        startup_mode = read_startup_mode()
+    except VarError as e:
+        print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+        startup_mode = envs.DEFAULT_STARTUP_MODE
+
+    _write_gpu_mode(config, startup_mode)
+
+    optimus_manager_setup.main()
 
     # UNIX socket
 
@@ -92,17 +99,17 @@ def main():
 
         # Switching
         if msg == "intel":
-            gpu_switch(config, "intel")
+            _write_gpu_mode(config, "intel")
         elif msg == "nvidia":
-            gpu_switch(config, "nvidia")
+            _write_gpu_mode(config, "nvidia")
 
         # Startup modes
         elif msg == "startup_nvidia":
-            set_startup("nvidia")
+            _write_startup_mode("nvidia")
         elif msg == "startup_intel":
-            set_startup("intel")
+            _write_startup_mode("intel")
         elif msg == "startup_nvidia_once":
-            set_startup("nvidia_once")
+            _write_startup_mode("nvidia_once")
         else:
             print("Invalid command !")
 
