@@ -50,16 +50,3 @@ def get_bus_ids(notation_fix=True):
 
     return bus_ids
 
-
-def get_login_managers():
-
-    login_managers = []
-
-    for manager in ["sddm", "gdm", "lightdm"]:
-        try:
-            exec_bash("which %s" % manager)
-            login_managers.append(manager)
-        except BashError:
-            pass
-
-    return login_managers
