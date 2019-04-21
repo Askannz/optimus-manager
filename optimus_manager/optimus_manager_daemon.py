@@ -2,7 +2,6 @@
 import sys
 import os
 import signal
-import argparse
 import select
 import socket
 import optimus_manager.envs as envs
@@ -12,23 +11,119 @@ from optimus_manager.xorg import cleanup_xorg_conf, is_xorg_running
 import optimus_manager.optimus_manager_setup as optimus_manager_setup
 
 
-class SignalHandler:
-    def __init__(self, server):
-        self.server = server
+def main():
 
-    def handler(self, signum, frame):
+    print("Optimus Manager (Daemon) version %s" % envs.VERSION)
 
-        print("\nProcess stop requested")
+    print("Cleaning up leftover Xorg conf")
+    cleanup_xorg_conf()
 
-        print("Closing and removing the socket...")
-        self.server.close()
+    print("Loading config file")
+    config = _get_config()
+
+    print("Reading startup mode")
+    startup_mode = _get_startup_mode()
+    print("Startup mode is : %s" % startup_mode)
+
+    print("Writing startup mode to requested GPU mode")
+    _write_gpu_mode(config, startup_mode)
+
+    print("Initial GPU setup")
+    _run_initial_gpu_setup()
+
+    print("Opening UNIX socket")
+    server_socket = _open_server_socket()
+
+    _setup_signal_handler(server_socket)
+
+    print("Awaiting commands")
+
+    while True:
+
+        msg = _wait_for_command(server_socket)
+        print("Received command : %s" % msg)
+
+        _process_command(config, msg)
+
+
+def _get_config():
+
+    try:
+        config = load_config()
+    except ConfigError as e:
+        print("Error loading config file : %s" % str(e))
+        sys.exit(1)
+
+    return config
+
+
+def _get_startup_mode():
+
+    try:
+        startup_mode = read_startup_mode()
+    except VarError as e:
+        print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+        startup_mode = envs.DEFAULT_STARTUP_MODE
+
+    return startup_mode
+
+
+def _run_initial_gpu_setup():
+
+    if not is_xorg_running():
+        optimus_manager_setup.main()
+    else:
+        print("Error : the daemon was started while a X server is already running ! Skipping initial GPU setup.")
+
+
+def _open_server_socket():
+
+    if os.path.exists(envs.SOCKET_PATH):
+        print("Warning : the UNIX socket file %s already exists ! Either another "
+              "daemon instance is running or the daemon was not exited gracefully "
+              "last time.\nRemoving the file and moving on..." % envs.SOCKET_PATH)
         os.remove(envs.SOCKET_PATH)
 
-        print("Cleaning up Xorg conf...")
-        cleanup_xorg_conf()
+    server_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    server_socket.settimeout(envs.SOCKET_TIMEOUT)
+    server_socket.bind(envs.SOCKET_PATH)
+    os.chmod(envs.SOCKET_PATH, 0o666)
 
-        print("Goodbye !")
-        sys.exit(0)
+    return server_socket
+
+
+def _setup_signal_handler(server_socket):
+
+    handler = _SignalHandler(server_socket)
+    signal.signal(signal.SIGTERM, handler.handler)
+    signal.signal(signal.SIGINT, handler.handler)
+
+
+def _wait_for_command(server_socket):
+
+    r, _, _ = select.select([server_socket], [], [])
+    datagram = server_socket.recv(1024)
+    msg = datagram.decode('utf-8')
+
+    return msg
+
+
+def _process_command(config, msg):
+
+    if msg == "intel":
+        _write_gpu_mode(config, "intel")
+    elif msg == "nvidia":
+        _write_gpu_mode(config, "nvidia")
+
+    # Startup modes
+    elif msg == "startup_nvidia":
+        _write_startup_mode("nvidia")
+    elif msg == "startup_intel":
+        _write_startup_mode("intel")
+    elif msg == "startup_nvidia_once":
+        _write_startup_mode("nvidia_once")
+    else:
+        print("Invalid command !")
 
 
 def _write_gpu_mode(config, mode):
@@ -50,86 +145,23 @@ def _write_startup_mode(mode):
         print("Cannot write startup mode : %s" % str(e))
 
 
-def main():
+class _SignalHandler:
+    def __init__(self, server_socket):
+        self.server_socket = server_socket
 
-    # Arguments parsing
-    parser = argparse.ArgumentParser(description="Daemon program for the Optimus Manager tool.\n"
-                                                 "https://github.com/Askannz/optimus-manager")
-    parser.parse_args()
+    def handler(self, signum, frame):
 
-    print("Optimus Manager (Daemon) version %s" % envs.VERSION)
+        print("\nProcess stop requested")
 
-    print("Cleaning up leftover Xorg conf")
-    cleanup_xorg_conf()
-
-    # Config
-    print("Loading config file")
-    try:
-        config = load_config()
-    except ConfigError as e:
-        print("Error loading config file : %s" % str(e))
-
-    # GPU setup at boot
-
-    print("Initial GPU setup")
-
-    try:
-        startup_mode = read_startup_mode()
-    except VarError as e:
-        print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-        startup_mode = envs.DEFAULT_STARTUP_MODE
-
-    _write_gpu_mode(config, startup_mode)
-
-    if not is_xorg_running():
-        optimus_manager_setup.main()
-    else:
-        print("Error : the daemon was started while a X server is already running ! Skipping initial GPU setup.")
-
-    # UNIX socket
-
-    print("Opening UNIX socket")
-
-    if os.path.exists(envs.SOCKET_PATH):
-        print("Warning : the UNIX socket file %s already exists ! Either another "
-              "daemon instance is running or the daemon was not exited gracefully "
-              "last time.\nRemoving the file and moving on..." % envs.SOCKET_PATH)
+        print("Closing and removing the socket...")
+        self.server_socket.close()
         os.remove(envs.SOCKET_PATH)
 
-    server = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-    server.settimeout(envs.SOCKET_TIMEOUT)
-    server.bind(envs.SOCKET_PATH)
-    os.chmod(envs.SOCKET_PATH, 0o666)
+        print("Cleaning up Xorg conf...")
+        cleanup_xorg_conf()
 
-    # Signal hander
-    handler = SignalHandler(server)
-    signal.signal(signal.SIGTERM, handler.handler)
-    signal.signal(signal.SIGINT, handler.handler)
-
-    print("Awaiting commands")
-    while True:
-
-        r, _, _ = select.select([server], [], [])
-        datagram = server.recv(1024)
-        msg = datagram.decode('utf-8')
-
-        print("Received command : %s" % msg)
-
-        # Switching
-        if msg == "intel":
-            _write_gpu_mode(config, "intel")
-        elif msg == "nvidia":
-            _write_gpu_mode(config, "nvidia")
-
-        # Startup modes
-        elif msg == "startup_nvidia":
-            _write_startup_mode("nvidia")
-        elif msg == "startup_intel":
-            _write_startup_mode("intel")
-        elif msg == "startup_nvidia_once":
-            _write_startup_mode("nvidia_once")
-        else:
-            print("Invalid command !")
+        print("Goodbye !")
+        sys.exit(0)
 
 
 if __name__ == '__main__':
