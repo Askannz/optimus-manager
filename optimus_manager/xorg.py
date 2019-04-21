@@ -4,7 +4,7 @@ from optimus_manager.detection import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
 
 
-class XorgError(Exception):
+class XorgSetupError(Exception):
     pass
 
 
@@ -98,4 +98,4 @@ def _write_xorg_conf(xorg_conf_text):
         with open(envs.XORG_CONF_PATH, 'w') as f:
             f.write(xorg_conf_text)
     except IOError:
-        raise XorgError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+        raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
