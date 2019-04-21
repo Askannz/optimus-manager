@@ -8,6 +8,7 @@ import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, write_startup_mode, write_requested_mode, VarError
+from optimus_manager.xorg import cleanup_xorg_conf
 import optimus_manager.optimus_manager_setup as optimus_manager_setup
 
 
@@ -16,10 +17,16 @@ class SignalHandler:
         self.server = server
 
     def handler(self, signum, frame):
+
         print("\nProcess stop requested")
+
         print("Closing and removing the socket...")
         self.server.close()
         os.remove(envs.SOCKET_PATH)
+
+        print("Cleaning up Xorg conf...")
+        cleanup_xorg_conf()
+
         print("Goodbye !")
         sys.exit(0)
 
@@ -52,13 +59,19 @@ def main():
 
     print("Optimus Manager (Daemon) version %s" % envs.VERSION)
 
+    print("Cleaning up leftover Xorg conf")
+    cleanup_xorg_conf()
+
     # Config
+    print("Loading config file")
     try:
         config = load_config()
     except ConfigError as e:
         print("Error loading config file : %s" % str(e))
 
     # GPU setup at boot
+
+    print("Initial GPU setup")
 
     try:
         startup_mode = read_startup_mode()
@@ -71,6 +84,8 @@ def main():
     optimus_manager_setup.main()
 
     # UNIX socket
+
+    print("Opening UNIX socket")
 
     if os.path.exists(envs.SOCKET_PATH):
         print("Warning : the UNIX socket file %s already exists ! Either another "

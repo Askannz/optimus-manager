@@ -10,7 +10,7 @@ class XorgSetupError(Exception):
 
 def configure_xorg(config, requested_gpu_mode):
 
-    _cleanup_xorg_conf()
+    cleanup_xorg_conf()
 
     bus_ids = get_bus_ids()
     xorg_extra = load_extra_xorg_options()
@@ -23,7 +23,7 @@ def configure_xorg(config, requested_gpu_mode):
     _write_xorg_conf(xorg_conf_text)
 
 
-def _cleanup_xorg_conf():
+def cleanup_xorg_conf():
 
     try:
         os.remove(envs.XORG_CONF_PATH)
