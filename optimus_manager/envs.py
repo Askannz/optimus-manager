@@ -8,7 +8,9 @@ DPI_VAR_PATH = "/var/lib/optimus-manager/dpi"
 DEFAULT_STARTUP_MODE = "intel"
 SYSTEM_CONFIGS_PATH = "/etc/optimus-manager/configs/"
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
-XSETUP_PATH = "/usr/bin/optimus-manager_Xsetup"
+
+PRIME_SETUP_SCRIPT_PATH = "/usr/bin/optimus-manager_prime_setup"
+X_STOP_SCRIPT_PATH = "/usr/bin/optimus-manager_X_stop"
 
 SDDM_CONF_NAME = "10-optimus-manager.conf"
 LIGHTDM_CONF_NAME = "10-optimus-manager.conf"

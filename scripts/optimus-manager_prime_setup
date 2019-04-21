@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ "$1" == "nvidia" ]; then
+
+    xrandr --setprovideroutputsource modesetting NVIDIA-0
+    xrandr --auto
+fi
