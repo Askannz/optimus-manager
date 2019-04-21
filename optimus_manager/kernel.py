@@ -3,7 +3,7 @@ import optimus_manager.pci as pci
 from optimus_manager.bash import exec_bash, BashError
 
 
-class KernelModulesError(Exception):
+class KernelSetupError(Exception):
     pass
 
 
@@ -34,7 +34,7 @@ def _load_nvidia_modules(config):
             exec_bash("modprobe nvidia_drm modeset=0")
 
     except BashError as e:
-        raise KernelModulesError("Cannot load Nvidia modules : %s" % str(e))
+        raise KernelSetupError("Cannot load Nvidia modules : %s" % str(e))
 
 
 def _unload_nvidia_modules(config):
@@ -44,7 +44,7 @@ def _unload_nvidia_modules(config):
     try:
         exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia")
     except BashError as e:
-        raise KernelModulesError("Cannot unload Nvidia modules : %s" % str(e))
+        raise KernelSetupError("Cannot unload Nvidia modules : %s" % str(e))
 
 
 def _get_PAT_parameter_value(config):
@@ -115,7 +115,7 @@ def _load_bbswitch():
         try:
             exec_bash("modprobe bbswitch")
         except BashError as e:
-            raise KernelModulesError("Cannot load bbswitch : %s" % str(e))
+            raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
 
 
 def _set_bbswitch_mode(requested_gpu_state):
@@ -128,7 +128,7 @@ def _set_bbswitch_mode(requested_gpu_state):
     current_gpu_state = ("ON" if checks.is_gpu_powered() else "OFF")
 
     if current_gpu_state != requested_gpu_state:
-        raise KernelModulesError("bbswitch failed to set the GPU to %s" % requested_gpu_state)
+        raise KernelSetupError("bbswitch failed to set the GPU to %s" % requested_gpu_state)
     else:
         print("bbswitch reports that the GPU is %s" % current_gpu_state)
 
@@ -142,7 +142,7 @@ def _load_nouveau(config):
     try:
         exec_bash("modprobe nouveau modeset=%d" % modeset_value)
     except BashError as e:
-        raise KernelModulesError("Cannot load nouveau : %s" % str(e))
+        raise KernelSetupError("Cannot load nouveau : %s" % str(e))
 
 
 def _unload_nouveau(config):
@@ -150,7 +150,7 @@ def _unload_nouveau(config):
     try:
         exec_bash("modprobe -r nouveau")
     except BashError as e:
-        raise KernelModulesError("Cannot unload nouveau : %s" % str(e))
+        raise KernelSetupError("Cannot unload nouveau : %s" % str(e))
 
 
 def _set_PCI_power_mode(requested_gpu_state):
