@@ -1,87 +1,35 @@
+import os
 import optimus_manager.envs as envs
 from optimus_manager.detection import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
-from optimus_manager.bash import exec_bash, BashError
-from optimus_manager.polling import poll_block
 
 
 class XorgError(Exception):
     pass
 
 
-def configure_xorg(config, mode):
+def configure_xorg(config, requested_gpu_mode):
+
+    _cleanup_xorg_conf()
 
     bus_ids = get_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
-    if mode == "nvidia":
+    if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif mode == "intel":
+    elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
 
     _write_xorg_conf(xorg_conf_text)
 
 
-def get_xorg_servers_pids():
+def _cleanup_xorg_conf():
 
     try:
-        x_pids = exec_bash("pidof X").stdout
-    except BashError:
-        x_pids = ""
-
-    try:
-        xorg_pids = exec_bash("pidof Xorg").stdout
-    except BashError:
-        xorg_pids = ""
-
-    pids_str_list = (x_pids.split() + xorg_pids.split())
-
-    return [int(p_str) for p_str in pids_str_list]
-
-
-def kill_current_xorg_servers():
-
-    pids_list = get_xorg_servers_pids()
-
-    if len(pids_list) == 0:
-        return
-
-    for signal in ["SIGTERM", "SIGKILL"]:
-
-        if len(pids_list) > 0:
-            print("There are %d X11 servers remaining, terminating them manually with %s" % (len(pids_list), signal))
-
-        for pid in pids_list:
-            try:
-                exec_bash("kill -s %s %d" % (signal, pid))
-            except BashError:
-                pass
-
-        success = poll_block(_is_xorg_running)
-
-        if success:
-            return
-        else:
-            pids_list = get_xorg_servers_pids()
-
-    if not success:
-        raise XorgError("Failed to kill all X11 servers")
-
-
-def _is_xorg_running():
-    try:
-        exec_bash("pidof X")
-        return True
-    except BashError:
+        os.remove(envs.XORG_CONF_PATH)
+        print("Removed %s" % envs.XORG_CONF_PATH)
+    except FileNotFoundError:
         pass
-
-    try:
-        exec_bash("pidof Xorg")
-        return True
-    except BashError:
-        pass
-
-    return False
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
