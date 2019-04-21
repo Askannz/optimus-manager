@@ -1,23 +1,37 @@
 #!/usr/bin/env python
 import sys
+import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, write_startup_mode, read_requested_mode, VarError
+from optimus_manager.prime import enable_PRIME
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, XorgSetupError
 
 
 def main():
 
+    parser = argparse.ArgumentParser(description="Display Manager setup service for the Optimus Manager tool.\n"
+                                                 "https://github.com/Askannz/optimus-manager")
+    parser.add_argument('--setup-prime', action='store_true')
+    parser.add_argument('--setup-gpu', action='store_true')
+
+    args = parser.parse_args()
+
     print("Optimus Manager (GPU setup) version %s" % envs.VERSION)
 
     print("Loading config")
     config = _get_config()
 
-    requested_mode = _get_requested_mode()
-    print("Requested mode :", requested_mode)
+    if args.setup_prime:
+        print("Setting up PRIME")
+        enable_PRIME()
 
-    _setup_gpu(config, requested_mode)
+    elif args.setup_gpu:
+        print("Setting up the GPU")
+        requested_mode = _get_requested_mode()
+        print("Requested mode :", requested_mode)
+        _setup_gpu(config, requested_mode)
 
 
 def _get_config():
