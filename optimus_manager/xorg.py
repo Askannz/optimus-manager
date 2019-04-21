@@ -1,6 +1,6 @@
 import os
 import optimus_manager.envs as envs
-from optimus_manager.detection import get_bus_ids
+from optimus_manager.pci import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
 
 
