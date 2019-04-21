@@ -1,7 +1,12 @@
 #!/bin/sh
 
-if [ "$1" == "nvidia" ]; then
+REQUESTED_MODE_VAR_PATH="/var/lib/optimus-manager/requested_mode"
 
-    xrandr --setprovideroutputsource modesetting NVIDIA-0
-    xrandr --auto
+if [ -f $REQUESTED_MODE_VAR_PATH ]; then
+
+    if [ $(cat $REQUESTED_MODE_VAR_PATH) = "nvidia" ]; then
+
+        xrandr --setprovideroutputsource modesetting NVIDIA-0
+        xrandr --auto
+    fi
 fi
