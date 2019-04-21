@@ -1,4 +1,5 @@
 import os
+from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.envs as envs
 from optimus_manager.pci import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
@@ -30,6 +31,23 @@ def cleanup_xorg_conf():
         print("Removed %s" % envs.XORG_CONF_PATH)
     except FileNotFoundError:
         pass
+
+
+def is_xorg_running():
+
+    try:
+        exec_bash("pidof X")
+        return True
+    except BashError:
+        pass
+
+    try:
+        exec_bash("pidof Xorg")
+        return True
+    except BashError:
+        pass
+
+    return False
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):

@@ -8,7 +8,7 @@ import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, write_startup_mode, write_requested_mode, VarError
-from optimus_manager.xorg import cleanup_xorg_conf
+from optimus_manager.xorg import cleanup_xorg_conf, is_xorg_running
 import optimus_manager.optimus_manager_setup as optimus_manager_setup
 
 
@@ -81,7 +81,10 @@ def main():
 
     _write_gpu_mode(config, startup_mode)
 
-    optimus_manager_setup.main()
+    if not is_xorg_running():
+        optimus_manager_setup.main()
+    else:
+        print("Error : the daemon was started while a X server is already running ! Skipping initial GPU setup.")
 
     # UNIX socket
 
