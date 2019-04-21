@@ -1,4 +1,7 @@
-from optimus_manager.detection import get_bus_ids
+from optimus_manager.bash import exec_bash, BashError
+
+NVIDIA_VENDOR_ID = "10de"
+INTEL_VENDOR_ID = "8086"
 
 
 class PCIError(Exception):
@@ -6,10 +9,56 @@ class PCIError(Exception):
 
 
 def set_power_management(enabled):
+
     if enabled:
         _set_mode("auto")
     else:
         _set_mode("on")
+
+
+def get_bus_ids(notation_fix=True):
+
+    try:
+        lspci_output = exec_bash("lspci -n").stdout.decode('utf-8')
+    except BashError as e:
+        raise PCIError("cannot run lspci -n : %s" % str(e))
+
+    bus_ids = {}
+
+    for line in lspci_output.splitlines():
+
+        items = line.split(" ")
+
+        bus_id = items[0]
+
+        # Notation quirk
+        if notation_fix:
+            bus_id = bus_id.replace(".", ":")
+
+        pci_class = items[1]
+        vendor_id, product_id = items[2].split(":")
+
+        # Display controllers are identified by a 03xx class
+        if pci_class[:2] != "03":
+            continue
+
+        if vendor_id == NVIDIA_VENDOR_ID:
+            if "nvidia" in bus_ids.keys():
+                raise PCIError("Multiple Nvidia GPUs found !")
+            bus_ids["nvidia"] = bus_id
+
+        elif vendor_id == INTEL_VENDOR_ID:
+            if "intel" in bus_ids.keys():
+                raise PCIError("Multiple Intel GPUs found !")
+            bus_ids["intel"] = bus_id
+
+    if "nvidia" not in bus_ids.keys():
+        raise PCIError("Cannot find Nvidia GPU in PCI devices list.")
+
+    if "intel" not in bus_ids.keys():
+        raise PCIError("Cannot find Intel GPU in PCI devices list.")
+
+    return bus_ids
 
 
 def _set_mode(mode):
