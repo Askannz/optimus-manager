@@ -11,8 +11,6 @@ class XorgSetupError(Exception):
 
 def configure_xorg(config, requested_gpu_mode):
 
-    cleanup_xorg_conf()
-
     bus_ids = get_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
@@ -114,6 +112,7 @@ def _write_xorg_conf(xorg_conf_text):
 
     try:
         with open(envs.XORG_CONF_PATH, 'w') as f:
+            print("Writing to %s" % envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
     except IOError:
         raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)

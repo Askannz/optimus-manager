@@ -14,9 +14,6 @@ def main():
 
     print("Optimus Manager (Daemon) version %s" % envs.VERSION)
 
-    print("Cleaning up leftover Xorg conf")
-    cleanup_xorg_conf()
-
     print("Loading config file")
     config = _get_config()
 
