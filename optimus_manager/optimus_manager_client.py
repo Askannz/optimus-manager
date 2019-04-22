@@ -33,7 +33,7 @@ def main():
                                                  "https://github.com/Askannz/optimus-manager")
     parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
     parser.add_argument('--print-mode', action='store_true',
-                        help="Print the current mode.")
+                        help="Print the GPU mode that your current desktop session is running on.")
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE and restart the display manager. "
                              "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other). "
@@ -100,13 +100,14 @@ def main():
             try:
                 gpu_mode = checks.read_gpu_mode()
             except checks.CheckError as e:
-                print("Error reading mode: %s" % str(e))
+                print("Error reading current GPU mode: %s" % str(e))
                 sys.exit(1)
 
             if gpu_mode == "nvidia":
                 switch_mode = "intel"
             else:
                 switch_mode = "nvidia"
+
             print("Switching to : %s" % switch_mode)
 
         else:
