@@ -6,9 +6,8 @@ import select
 import socket
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import read_startup_mode, write_startup_mode, write_requested_mode, VarError
-from optimus_manager.xorg import cleanup_xorg_conf, is_xorg_running
-import optimus_manager.optimus_manager_setup as optimus_manager_setup
+from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
+from optimus_manager.xorg import cleanup_xorg_conf
 
 
 def main():
@@ -20,16 +19,6 @@ def main():
 
     print("Loading config file")
     config = _get_config()
-
-    print("Reading startup mode")
-    startup_mode = _get_startup_mode()
-    print("Startup mode is : %s" % startup_mode)
-
-    print("Writing startup mode to requested GPU mode")
-    _write_gpu_mode(config, startup_mode)
-
-    print("Initial GPU setup")
-    _run_initial_gpu_setup()
 
     print("Opening UNIX socket")
     server_socket = _open_server_socket()
@@ -55,25 +44,6 @@ def _get_config():
         sys.exit(1)
 
     return config
-
-
-def _get_startup_mode():
-
-    try:
-        startup_mode = read_startup_mode()
-    except VarError as e:
-        print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-        startup_mode = envs.DEFAULT_STARTUP_MODE
-
-    return startup_mode
-
-
-def _run_initial_gpu_setup():
-
-    if not is_xorg_running():
-        optimus_manager_setup.main()
-    else:
-        print("Error : the daemon was started while a X server is already running ! Skipping initial GPU setup.")
 
 
 def _open_server_socket():
