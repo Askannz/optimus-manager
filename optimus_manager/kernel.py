@@ -87,7 +87,7 @@ def _power_switch_on(config):
 
     # Modules
 
-    _unload_nouveau()
+    _unload_nouveau(config)
 
     if config["optimus"]["switching"] == "bbswitch":
         _load_bbswitch()
