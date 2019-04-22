@@ -32,17 +32,21 @@ def main():
     parser = argparse.ArgumentParser(description="Client program for the Optimus Manager tool.\n"
                                                  "https://github.com/Askannz/optimus-manager")
     parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
+
     parser.add_argument('--print-mode', action='store_true',
                         help="Print the GPU mode that your current desktop session is running on.")
+    parser.add_argument('--print-next-mode', action='store_true',
+                        help="Print the GPU mode that will be used the next time you log into your session.")
+    parser.add_argument('--print-startup', action='store_true',
+                        help="Print the GPU mode that will be used on startup.")
+
     parser.add_argument('--switch', metavar='MODE', action='store',
-                        help="Set the GPU mode to MODE and restart the display manager. "
-                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other). "
-                             "WARNING : All your applications will close ! Be sure to save your work.")
+                        help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
+                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
                              "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot)")
-    parser.add_argument('--print-startup', action='store_true',
-                        help="Print the current startup mode.")
+
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation before switching GPUs.")
     parser.add_argument('--cleanup', action='store_true',
@@ -72,7 +76,17 @@ def main():
             print("Error reading mode : %s" % str(e))
             sys.exit(1)
 
-        print("Current mode : %s" % mode)
+        print("Current GPU mode : %s" % mode)
+
+    elif args.print_next_mode:
+
+        try:
+            requested_mode = var.read_requested_mode()
+        except var.VarError as e:
+            print("Error reading requested GPU mode : %s" % str(e))
+            sys.exit(1)
+
+        print("GPU mode requested for next login : %s" % requested_mode)
 
     elif args.print_startup:
 
@@ -82,7 +96,7 @@ def main():
             print("Error reading startup mode : %s" % str(e))
             sys.exit(1)
 
-        print("Current startup mode : %s" % startup_mode)
+        print("Current startup GPU mode : %s" % startup_mode)
 
     elif args.switch:
 
