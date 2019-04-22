@@ -10,22 +10,6 @@ import optimus_manager.checks as checks
 from optimus_manager.xorg import cleanup_xorg_conf
 
 
-def send_command(cmd):
-
-    try:
-        client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        client.connect(envs.SOCKET_PATH)
-        client.send(cmd.encode('utf-8'))
-        client.close()
-
-    except (ConnectionRefusedError, OSError):
-        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-              "\nYou can enable and start it by running those commands as root :\n"
-              "\nsystemctl enable optimus-manager.service\n"
-              "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
-        sys.exit(1)
-
-
 def main():
 
     # Arguments parsing
@@ -54,137 +38,213 @@ def main():
     args = parser.parse_args()
 
     # Config loading
-    if not args.version:
-        try:
-            config = load_config()
-        except ConfigError as e:
-            print("Error loading config file : %s" % str(e))
-            sys.exit(1)
+    config = _get_config()
 
     #
     # Arguments switch
 
     if args.version:
-        print("Optimus Manager (Client) version %s" % envs.VERSION)
-        sys.exit(0)
+        _print_version_and_exit()
 
     elif args.print_mode:
-
-        try:
-            mode = checks.read_gpu_mode()
-        except checks.CheckError as e:
-            print("Error reading mode : %s" % str(e))
-            sys.exit(1)
-
-        print("Current GPU mode : %s" % mode)
+        _print_current_mode_and_exit()
 
     elif args.print_next_mode:
-
-        try:
-            requested_mode = var.read_requested_mode()
-        except var.VarError as e:
-            print("Error reading requested GPU mode : %s" % str(e))
-            sys.exit(1)
-
-        print("GPU mode requested for next login : %s" % requested_mode)
+        _print_next_mode_and_exit()
 
     elif args.print_startup:
-
-        try:
-            startup_mode = var.read_startup_mode()
-        except var.VarError as e:
-            print("Error reading startup mode : %s" % str(e))
-            sys.exit(1)
-
-        print("Current startup GPU mode : %s" % startup_mode)
+        _print_startup_mode_and_exit()
 
     elif args.switch:
 
-        if args.switch not in ["auto", "intel", "nvidia"]:
-            print("Invalid mode : %s" % args.switch)
-            sys.exit(1)
+        _check_daemon_active()
 
-        if not checks.is_daemon_active():
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                  "sudo systemctl enable optimus-manager\n"
-                  "sudo systemctl start optimus-manager\n")
-            sys.exit(1)
+        switch_mode = _get_switch_mode(args.switch)
 
-        if args.switch == "auto":
-            try:
-                gpu_mode = checks.read_gpu_mode()
-            except checks.CheckError as e:
-                print("Error reading current GPU mode: %s" % str(e))
-                sys.exit(1)
-
-            if gpu_mode == "nvidia":
-                switch_mode = "intel"
-            else:
-                switch_mode = "nvidia"
-
-            print("Switching to : %s" % switch_mode)
-
-        else:
-            switch_mode = args.switch
-
-        # Printing warnings if something is wrong
-        if config["optimus"]["switching"] == "bbswitch" and not checks.is_module_available("bbswitch"):
-            print("WARNING : bbswitch is enabled in the configuration file but the bbswitch module does"
-                  " not seem to be available for the current kernel. Power switching will not work.\n"
-                  "You can install bbswitch for the default kernel with \"sudo pacman -S bbswitch\" or"
-                  " for all kernels with \"sudo pacman -S bbswitch-dkms\".\n")
-
-        if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
-            print("WARNING : the nvidia module does not seem to be available for the current kernel."
-                  " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,"
-                  " continue anyway ? (y/N)")
-            ans = input("> ").lower()
-
-            if ans == "y":
-                pass
-            elif ans == "n" or ans == "N":
-                print("Aborting.")
-                sys.exit(0)
-            else:
-                print("Invalid choice. Aborting")
-                sys.exit(0)
+        _check_bbswitch_module(config)
+        _check_nvidia_module(switch_mode)
 
         if args.no_confirm:
-            send_command(switch_mode)
+            _send_command(switch_mode)
         else:
             print("You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
-            ans = input("> ").lower()
 
-            if ans == "y":
-                send_command(switch_mode)
-            elif ans == "n" or ans == "N":
-                print("Aborting.")
-                sys.exit(0)
+            confirmation = _ask_confirmation()
+            if confirmation:
+                _send_command(switch_mode)
             else:
-                print("Invalid choice. Aborting")
                 sys.exit(0)
 
     elif args.set_startup:
-
-        if args.set_startup not in ["intel", "nvidia", "nvidia_once"]:
-            print("Invalid startup mode : %s" % args.set_startup)
-            sys.exit(1)
-
-        send_command("startup_" + args.set_startup)
+        _set_startup_and_exit(args.set_startup)
 
     elif args.cleanup:
-
-        if os.geteuid() != 0:
-            print("You need to execute the command as root for this action.")
-            sys.exit(1)
-
-        cleanup_xorg_conf()
+        _cleanup_xorg_and_exit()
 
     else:
-
         print("Invalid arguments.")
+
+
+def _get_config():
+
+    try:
+        config = load_config()
+    except ConfigError as e:
+        print("Error loading config file : %s" % str(e))
+        sys.exit(1)
+
+    return config
+
+
+def _print_version_and_exit():
+
+    print("Optimus Manager (Client) version %s" % envs.VERSION)
+    sys.exit(0)
+
+
+def _print_current_mode_and_exit():
+
+    try:
+        mode = checks.read_gpu_mode()
+    except checks.CheckError as e:
+        print("Error reading mode : %s" % str(e))
+        sys.exit(1)
+
+    print("Current GPU mode : %s" % mode)
+    sys.exit(0)
+
+
+def _print_next_mode_and_exit():
+
+    try:
+        requested_mode = var.read_requested_mode()
+    except var.VarError as e:
+        print("Error reading requested GPU mode : %s" % str(e))
+        sys.exit(1)
+
+    print("GPU mode requested for next login : %s" % requested_mode)
+    sys.exit(0)
+
+
+def _print_startup_mode_and_exit():
+
+    try:
+        startup_mode = var.read_startup_mode()
+    except var.VarError as e:
+        print("Error reading startup mode : %s" % str(e))
+        sys.exit(1)
+
+    print("Current startup GPU mode : %s" % startup_mode)
+    sys.exit(0)
+
+
+def _check_daemon_active():
+
+    if not checks.is_daemon_active():
+        print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+              "sudo systemctl enable optimus-manager\n"
+              "sudo systemctl start optimus-manager\n")
+        sys.exit(1)
+
+
+def _get_switch_mode(switch_arg):
+
+    if switch_arg not in ["auto", "intel", "nvidia"]:
+        print("Invalid mode : %s" % switch_arg)
+        sys.exit(1)
+
+    if switch_arg == "auto":
+        try:
+            gpu_mode = checks.read_gpu_mode()
+        except checks.CheckError as e:
+            print("Error reading current GPU mode: %s" % str(e))
+            sys.exit(1)
+
+        if gpu_mode == "nvidia":
+            switch_mode = "intel"
+        else:
+            switch_mode = "nvidia"
+
+        print("Switching to : %s" % switch_mode)
+
+    else:
+        switch_mode = switch_arg
+
+    return switch_mode
+
+
+def _check_bbswitch_module(config):
+
+    if config["optimus"]["switching"] == "bbswitch" and not checks.is_module_available("bbswitch"):
+        print("WARNING : bbswitch is enabled in the configuration file but the bbswitch module does"
+              " not seem to be available for the current kernel. Power switching will not work.\n"
+              "You can install bbswitch for the default kernel with \"sudo pacman -S bbswitch\" or"
+              " for all kernels with \"sudo pacman -S bbswitch-dkms\".\n")
+
+
+def _check_nvidia_module(switch_mode):
+
+    if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
+        print("WARNING : the nvidia module does not seem to be available for the current kernel."
+              " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,"
+              " continue anyway ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _ask_confirmation():
+
+    ans = input("> ").lower()
+
+    if ans == "y":
+        return True
+    elif ans == "n" or ans == "N":
+        print("Aborting.")
+        return False
+    else:
+        print("Invalid choice. Aborting")
+        return False
+
+
+def _send_command(cmd):
+
+    try:
+        client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        client.connect(envs.SOCKET_PATH)
+        client.send(cmd.encode('utf-8'))
+        client.close()
+
+    except (ConnectionRefusedError, OSError):
+        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+              "\nYou can enable and start it by running those commands as root :\n"
+              "\nsystemctl enable optimus-manager.service\n"
+              "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
+        sys.exit(1)
+
+
+def _set_startup_and_exit(startup_arg):
+
+    if startup_arg not in ["intel", "nvidia", "nvidia_once"]:
+        print("Invalid startup mode : %s" % startup_arg)
+        sys.exit(1)
+
+    _send_command("startup_" + startup_arg)
+    sys.exit(0)
+
+
+def _cleanup_xorg_and_exit():
+
+    if os.geteuid() != 0:
+        print("You need to execute the command as root for this action.")
+        sys.exit(1)
+
+    cleanup_xorg_conf()
+    sys.exit(0)
 
 
 if __name__ == '__main__':
