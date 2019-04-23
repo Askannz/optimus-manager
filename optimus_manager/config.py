@@ -110,7 +110,8 @@ def validate_config(config):
         for option in config[section].keys():
 
             if option not in schema[section].keys():
-                raise ConfigError("Unknown option %s in section %s" % (option, section))
+                print("Config parsing : unknown option %s in section %s. Ignoring." % (option, section))
+                del schema[section][option]
 
 
 def load_extra_xorg_options():
