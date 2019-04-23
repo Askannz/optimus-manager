@@ -56,7 +56,7 @@ def validate_config(config):
 
                 values = config[section][option].replace(" ", "").split(",")
 
-                if len(values) == ['']:
+                if values == ['']:
                     if not can_be_blank:
                         raise ConfigError("Option \"%s\" in section [%s] requires at least one parameter" % (option, section))
 
