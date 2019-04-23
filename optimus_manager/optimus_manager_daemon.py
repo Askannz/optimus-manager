@@ -8,6 +8,7 @@ import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
+from optimus_manager.sessions import logout_all_x11_sessions, SessionError
 
 
 def main():
@@ -77,10 +78,10 @@ def _wait_for_command(server_socket):
 
 def _process_command(config, msg):
 
-    if msg == "intel":
-        _write_gpu_mode(config, "intel")
-    elif msg == "nvidia":
-        _write_gpu_mode(config, "nvidia")
+    # GPU switching
+    if msg == "intel" or msg == "nvidia":
+        _write_gpu_mode(config, msg)
+        _log_out_X11()
 
     # Startup modes
     elif msg == "startup_nvidia":
@@ -109,7 +110,17 @@ def _write_startup_mode(mode):
         write_startup_mode(mode)
 
     except VarError as e:
+
         print("Cannot write startup mode : %s" % str(e))
+
+
+def _log_out_X11():
+
+    try:
+        logout_all_x11_sessions()
+    except SessionError as e:
+        print("Failed to logout X11 sessions : %s" % str(e))
+        sys.exit(1)
 
 
 class _SignalHandler:

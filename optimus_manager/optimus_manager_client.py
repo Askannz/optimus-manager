@@ -3,10 +3,10 @@ import sys
 import os
 import argparse
 import socket
-from optimus_manager.config import load_config, ConfigError
 import optimus_manager.envs as envs
-import optimus_manager.var as var
 import optimus_manager.checks as checks
+from optimus_manager.config import load_config, ConfigError
+from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
 
 
@@ -67,7 +67,8 @@ def main():
         if args.no_confirm:
             _send_command(switch_mode)
         else:
-            print("You are about to switch GPUs. This will restart the display manager and all your applications WILL CLOSE.\n"
+            print("You are about to switch GPUs. This will forcibly close all graphical sessions"
+                  " and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
 
@@ -76,6 +77,8 @@ def main():
                 _send_command(switch_mode)
             else:
                 sys.exit(0)
+
+        sys.exit(0)
 
     elif args.set_startup:
         _set_startup_and_exit(args.set_startup)
@@ -119,8 +122,8 @@ def _print_current_mode_and_exit():
 def _print_next_mode_and_exit():
 
     try:
-        requested_mode = var.read_requested_mode()
-    except var.VarError as e:
+        requested_mode = read_requested_mode()
+    except VarError as e:
         print("Error reading requested GPU mode : %s" % str(e))
         sys.exit(1)
 
@@ -131,8 +134,8 @@ def _print_next_mode_and_exit():
 def _print_startup_mode_and_exit():
 
     try:
-        startup_mode = var.read_startup_mode()
-    except var.VarError as e:
+        startup_mode = read_startup_mode()
+    except VarError as e:
         print("Error reading startup mode : %s" % str(e))
         sys.exit(1)
 
