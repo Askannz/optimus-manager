@@ -3,6 +3,7 @@ from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.envs as envs
 from optimus_manager.pci import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
+from optimus_manager import manjaro_hacks
 
 
 class XorgSetupError(Exception):
@@ -19,6 +20,7 @@ def configure_xorg(config, requested_gpu_mode):
     elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
 
+    manjaro_hacks.remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
 
 
