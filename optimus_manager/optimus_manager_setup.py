@@ -19,7 +19,7 @@ def main():
 
     args = parser.parse_args()
 
-    print("Optimus Manager (GPU setup) version %s" % envs.VERSION)
+    print("Optimus Manager (Setup script) version %s" % envs.VERSION)
 
     if args.setup_boot:
         print("Setting up boot")
