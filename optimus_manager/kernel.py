@@ -93,6 +93,9 @@ def _power_switch_on(config):
         _load_bbswitch()
         _set_bbswitch_mode("ON")
 
+    elif config["optimus"]["switching"] == "nouveau":
+        pass
+
     else:
         print("Power switching backend is disabled.")
 
