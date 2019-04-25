@@ -70,9 +70,6 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     if "triple_buffer" in options:
         text += "\tOption \"TripleBuffer\" \"true\"\n"
 
-    dri = int(config["nvidia"]["DRI"])
-    text += "\tOption \"DRI\" \"%d\"\n" % dri
-
     if "nvidia" in xorg_extra.keys():
         for line in xorg_extra["nvidia"]:
             text += ("\t" + line + "\n")
