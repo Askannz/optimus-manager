@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-prime
+
+ 

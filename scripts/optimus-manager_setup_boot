@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-boot | tee /var/log/optimus-manager_setup_boot.log
+
