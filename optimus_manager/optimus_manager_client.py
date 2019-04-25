@@ -8,6 +8,7 @@ import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
+from optimus_manager.sessions import logout_all_desktop_sessions
 
 
 def main():
@@ -66,6 +67,7 @@ def main():
 
         if args.no_confirm:
             _send_command(switch_mode)
+            logout_all_desktop_sessions()
         else:
             print("You are about to switch GPUs. This will forcibly close all graphical sessions"
                   " and all your applications WILL CLOSE.\n"
@@ -75,6 +77,7 @@ def main():
             confirmation = _ask_confirmation()
             if confirmation:
                 _send_command(switch_mode)
+                logout_all_desktop_sessions()
             else:
                 sys.exit(0)
 
