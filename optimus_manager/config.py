@@ -10,20 +10,11 @@ class ConfigError(Exception):
 
 def load_config():
 
-    if os.path.isfile(envs.DEPRECATED_USER_CONFIG_PATH):
-        print("Warning : Your configuration file is at the deprecated location %s.\n"
-              "Please move it to %s" % (envs.DEPRECATED_USER_CONFIG_PATH, envs.USER_CONFIG_PATH))
-        user_config_path = envs.DEPRECATED_USER_CONFIG_PATH
-    elif os.path.isfile(envs.USER_CONFIG_PATH):
-        user_config_path = envs.USER_CONFIG_PATH
-    else:
-        user_config_path = None
-
     config = configparser.ConfigParser()
 
     try:
-        if user_config_path is not None:
-            config.read([envs.DEFAULT_CONFIG_PATH, user_config_path])
+        if os.path.isfile(envs.USER_CONFIG_PATH):
+            config.read([envs.DEFAULT_CONFIG_PATH, envs.USER_CONFIG_PATH])
         else:
             config.read(envs.DEFAULT_CONFIG_PATH)
 
@@ -65,7 +56,7 @@ def validate_config(config):
 
                 values = config[section][option].replace(" ", "").split(",")
 
-                if len(values) == ['']:
+                if values == ['']:
                     if not can_be_blank:
                         raise ConfigError("Option \"%s\" in section [%s] requires at least one parameter" % (option, section))
 
@@ -119,7 +110,8 @@ def validate_config(config):
         for option in config[section].keys():
 
             if option not in schema[section].keys():
-                raise ConfigError("Unknown option %s in section %s" % (option, section))
+                print("Config parsing : unknown option %s in section %s. Ignoring." % (option, section))
+                del schema[section][option]
 
 
 def load_extra_xorg_options():
