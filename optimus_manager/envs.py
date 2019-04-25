@@ -13,7 +13,6 @@ SYSTEM_CONFIGS_PATH = "/etc/optimus-manager/configs/"
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 
 DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
-DEPRECATED_USER_CONFIG_PATH = "/etc/optimus-manager.conf"
 USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
 EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/xorg-intel.conf"

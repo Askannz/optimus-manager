@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 from os.path import dirname, join
 from setuptools import setup
+from optimus_manager import __version__
 
 
 setup(
     name='optimus-manager',
-    version='0.8',
+    version=__version__,
     description='Management utility for Optimus laptops on Linux.',
     long_description=open(
         join(dirname(__file__), 'README.md')).read(),
