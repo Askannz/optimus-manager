@@ -8,7 +8,7 @@ import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
-from optimus_manager.sessions import logout_all_desktop_sessions
+from optimus_manager.sessions import logout_all_desktop_sessions, is_there_a_wayland_session
 
 
 def main():
@@ -64,6 +64,7 @@ def main():
 
         _check_bbswitch_module(config)
         _check_nvidia_module(switch_mode)
+        _check_wayland()
 
         if args.no_confirm:
             _send_command(switch_mode)
@@ -196,6 +197,19 @@ def _check_nvidia_module(switch_mode):
         print("WARNING : the nvidia module does not seem to be available for the current kernel."
               " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,"
               " continue anyway ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_wayland():
+
+    if is_there_a_wayland_session():
+        print("Warning : there is at least one Wayland session running on this computer."
+              "Wayland is not supported by this optimus-manager, so GPU switching may fail.\n"
+              "Continue anyway ? (y/N)")
 
         confirmation = _ask_confirmation()
 
