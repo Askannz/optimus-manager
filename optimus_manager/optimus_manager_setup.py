@@ -7,6 +7,7 @@ from optimus_manager.var import read_startup_mode, read_requested_mode, write_re
 from optimus_manager.prime import enable_PRIME
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, XorgSetupError
+import optimus_manager.processes as processes
 
 
 def main():
@@ -109,6 +110,8 @@ def _get_requested_mode():
 
 def _setup_gpu(config, requested_mode):
 
+    _kill_gdm_server()
+
     try:
         setup_kernel_state(config, requested_mode)
         configure_xorg(config, requested_mode)
@@ -120,6 +123,23 @@ def _setup_gpu(config, requested_mode):
     except XorgSetupError as e:
         print("Cannot setup GPU : Xorg setup error : %s" % str(e))
         sys.exit(1)
+
+
+def _kill_gdm_server():
+
+    print("Checking for GDM display servers")
+
+    try:
+        xorg_PIDs_list = processes.get_PIDs_from_process_names(["Xorg", "X"])
+
+        for PID_value in xorg_PIDs_list:
+            user = processes.get_PID_user(PID_value)
+            if user == "gdm":
+                print("Found a Xorg GDM process (PID %d), killing it..." % PID_value)
+                processes.kill_PID(PID_value, signal="-KILL")
+
+    except processes.ProcessesError as e:
+        print("Error : cannot check for or kill the GDM display server : %s" % str(e))
 
 
 if __name__ == '__main__':
