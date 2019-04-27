@@ -54,6 +54,10 @@ def is_there_a_default_xorg_conf_file():
     return os.path.isfile("/etc/X11/xorg.conf")
 
 
+def is_there_a_MHWD_file():
+    return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
+
+
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
     text = "Section \"Module\"\n" \
