@@ -33,7 +33,7 @@ def main():
                              "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot)")
 
     parser.add_argument('--no-confirm', action='store_true',
-                        help="Do not ask for confirmation before switching GPUs.")
+                        help="Do not ask for confirmation and skip all warnings when switching GPUs.")
     parser.add_argument('--cleanup', action='store_true',
                         help="Remove auto-generated configuration files left over by the daemon.")
     args = parser.parse_args()
