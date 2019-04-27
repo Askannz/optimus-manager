@@ -65,6 +65,7 @@ def main():
 
         _check_bbswitch_module(config)
         _check_nvidia_module(switch_mode)
+        _check_patched_GDM()
         _check_wayland()
         _check_bumblebeed()
         _check_xorg_conf()
@@ -256,6 +257,21 @@ def _check_bumblebeed():
         print("WARNING : The Bumblebee service (bumblebeed.service) is running. This can interfere with optimus-manager,"
               " therefore it is recommended you stop and disable this service before proceeding."
               "Ignore this warning and proceed with GPU switching ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_patched_GDM():
+
+    if checks.get_current_display_manager() == "gdm" and \
+     not checks.using_patched_GDM():
+        print("WARNING : It seems like the version of the Gnome Display Manager (GDM) you are using has not been patched"
+              " for Prime switching. Without a patched GDM version, GPU switching will likely fail. Follow instructions at"
+              " https://github.com/Askannz/optimus-manager to install a patched version."
+              "Continue anyway Without a patched GDM ? (y/N)")
 
         confirmation = _ask_confirmation()
 

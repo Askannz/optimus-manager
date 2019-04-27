@@ -1,3 +1,4 @@
+import os
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -40,6 +41,26 @@ def is_module_available(module_name):
         return False
     else:
         return True
+
+
+def get_current_display_manager():
+
+    if not os.path.isfile("/etc/systemd/system/display-manager.service"):
+        raise CheckError("No display-manager.service file found")
+
+    dm_service_path = os.path.realpath("/etc/systemd/system/display-manager.service")
+    dm_service_filename = os.path.split(dm_service_path)[-1]
+    dm_name = os.path.splitext(dm_service_filename)[0]
+
+    return dm_name
+
+
+def using_patched_GDM():
+
+    folder_path_1 = os.path.isdir("/etc/gdm/Prime")
+    folder_path_2 = os.path.isdir("/etc/gdm3/Prime")
+
+    return (os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2))
 
 
 def is_login_manager_active():
