@@ -8,7 +8,7 @@ import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
-from optimus_manager.sessions import logout_all_desktop_sessions, is_there_a_wayland_session
+from optimus_manager.sessions import logout_all_desktop_sessions, is_there_a_wayland_session, SessionsError
 
 
 def main():
@@ -211,7 +211,13 @@ def _check_nvidia_module(switch_mode):
 
 def _check_wayland():
 
-    if is_there_a_wayland_session():
+    try:
+        wayland_session_present = is_there_a_wayland_session()
+    except SessionsError as e:
+        print("ERROR : cannot check for Wayland session : %s" % str(e))
+        return
+
+    if wayland_session_present:
         print("WARNING : there is at least one Wayland session running on this computer."
               " Wayland is not supported by this optimus-manager, so GPU switching may fail.\n"
               "Continue anyway ? (y/N)")
@@ -266,8 +272,13 @@ def _check_bumblebeed():
 
 def _check_patched_GDM():
 
-    if checks.get_current_display_manager() == "gdm" and \
-     not checks.using_patched_GDM():
+    try:
+        dm_name = checks.get_current_display_manager()
+    except checks.CheckError as e:
+        print("ERROR : cannot get current display manager name : %s" % str(e))
+        return
+
+    if dm_name == "gdm" and not checks.using_patched_GDM():
         print("WARNING : It does not seem like you are using a version of the Gnome Display Manager (GDM)"
               " that has been patched for Prime switching. Follow instructions at https://github.com/Askannz/optimus-manager"
               " to install a patched version. Without a patched GDM version, GPU switching will likely fail.\n"
