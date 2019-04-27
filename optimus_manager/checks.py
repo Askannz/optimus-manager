@@ -11,12 +11,6 @@ def is_gpu_powered():
     return state == "ON"
 
 
-def is_login_manager_active(config):
-
-    state = exec_bash("systemctl is-active display-manager").stdout.decode('utf-8')[:-1]
-    return state == "active"
-
-
 def is_pat_available():
     try:
         exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
@@ -38,11 +32,6 @@ def read_gpu_mode():
         return "intel"
 
 
-def is_daemon_active():
-    state = exec_bash("systemctl is-active optimus-manager").stdout.decode('utf-8')[:-1]
-    return state == "active"
-
-
 def is_module_available(module_name):
 
     try:
@@ -53,6 +42,23 @@ def is_module_available(module_name):
         return True
 
 
+def is_login_manager_active():
+    return _is_service_active("display-manager")
+
+
+def is_daemon_active():
+    return _is_service_active("optimus-manager")
+
+
 def is_bumblebeed_service_active():
-    state = exec_bash("systemctl is-active bumblebeed").stdout.decode('utf-8')[:-1]
-    return state == "active"
+    return _is_service_active("bumblebeed")
+
+
+def _is_service_active(service_name):
+
+    try:
+        state = exec_bash("systemctl is-active %s.service" % service_name).stdout.decode('utf-8')[:-1]
+    except BashError:
+        return False
+    else:
+        return (state == "active")
