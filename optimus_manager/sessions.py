@@ -21,6 +21,12 @@ def logout_all_desktop_sessions():
     except BashError:
         pass
 
+    # XFCE
+    try:
+        exec_bash("xfce4-session-logout --logout")
+    except BashError:
+        pass
+
 
 def is_there_a_wayland_session():
 
