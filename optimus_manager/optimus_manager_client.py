@@ -7,7 +7,7 @@ import optimus_manager.envs as envs
 import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
-from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file
+from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from optimus_manager.sessions import logout_all_desktop_sessions, is_there_a_wayland_session
 
 
@@ -67,6 +67,7 @@ def main():
         _check_nvidia_module(switch_mode)
         _check_wayland()
         _check_xorg_conf()
+        _check_MHWD_conf()
 
         if args.no_confirm:
             _send_command(switch_mode)
@@ -227,6 +228,20 @@ def _check_xorg_conf():
               "This file may contain hard-coded GPU configuration that could interfere with optimus-manager,"
               " so it is recommended that you delete it before proceeding.\n"
               "Ignore this warning and proceed with GPU switching ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_MHWD_conf():
+
+    if is_there_a_MHWD_file():
+        print("WARNING : Found a Xorg config file at /etc/X11/xorg.conf.d/90-mhwd.conf that was auto-generated"
+              " by the Manjaro driver utility (MHWD). This will likely interfere with GPU switching, so"
+              " optimus-manager will delete this file automatically if you proceded with GPU switching.\n"
+              "Proceed ? (y/N)")
 
         confirmation = _ask_confirmation()
 
