@@ -51,3 +51,8 @@ def is_module_available(module_name):
         return False
     else:
         return True
+
+
+def is_bumblebeed_service_active():
+    state = exec_bash("systemctl is-active bumblebeed").stdout.decode('utf-8')[:-1]
+    return state == "active"

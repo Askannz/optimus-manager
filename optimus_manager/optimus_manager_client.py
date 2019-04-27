@@ -66,6 +66,7 @@ def main():
         _check_bbswitch_module(config)
         _check_nvidia_module(switch_mode)
         _check_wayland()
+        _check_bumblebeed()
         _check_xorg_conf()
         _check_MHWD_conf()
 
@@ -242,6 +243,19 @@ def _check_MHWD_conf():
               " by the Manjaro driver utility (MHWD). This will likely interfere with GPU switching, so"
               " optimus-manager will delete this file automatically if you proceded with GPU switching.\n"
               "Proceed ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_bumblebeed():
+
+    if checks.is_bumblebeed_service_active():
+        print("WARNING : The Bumblebee service (bumblebeed.service) is running. This can interfere with optimus-manager,"
+              " therefore it is recommended you stop and disable this service before proceeding."
+              "Ignore this warning and proceed with GPU switching ? (y/N)")
 
         confirmation = _ask_confirmation()
 
