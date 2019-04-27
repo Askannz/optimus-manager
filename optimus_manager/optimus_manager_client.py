@@ -200,7 +200,7 @@ def _check_nvidia_module(switch_mode):
 
     if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
         print("WARNING : the nvidia module does not seem to be available for the current kernel."
-              " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,"
+              " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,\n"
               " continue anyway ? (y/N)")
 
         confirmation = _ask_confirmation()
@@ -255,7 +255,7 @@ def _check_bumblebeed():
 
     if checks.is_bumblebeed_service_active():
         print("WARNING : The Bumblebee service (bumblebeed.service) is running. This can interfere with optimus-manager,"
-              " therefore it is recommended you stop and disable this service before proceeding."
+              " therefore it is recommended you stop and disable this service before proceeding.\n"
               "Ignore this warning and proceed with GPU switching ? (y/N)")
 
         confirmation = _ask_confirmation()
@@ -268,10 +268,10 @@ def _check_patched_GDM():
 
     if checks.get_current_display_manager() == "gdm" and \
      not checks.using_patched_GDM():
-        print("WARNING : It seems like the version of the Gnome Display Manager (GDM) you are using has not been patched"
-              " for Prime switching. Without a patched GDM version, GPU switching will likely fail. Follow instructions at"
-              " https://github.com/Askannz/optimus-manager to install a patched version."
-              "Continue anyway Without a patched GDM ? (y/N)")
+        print("WARNING : It does not seem like you are using a version of the Gnome Display Manager (GDM)"
+              " that has been patched for Prime switching. Follow instructions at https://github.com/Askannz/optimus-manager"
+              " to install a patched version. Without a patched GDM version, GPU switching will likely fail.\n"
+              "Continue anyway ? (y/N)")
 
         confirmation = _ask_confirmation()
 
