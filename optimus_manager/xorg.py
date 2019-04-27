@@ -50,6 +50,10 @@ def is_xorg_running():
     return False
 
 
+def is_there_a_default_xorg_conf_file():
+    return os.path.isfile("/etc/X11/xorg.conf")
+
+
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
     text = "Section \"Module\"\n" \
