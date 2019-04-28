@@ -10,11 +10,11 @@ Only Xorg sessions are supported (no Wayland).
 
 Supported display managers are : SDDM, LightDM, GDM.
 
-optimus-manager *might* still work with other display managers but you have to configure them manually (see [this section](#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
+optimus-manager *might* still work with other display managers but you have to configure them manually (see [this FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
 
 Introduction
 ----------
-GPU offloading with Nvidia cards is not supported on Linux, which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between Nvidia and your screen.
+GPU offloading with Nvidia cards is not supported on Linux, which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between the Nvidia GPU and your screen.
 
 This is essentially a port to Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
@@ -40,14 +40,14 @@ After reboot, the optimus-manager daemon should have been started automatically,
 
 * **Manjaro-generated Xorg config :** Manjaro has its own driver utility called MHWD that also auto-generates a Xorg config file at `/etc/X11/xorg.conf.d/90-mhwd.conf`. optimus-manager will automatically delete that file to avoid issues.
 
-* **Bumblebee :** optimus-manager is incompatible with Bumblebee since both would be trying to control GPU power switching at the same time. If Bumblebee is installed, you must disable its daemon (`sudo systemctl disable bumblebeed.service`, then reboot). This is particularly important for Manjaro users since Bumblebee is installed by default.
+* **Bumblebee :** optimus-manager is incompatible with Bumblebee since both tools would be trying to control GPU power switching at the same time. If Bumblebee is installed, you must disable its daemon (`sudo systemctl disable bumblebeed.service`, then reboot). This is particularly important for Manjaro users since Bumblebee is installed by default.
 
 IMPORTANT : Gnome and GDM users
 ----------
 
 If you use the Gnome Display Manager (GDM), there is an extra installation step. The default `gdm` package from the Archlinux and Manjaro repositories is not compatible with optimus-manager, so you must replace it with this patched version : [gdm-prime](https://aur.archlinux.org/packages/gdm-prime/) (also replaces `libgdm`).
 
-The patch was written by Canonical for Ubuntu and simply adds two additional script entry points specifically for Prime switching.
+The patch was written by Canonical for Ubuntu and simply adds two script entry points specifically for Prime switching.
 
 Another quirk of GDM is that the X server may not automatically restart after a GPU switch. If you see a black screen with a blinking cursor, see [this FAQ question](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#after-trying-to-switch-gpus-i-am-stuck-with-a-black-screen-or-a-black-screen-with-a-blinking-cursor-or-a-tty-login-screen).
 
@@ -59,27 +59,19 @@ To uninstall the program, simply remove the `optimus-manager` package. The auto-
 
 You can also force cleanup by running `optimus-manager --cleanup`.
 
-Not that simply disabling the daemon will not prevent `optimus-manager` from running, as most of the GPU setup process happens in script directly run by the login manager.
+Not that simply disabling the daemon will not prevent `optimus-manager` from running, as most of the GPU setup process happens in scripts directly run by the login manager.
 
 Usage
 ----------
 
 Run
-```
-optimus-manager --switch nvidia
-```
-to switch to the Nvidia GPU, and
-```
-optimus-manager --switch intel
-```
-to switch to the Intel GPU.
-
-(you can also use `optimus-manager --switch auto` to automatically switch to the other mode)
+* `optimus-manager --switch nvidia` to switch to the Nvidia GPU
+* `optimus-manager --switch intel` to switch to the Intel GPU.
+* `optimus-manager --switch auto` to automatically detect which mode you are currently running in and switch to the other.
 
 *WARNING :* Switching GPUs automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
 You can disable auto-logout in the configuration file. In that case, the GPU switch will not be effective until the next login.
-
 
 You can also specify which GPU you want to be used by default when the system boots :
 
