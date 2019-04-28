@@ -43,6 +43,11 @@ post_install() {
     echo "optimus-manager : enabling optimus-manager.service"
     mkdir -p /etc/systemd/system/graphical.target.wants/
     ln -s /usr/lib/systemd/system/optimus-manager.service /etc/systemd/system/graphical.target.wants/optimus-manager.service
+    
+    bold=$(tput bold)
+    green=$(tput setaf 2)
+    normal=$(tput sgr0)
+    echo "${bold}${green}Please reboot your computer before using optimus-manager${normal}"
 
 }
 
