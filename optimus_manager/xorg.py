@@ -92,7 +92,11 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n"
 
-    text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
+    if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
+        print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
+        text += "\tDriver \"modesetting\"\n"
+    else:
+        text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
@@ -123,3 +127,7 @@ def _write_xorg_conf(xorg_conf_text):
             f.write(xorg_conf_text)
     except IOError:
         raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+
+
+def _is_intel_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")

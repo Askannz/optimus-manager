@@ -10,7 +10,8 @@ license=('MIT')
 conflicts=("optimus-manager")
 provides=("optimus-manager")
 depends=('python' 'python-setuptools' 'mesa-demos' 'xorg-xrandr')
-optdepends=('bbswitch: alternative power switching method')
+optdepends=('bbswitch: alternative power switching method'
+            'xf86-video-intel: provides the Xorg intel driver')
 makedepends=('python-setuptools' 'git')
 backup=('etc/optimus-manager/xorg-intel.conf'
         'etc/optimus-manager/xorg-nvidia.conf'
