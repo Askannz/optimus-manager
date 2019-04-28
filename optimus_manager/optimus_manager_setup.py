@@ -4,9 +4,8 @@ import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_startup_mode, read_requested_mode, write_requested_mode, VarError
-from optimus_manager.prime import enable_PRIME
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
-from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, XorgSetupError
+from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
 
 
@@ -49,7 +48,12 @@ def main():
 
     elif args.setup_prime:
         print("Setting up PRIME")
-        enable_PRIME()
+
+        print("Loading config")
+        config = _get_config()
+
+        _setup_PRIME()
+        _set_DPI(config)
 
     elif args.setup_gpu:
         print("Setting up the GPU")
@@ -140,6 +144,22 @@ def _kill_gdm_server():
 
     except processes.ProcessesError as e:
         print("Error : cannot check for or kill the GDM display server : %s" % str(e))
+
+
+def _setup_PRIME():
+
+    try:
+        setup_PRIME()
+    except XorgSetupError as e:
+        print("Error : cannot setup PRIME : %s" % str(e))
+
+
+def _set_DPI(config):
+
+    try:
+        set_DPI(config)
+    except XorgSetupError as e:
+        print("Error : cannot set DPI value : %s" % str(e))
 
 
 if __name__ == '__main__':
