@@ -260,9 +260,10 @@ def _check_MHWD_conf():
 def _check_bumblebeed():
 
     if checks.is_bumblebeed_service_active():
-        print("WARNING : The Bumblebee service (bumblebeed.service) is running. This can interfere with optimus-manager,"
-              " therefore it is recommended you stop and disable this service before proceeding.\n"
-              "Ignore this warning and proceed with GPU switching ? (y/N)")
+        print("WARNING : The Bumblebee service (bumblebeed.service) is running, and this can interfere with optimus-manager."
+              " Before attempting a GPU switch, it is recommended that you disable this service (sudo systemctl disable bumblebeed.service)"
+              " then REBOOT your computer.\n"
+              "Ignore this warning and proceed with GPU switching now ? (y/N)")
 
         confirmation = _ask_confirmation()
 
