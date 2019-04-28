@@ -8,8 +8,11 @@ pre_install() {
         rm $sddm_conf
     fi
     
-    printf "#!/bin/sh\n# Xsetup - run as root before the login dialog appears\n" > /usr/share/sddm/scripts/Xsetup
-    chmod 755 /usr/share/sddm/scripts/Xsetup
+    sddm_xsetup=/usr/share/sddm/scripts/Xsetup
+    if [ -f "$sddm_conf" ]; then
+        printf "#!/bin/sh\n# Xsetup - run as root before the login dialog appears\n" > "$sddm_xsetup"
+        chmod 755 "$sddm_xsetup"
+    fi
 
     # LightDM
     lightdm_conf=/etc/lightdm/lightdm.conf.d/10-optimus-manager.conf
