@@ -70,6 +70,7 @@ def main():
         _check_bumblebeed()
         _check_xorg_conf()
         _check_MHWD_conf()
+        _check_intel_xorg_module(config, switch_mode)
 
         if args.no_confirm:
             _send_command(switch_mode)
@@ -284,6 +285,20 @@ def _check_patched_GDM():
               " that has been patched for Prime switching. Follow instructions at https://github.com/Askannz/optimus-manager"
               " to install a patched version. Without a patched GDM version, GPU switching will likely fail.\n"
               "Continue anyway ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_intel_xorg_module(config, switch_mode):
+
+    if switch_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
+        print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
+              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
+              " the package \"xf86-video-intel.\"\n"
+              "Continue ? (y/N)")
 
         confirmation = _ask_confirmation()
 

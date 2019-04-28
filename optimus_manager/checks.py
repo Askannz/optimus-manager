@@ -63,6 +63,10 @@ def using_patched_GDM():
     return (os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2))
 
 
+def is_xorg_intel_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
+
+
 def is_login_manager_active():
     return _is_service_active("display-manager")
 
