@@ -73,8 +73,7 @@ def main():
         _check_intel_xorg_module(config, switch_mode)
 
         if args.no_confirm:
-            _send_command(switch_mode)
-            logout_all_desktop_sessions()
+            _gpu_switch(switch_mode)
         else:
             print("You are about to switch GPUs. This will forcibly close all graphical sessions"
                   " and all your applications WILL CLOSE.\n"
@@ -83,8 +82,7 @@ def main():
 
             confirmation = _ask_confirmation()
             if confirmation:
-                _send_command(switch_mode)
-                logout_all_desktop_sessions()
+                _gpu_switch(switch_mode)
             else:
                 sys.exit(0)
 
@@ -320,6 +318,13 @@ def _ask_confirmation():
         return False
 
 
+def _gpu_switch(switch_mode):
+
+    print("Switching to mode : %s" % switch_mode)
+    _send_command(switch_mode)
+    logout_all_desktop_sessions()
+
+
 def _send_command(cmd):
 
     try:
@@ -342,6 +347,7 @@ def _set_startup_and_exit(startup_arg):
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 
+    print("setting startup mode to : %s" % startup_arg)
     _send_command("startup_" + startup_arg)
     sys.exit(0)
 
