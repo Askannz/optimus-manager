@@ -68,6 +68,8 @@ def setup_PRIME():
 
     if requested_mode == "nvidia":
 
+        print("Nvidia mode requested, running xrandr...")
+
         try:
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
             exec_bash("xrandr --auto")
