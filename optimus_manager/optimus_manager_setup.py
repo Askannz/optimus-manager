@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys
+import time
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
@@ -7,7 +8,6 @@ from optimus_manager.var import read_startup_mode, read_requested_mode, write_re
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
-from optimus_manager.log import setup_logfiles, print_timestamp_separator
 
 
 def main():
@@ -20,14 +20,11 @@ def main():
 
     args = parser.parse_args()
 
-    print_timestamp_separator()
+    _print_timestamp_separator()
     print("Optimus Manager (Setup script) version %s" % envs.VERSION)
 
     if args.setup_boot:
         print("Setting up boot")
-
-        print("Setting up logfiles")
-        setup_logfiles()
 
         if is_xorg_running():
             print("Error : attempting to run the initial boot setup while a X server is already running !"
@@ -165,6 +162,12 @@ def _set_DPI(config):
         set_DPI(config)
     except XorgSetupError as e:
         print("Error : cannot set DPI value : %s" % str(e))
+
+
+def _print_timestamp_separator():
+
+    time_str = time.strftime("%Y-%m-%d %I:%M:%S %p %z ")
+    print("\n" + time_str + ("=" * 20) + "\n")
 
 
 if __name__ == '__main__':
