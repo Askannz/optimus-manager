@@ -1,5 +1,6 @@
 import os
 from optimus_manager.bash import exec_bash, BashError
+from optimus_manager.var import read_requested_mode, VarError
 import optimus_manager.envs as envs
 from optimus_manager.pci import get_bus_ids
 from optimus_manager.config import load_extra_xorg_options
@@ -61,10 +62,17 @@ def is_there_a_MHWD_file():
 def setup_PRIME():
 
     try:
-        exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
-        exec_bash("xrandr --auto")
-    except BashError as e:
-        raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
+        requested_mode = read_requested_mode()
+    except VarError as e:
+        raise XorgSetupError("Cannot setup PRIME : cannot read requested mode : %s" % str(e))
+
+    if requested_mode == "nvidia":
+
+        try:
+            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+            exec_bash("xrandr --auto")
+        except BashError as e:
+            raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
 
 
 def set_DPI(config):
