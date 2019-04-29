@@ -47,6 +47,7 @@ package() {
   install -Dm644 var/startup_mode "$pkgdir/var/lib/optimus-manager/startup_mode"
   install -Dm644 var/requested_mode "$pkgdir/var/lib/optimus-manager/requested_mode"
   
+  install -Dm755 scripts/prime-switch-boot "$pkgdir/usr/bin/prime-switch-boot"
   install -Dm755 scripts/prime-switch "$pkgdir/usr/bin/prime-switch"
   install -Dm755 scripts/prime-offload "$pkgdir/usr/bin/prime-offload"
   

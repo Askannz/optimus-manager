@@ -3,7 +3,7 @@ Description=Optimus Manager Commands Daemon
 Before=display-manager.service
 
 [Service]
-ExecStartPre=/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-boot 2>&1 | tee -a /var/log/optimus-manager/boot_setup.log
+ExecStartPre=/usr/bin/prime-switch-boot
 ExecStart=/usr/bin/python -u /usr/bin/optimus-manager-daemon
 
 [Install]
