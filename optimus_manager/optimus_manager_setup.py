@@ -7,6 +7,7 @@ from optimus_manager.var import read_startup_mode, read_requested_mode, write_re
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
+from optimus_manager.log import setup_logfiles, print_timestamp_separator
 
 
 def main():
@@ -19,10 +20,14 @@ def main():
 
     args = parser.parse_args()
 
+    print_timestamp_separator()
     print("Optimus Manager (Setup script) version %s" % envs.VERSION)
 
     if args.setup_boot:
         print("Setting up boot")
+
+        print("Setting up logfiles")
+        setup_logfiles()
 
         if is_xorg_running():
             print("Error : attempting to run the initial boot setup while a X server is already running !"

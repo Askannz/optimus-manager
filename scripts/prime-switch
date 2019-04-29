@@ -1,5 +1,5 @@
 #!/bin/bash
 
-/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-gpu 2>&1 | tee /var/log/optimus-manager_setup_gpu.log
+/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-gpu 2>&1 | tee -a /var/log/optimus-manager/gpu_setup.log
 
  
