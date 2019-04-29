@@ -53,6 +53,12 @@ post_install() {
 
 }
 
+post_upgrade() {
+
+    mkdir -p /var/log/optimus-manager/
+
+}
+
 post_remove() {
 
 	echo "optimus-manager : cleaning up auto-generated Xorg conf"
