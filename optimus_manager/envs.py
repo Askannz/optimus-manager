@@ -1,4 +1,4 @@
-VERSION = "0.8"
+VERSION = "1.0"
 
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
