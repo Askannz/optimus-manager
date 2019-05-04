@@ -99,6 +99,8 @@ Any parameter not specified in your config file will take value from the default
 
 Please refer to the comments in the [default config file](https://github.com/Askannz/optimus-manager/blob/master/optimus-manager.conf) for descriptions of the available parameters. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
 
+Some config changes will not be effective until you computer is rebooted or the optimus-manager service is restarted.
+
 You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf` and `/etc/optimus-manager/xorg-nvidia.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
 
 Finally, if you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh` (for Intel mode) and `/etc/optimus-manager/xsetup-nvidia.sh` (for Nvidia mode).
