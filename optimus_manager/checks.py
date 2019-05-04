@@ -57,8 +57,8 @@ def get_current_display_manager():
 
 def using_patched_GDM():
 
-    folder_path_1 = os.path.isdir("/etc/gdm/Prime")
-    folder_path_2 = os.path.isdir("/etc/gdm3/Prime")
+    folder_path_1 = "/etc/gdm/Prime"
+    folder_path_2 = "/etc/gdm3/Prime"
 
     return (os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2))
 
