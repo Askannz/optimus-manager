@@ -57,9 +57,9 @@ post_install() {
     make_log_folder
     
     bold=$(tput bold)
-    green=$(tput setaf 2)
+    red=$(tput setaf 1)
     normal=$(tput sgr0)
-    echo "${bold}${green}Please reboot your computer before using optimus-manager${normal}"
+    echo "${bold}${red}Please reboot your computer before using optimus-manager${normal}"
 
 }
 
@@ -73,9 +73,9 @@ post_upgrade() {
     make_log_folder
     
     bold=$(tput bold)
-    green=$(tput setaf 2)
+    red=$(tput setaf 1)
     normal=$(tput sgr0)
-    echo "${bold}${green}optimus-manager : if you are upgrading from version v0.8 or earlier, please reboot before attempting a GPU switch.${normal}"
+    echo "${bold}${red}optimus-manager : if you are upgrading from version v0.8 or earlier, please reboot before attempting a GPU switch.${normal}"
 }
 
 post_remove() {
