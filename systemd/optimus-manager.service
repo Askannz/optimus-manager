@@ -1,7 +1,9 @@
 [Unit]
 Description=Optimus Manager Commands Daemon
+Before=display-manager.service
 
 [Service]
+ExecStartPre=/usr/bin/prime-switch-boot
 ExecStart=/usr/bin/python -u /usr/bin/optimus-manager-daemon
 
 [Install]

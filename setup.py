@@ -19,8 +19,7 @@ setup(
         'console_scripts': [
             'optimus-manager=optimus_manager.optimus_manager_client:main',
             'optimus-manager-setup=optimus_manager.optimus_manager_setup:main',
-            'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main',
-            'optimus-manager-systray=optimus_manager.optimus_manager_systray:main',
+            'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main'
         ],
     },
     package_data={'optimus_manager': ['config_schema.json', 'icon/intel.png', 'icon/nvidia.png']},
