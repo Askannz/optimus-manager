@@ -92,12 +92,23 @@ def set_DPI(config):
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
-    text = "Section \"Module\"\n" \
-           "\tLoad \"modesetting\"\n" \
-           "EndSection\n\n" \
-           "Section \"Device\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDriver \"nvidia\"\n"
+    text = "Section \"Files\"\n" \
+           "\tModulePath \"/usr/lib/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
+           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
+           "EndSection\n\n"
+
+    text += "Section \"Module\"\n" \
+            "\tLoad \"modesetting\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n"
 
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
     text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
