@@ -1,70 +1,97 @@
 from optimus_manager.bash import exec_bash, BashError
-from optimus_manager.polling import poll_block
 
 
-class SessionError(Exception):
+class SessionsError(Exception):
     pass
 
 
-def terminate_current_x11_sessions():
+def logout_all_desktop_sessions():
 
-    def any_session_left(): return (len(get_x11_sessions()) != 0)
+    print("Logging out the current desktop session")
 
-    x11_sessions = get_x11_sessions()
+    # KDE Plasma
+    try:
+        exec_bash("qdbus org.kde.ksmserver /KSMServer logout 0 3 3")
+    except BashError:
+        pass
 
-    if len(x11_sessions) == 0:
-        return
+    # GNOME
+    try:
+        exec_bash("gnome-session-quit --logout --force")
+    except BashError:
+        pass
 
-    for mode in ["terminate", "sigterm", "sigkill"]:
+    # XFCE
+    try:
+        exec_bash("xfce4-session-logout --logout")
+    except BashError:
+        pass
 
-        print("%d open sessions found, terminating them manually with \"%s\"" % (len(x11_sessions), mode))
 
-        for session in x11_sessions:
-            terminate_session(session, mode)
+def is_there_a_wayland_session():
 
-        success = poll_block(any_session_left)
+    sessions_list = _get_sessions_list()
 
-        if success:
-            return
-        else:
-            x11_sessions = get_x11_sessions()
-
+    for session_id, _ in sessions_list:
+        session_type = _get_session_type(session_id)
+        if session_type == "wayland":
+            return True
     else:
-        raise SessionError("Failed to terminate loginctl x11 sessions")
+        return False
 
 
-def get_x11_sessions():
+def get_number_of_desktop_sessions(ignore_gdm=True):
 
-    try:
-        sessions_list_str = exec_bash("loginctl list-sessions --no-legend | awk '{print $1}'").stdout.decode('utf-8')[:-1]
-    except BashError as e:
-        raise SessionError("Cannot list sessions : %s" % str(e))
+    sessions_list = _get_sessions_list()
 
-    sessions = list(sessions_list_str.splitlines())
-    return list(filter(_is_x11_session, sessions))
+    count = 0
+    for session_id, username in sessions_list:
+        session_type = _get_session_type(session_id)
+        if (session_type == "wayland" or session_type == "x11") and \
+           (username != "gdm" or not ignore_gdm):
+            count += 1
 
-
-def terminate_session(session, mode="terminate"):
-
-    assert mode in ["terminate", "sigterm", "sigkill"]
-
-    try:
-        if mode == "terminate":
-            exec_bash("loginctl terminate-session %s" % session)
-        elif mode == "sigterm":
-            exec_bash("loginctl kill-session %s -s SIGTERM" % session)
-        elif mode == "sigkill":
-            exec_bash("loginctl kill-session %s -s SIGKILL" % session)
-    except BashError as e:
-        raise SessionError("Cannot kill session %s : %s" % (session, str(e)))
+    return count
 
 
-def _is_x11_session(session):
+def _get_sessions_list():
 
     try:
+        sessions_list_str = exec_bash("loginctl list-sessions --no-legend").stdout.decode('utf-8')[:-1]
+    except BashError as e:
+        raise SessionsError("Cannot list sessions : %s" % str(e))
 
-        session_info = exec_bash("loginctl show-session %s" % session).stdout.decode('utf-8')[:-1]
-        return ("Type=x11" in session_info)
+    sessions_list = []
+
+    for line in sessions_list_str.splitlines():
+
+        line_items = line.split(" ")
+
+        if len(line_items) < 3:
+            print("Warning : loginctl : cannot parse line : %s" % line)
+            continue
+
+        session_id = line_items[0]
+        username = line_items[2]
+
+        sessions_list.append((session_id, username))
+
+    return sessions_list
+
+
+def _get_session_type(session_id):
+
+    try:
+
+        session_info = exec_bash("loginctl show-session %s" % session_id).stdout.decode('utf-8')[:-1]
 
     except BashError as e:
-        raise SessionError("Error checking type of session %s : %s" % (session, str(e)))
+        raise SessionsError("Error checking type of session %s : error running loginctl : %s" % (session_id, str(e)))
+
+    for line in session_info.splitlines():
+        if "Type=" in line:
+            equal_sign_index = line.find("=")
+            session_type = line[equal_sign_index+1:]
+            return session_type
+    else:
+        raise SessionsError("Error checking type of session %s : no Type value")

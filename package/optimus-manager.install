@@ -1,0 +1,97 @@
+cleanup() {
+
+    echo "optimus-manager : removing obsolete auto-generated files left over by previous versions"
+    
+    # SDDM
+    sddm_conf=/etc/sddm.conf.d/10-optimus-manager.conf
+    if [ -f "$sddm_conf" ]; then
+        rm $sddm_conf
+    fi
+    
+    sddm_xsetup=/usr/share/sddm/scripts/Xsetup
+    if [ -f "$sddm_conf" ]; then
+        printf "#!/bin/sh\n# Xsetup - run as root before the login dialog appears\n" > "$sddm_xsetup"
+        chmod 755 "$sddm_xsetup"
+    fi
+
+    # LightDM
+    lightdm_conf=/etc/lightdm/lightdm.conf.d/10-optimus-manager.conf
+    if [ -f "$lightdm_conf" ]; then
+        rm $lightdm_conf
+    fi
+
+    # GDM
+    gdm_file_1=/usr/share/gdm/greeter/autostart/optimus-manager-xsetup.desktop
+    if [ -f "$gdm_file_1" ]; then
+        rm $gdm_file_1
+    fi
+
+    gdm_file_2=/etc/xdg/autostart/optimus-manager-xsetup.desktop
+    if [ -f "$gdm_file_2" ]; then
+        rm $gdm_file_2
+    fi
+
+    # Xorg
+    xorg_conf=/etc/X11/xorg.conf.d/10-optimus-manager.conf
+    if [ -f "$xorg_conf" ]; then
+        rm $xorg_conf
+    fi
+}
+
+make_log_folder() {
+    LOGDIR=/var/log/optimus-manager/
+    mkdir -p "$LOGDIR"
+    chmod 777 "$LOGDIR"
+}
+
+pre_install() {
+    cleanup
+}
+
+post_install() {
+
+    echo "optimus-manager : enabling optimus-manager.service"
+    mkdir -p /etc/systemd/system/graphical.target.wants/
+    ln -s /usr/lib/systemd/system/optimus-manager.service /etc/systemd/system/graphical.target.wants/optimus-manager.service
+    
+    make_log_folder
+    
+    bold=$(tput bold)
+    red=$(tput setaf 1)
+    normal=$(tput sgr0)
+    echo "${bold}${red}Please reboot your computer before using optimus-manager${normal}"
+
+}
+
+pre_upgrade() {
+    cleanup
+    
+}
+
+post_upgrade() {
+
+    make_log_folder
+    
+    bold=$(tput bold)
+    red=$(tput setaf 1)
+    normal=$(tput sgr0)
+    echo "${bold}${red}optimus-manager : if you are upgrading from version v0.8 or earlier, please reboot before attempting a GPU switch.${normal}"
+}
+
+post_remove() {
+
+	echo "optimus-manager : cleaning up auto-generated Xorg conf"
+
+    xorg_conf=/etc/X11/xorg.conf.d/10-optimus-manager.conf
+    if [ -f "$xorg_conf" ]; then
+        rm $xorg_conf
+    fi
+
+    echo "optimus-manager : disabling optimus-manager.service"
+
+    service_file_link=/etc/systemd/system/graphical.target.wants/optimus-manager.service
+    if [ -L "$service_file_link" ]; then
+        rm $service_file_link
+    fi
+
+}

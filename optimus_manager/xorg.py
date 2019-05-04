@@ -1,74 +1,41 @@
-import optimus_manager.envs as envs
-from optimus_manager.detection import get_bus_ids
-from optimus_manager.config import load_extra_xorg_options
+import os
 from optimus_manager.bash import exec_bash, BashError
-from optimus_manager.polling import poll_block
+from optimus_manager.var import read_requested_mode, VarError
+import optimus_manager.envs as envs
+from optimus_manager.pci import get_bus_ids
+from optimus_manager.config import load_extra_xorg_options
+from optimus_manager import manjaro_hacks
 
 
-class XorgError(Exception):
+class XorgSetupError(Exception):
     pass
 
 
-def configure_xorg(config, mode):
+def configure_xorg(config, requested_gpu_mode):
 
     bus_ids = get_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
-    if mode == "nvidia":
+    if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif mode == "intel":
+    elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
 
+    manjaro_hacks.remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
 
 
-def get_xorg_servers_pids():
+def cleanup_xorg_conf():
 
     try:
-        x_pids = exec_bash("pidof X").stdout
-    except BashError:
-        x_pids = ""
-
-    try:
-        xorg_pids = exec_bash("pidof Xorg").stdout
-    except BashError:
-        xorg_pids = ""
-
-    pids_str_list = (x_pids.split() + xorg_pids.split())
-
-    return [int(p_str) for p_str in pids_str_list]
+        os.remove(envs.XORG_CONF_PATH)
+        print("Removed %s" % envs.XORG_CONF_PATH)
+    except FileNotFoundError:
+        pass
 
 
-def kill_current_xorg_servers():
+def is_xorg_running():
 
-    pids_list = get_xorg_servers_pids()
-
-    if len(pids_list) == 0:
-        return
-
-    for signal in ["SIGTERM", "SIGKILL"]:
-
-        if len(pids_list) > 0:
-            print("There are %d X11 servers remaining, terminating them manually with %s" % (len(pids_list), signal))
-
-        for pid in pids_list:
-            try:
-                exec_bash("kill -s %s %d" % (signal, pid))
-            except BashError:
-                pass
-
-        success = poll_block(_is_xorg_running)
-
-        if success:
-            return
-        else:
-            pids_list = get_xorg_servers_pids()
-
-    if not success:
-        raise XorgError("Failed to kill all X11 servers")
-
-
-def _is_xorg_running():
     try:
         exec_bash("pidof X")
         return True
@@ -84,14 +51,64 @@ def _is_xorg_running():
     return False
 
 
+def is_there_a_default_xorg_conf_file():
+    return os.path.isfile("/etc/X11/xorg.conf")
+
+
+def is_there_a_MHWD_file():
+    return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
+
+
+def setup_PRIME():
+
+    try:
+        requested_mode = read_requested_mode()
+    except VarError as e:
+        raise XorgSetupError("Cannot setup PRIME : cannot read requested mode : %s" % str(e))
+
+    if requested_mode == "nvidia":
+
+        print("Nvidia mode requested, running xrandr...")
+
+        try:
+            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+            exec_bash("xrandr --auto")
+        except BashError as e:
+            raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
+
+
+def set_DPI(config):
+
+    dpi_str = config["nvidia"]["DPI"]
+
+    if dpi_str == "":
+        return
+
+    try:
+        exec_bash("xrandr --dpi %s" % dpi_str)
+    except BashError as e:
+        raise XorgSetupError("Cannot set DPI : %s" % str(e))
+
+
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
-    text = "Section \"Module\"\n" \
-           "\tLoad \"modesetting\"\n" \
-           "EndSection\n\n" \
-           "Section \"Device\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDriver \"nvidia\"\n"
+    text = "Section \"Files\"\n" \
+           "\tModulePath \"/usr/lib/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
+           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
+           "EndSection\n\n"
+
+    text += "Section \"Module\"\n" \
+            "\tLoad \"modesetting\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n"
 
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
     text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
@@ -103,9 +120,6 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
     if "triple_buffer" in options:
         text += "\tOption \"TripleBuffer\" \"true\"\n"
-
-    dri = int(config["nvidia"]["DRI"])
-    text += "\tOption \"DRI\" \"%d\"\n" % dri
 
     if "nvidia" in xorg_extra.keys():
         for line in xorg_extra["nvidia"]:
@@ -121,7 +135,11 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n"
 
-    text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
+    if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
+        print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
+        text += "\tDriver \"modesetting\"\n"
+    else:
+        text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
 
@@ -148,6 +166,11 @@ def _write_xorg_conf(xorg_conf_text):
 
     try:
         with open(envs.XORG_CONF_PATH, 'w') as f:
+            print("Writing to %s" % envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
     except IOError:
-        raise XorgError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+        raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+
+
+def _is_intel_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
