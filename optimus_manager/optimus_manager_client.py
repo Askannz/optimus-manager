@@ -72,19 +72,24 @@ def main():
         _check_MHWD_conf()
         _check_intel_xorg_module(config, switch_mode)
 
-        if args.no_confirm:
-            gpu_switch(config, switch_mode)
-        else:
-            print("You are about to switch GPUs. This will forcibly close all graphical sessions"
-                  " and all your applications WILL CLOSE.\n"
-                  "(you can pass the --no-confirm option to disable this warning)\n"
-                  "Continue ? (y/N)")
-
-            confirmation = _ask_confirmation()
-            if confirmation:
+        if config["optimus"]["auto_logout"] == "yes":
+            if args.no_confirm:
                 gpu_switch(config, switch_mode)
             else:
-                sys.exit(0)
+                print("You are about to switch GPUs. This will forcibly close all graphical sessions"
+                      " and all your applications WILL CLOSE.\n"
+                      "(you can pass the --no-confirm option to disable this warning)\n"
+                      "Continue ? (y/N)")
+
+                confirmation = _ask_confirmation()
+                if confirmation:
+                    gpu_switch(config, switch_mode)
+                else:
+                    sys.exit(0)
+
+        else:
+            gpu_switch(config, switch_mode)
+            print("Please logout all graphical sessions then log back in to apply the change.")
 
         sys.exit(0)
 
