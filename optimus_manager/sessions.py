@@ -7,7 +7,7 @@ class SessionsError(Exception):
 
 def logout_all_desktop_sessions():
 
-    print("Logging out any open desktop session")
+    print("Logging out the current desktop session")
 
     # KDE Plasma
     try:
