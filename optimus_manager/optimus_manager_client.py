@@ -8,7 +8,7 @@ import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
-from optimus_manager.sessions import logout_all_desktop_sessions, is_there_a_wayland_session, SessionsError
+import optimus_manager.sessions as sessions
 
 
 def main():
@@ -71,6 +71,7 @@ def main():
         _check_xorg_conf()
         _check_MHWD_conf()
         _check_intel_xorg_module(config, switch_mode)
+        _check_number_of_sessions()
 
         if config["optimus"]["auto_logout"] == "yes":
             if args.no_confirm:
@@ -109,7 +110,7 @@ def gpu_switch(config, switch_mode):
     _send_command(switch_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
-        logout_all_desktop_sessions()
+        sessions.logout_all_desktop_sessions()
 
 
 def _get_config():
@@ -225,8 +226,8 @@ def _check_nvidia_module(switch_mode):
 def _check_wayland():
 
     try:
-        wayland_session_present = is_there_a_wayland_session()
-    except SessionsError as e:
+        wayland_session_present = sessions.is_there_a_wayland_session()
+    except sessions.SessionsError as e:
         print("ERROR : cannot check for Wayland session : %s" % str(e))
         return
 
@@ -311,6 +312,21 @@ def _check_intel_xorg_module(config, switch_mode):
               " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
               " the package \"xf86-video-intel.\"\n"
               "Continue ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_number_of_sessions():
+
+    nb_desktop_sessions = sessions.get_number_of_desktop_sessions(ignore_gdm=True)
+
+    if nb_desktop_sessions > 1:
+        print("WARNING : There are %d other(s) desktop sessions open. The GPU switch will not become effective until you have manually"
+              " logged out from ALL desktop sessions.\n"
+              "Continue ? (y/N)" % (nb_desktop_sessions - 1))
 
         confirmation = _ask_confirmation()
 
