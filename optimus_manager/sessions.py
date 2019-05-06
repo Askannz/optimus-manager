@@ -65,7 +65,7 @@ def _get_sessions_list():
 
     for line in sessions_list_str.splitlines():
 
-        line_items = line.split(" ")
+        line_items = line.split()
 
         if len(line_items) < 3:
             print("Warning : loginctl : cannot parse line : %s" % line)
@@ -94,4 +94,4 @@ def _get_session_type(session_id):
             session_type = line[equal_sign_index+1:]
             return session_type
     else:
-        raise SessionsError("Error checking type of session %s : no Type value")
+        raise SessionsError("Error checking type of session %s : no Type value" % session_id)
