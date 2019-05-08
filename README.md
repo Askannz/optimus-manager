@@ -1,6 +1,8 @@
 optimus-manager
 ==================
 
+**IMPORTANT :** this README is for version v1.0, which has not been officially released yet. If you are still using the previous version (v0.8), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v0.8-README
+
 This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU configuration).
 
 Obviously this is unofficial, I am not affiliated with Nvidia in any way.
