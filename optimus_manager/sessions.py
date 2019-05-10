@@ -5,7 +5,7 @@ class SessionsError(Exception):
     pass
 
 
-def logout_all_desktop_sessions():
+def logout_current_desktop_session():
 
     print("Logging out the current desktop session")
 
