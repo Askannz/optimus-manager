@@ -46,6 +46,8 @@ package() {
   install -Dm644 systemd/optimus-manager.service "$pkgdir/usr/lib/systemd/system/optimus-manager.service"
   install -Dm644 optimus-manager.conf "$pkgdir/usr/share/optimus-manager.conf"
   
+  install -Dm644 systemd/logind/10-optimus-manager.conf "$pkgdir/usr/lib/systemd/logind.conf.d/10-optimus-manager.conf"
+  
   install -Dm644 var/startup_mode "$pkgdir/var/lib/optimus-manager/startup_mode"
   install -Dm644 var/requested_mode "$pkgdir/var/lib/optimus-manager/requested_mode"
   
