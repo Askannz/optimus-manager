@@ -110,7 +110,7 @@ def gpu_switch(config, switch_mode):
     _send_command(switch_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
-        sessions.logout_all_desktop_sessions()
+        sessions.logout_current_desktop_session()
 
 
 def _get_config():
