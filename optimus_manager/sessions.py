@@ -12,16 +12,25 @@ def logout_current_desktop_session():
     session_bus = dbus.SessionBus()
 
     # KDE Plasma
-    kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
-    kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
+    try:
+        kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
+        kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
+    except dbus.exceptions.DBusException:
+        pass
 
     # GNOME
-    gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
-    gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
+    try:
+        gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
+        gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
+    except dbus.exceptions.DBusException:
+        pass
 
     # XFCE
-    xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
-    xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
+    try:
+        xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
+        xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
+    except dbus.exceptions.DBusException:
+        pass
 
 
 def is_there_a_wayland_session():
