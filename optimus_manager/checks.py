@@ -86,9 +86,9 @@ def _is_service_active(service_name):
 
     systemd = system_bus.get_object("org.freedesktop.systemd1", "/org/freedesktop/systemd1")
 
-    unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
-
-    if len(unit_path) == 0:
+    try:
+        unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
+    except dbus.exceptions.DBusException:
         return False
 
     optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
