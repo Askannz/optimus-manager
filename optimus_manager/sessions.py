@@ -1,3 +1,4 @@
+import dbus
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -9,23 +10,19 @@ def logout_current_desktop_session():
 
     print("Logging out the current desktop session")
 
+    session_bus = dbus.SessionBus()
+
     # KDE Plasma
-    try:
-        exec_bash("qdbus org.kde.ksmserver /KSMServer logout 0 3 3")
-    except BashError:
-        pass
+    kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
+    kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
 
     # GNOME
-    try:
-        exec_bash("gnome-session-quit --logout --force")
-    except BashError:
-        pass
+    gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
+    gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
 
     # XFCE
-    try:
-        exec_bash("xfce4-session-logout --logout")
-    except BashError:
-        pass
+    xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
+    xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
 
 
 def is_there_a_wayland_session():
