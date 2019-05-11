@@ -1,4 +1,5 @@
 import os
+import dbus
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -81,9 +82,17 @@ def is_bumblebeed_service_active():
 
 def _is_service_active(service_name):
 
-    try:
-        state = exec_bash("systemctl is-active %s.service" % service_name).stdout.decode('utf-8')[:-1]
-    except BashError:
+    system_bus = dbus.SystemBus()
+
+    systemd = system_bus.get_object("org.freedesktop.systemd1", "/org/freedesktop/systemd1")
+
+    unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
+
+    if len(unit_path) == 0:
         return False
-    else:
-        return (state == "active")
+
+    optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
+    properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
+    state = properties_manager.Get("org.freedesktop.systemd1.Unit", "SubState")
+
+    return (state == "running")
