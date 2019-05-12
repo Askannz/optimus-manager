@@ -68,13 +68,27 @@ def setup_PRIME():
 
     if requested_mode == "nvidia":
 
-        print("Nvidia mode requested, running xrandr...")
+        print("Running xrandr commands")
 
         try:
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
             exec_bash("xrandr --auto")
         except BashError as e:
             raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
+
+        print("Running %s" % envs.XSETUP_SCRIPT_NVIDIA)
+        try:
+            exec_bash(envs.XSETUP_SCRIPT_NVIDIA)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_NVIDIA, str(e)))
+
+    elif requested_mode == "intel":
+
+        print("Running %s" % envs.XSETUP_SCRIPT_INTEL)
+        try:
+            exec_bash(envs.XSETUP_SCRIPT_INTEL)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
 
 
 def set_DPI(config):
