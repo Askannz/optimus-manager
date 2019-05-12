@@ -18,6 +18,9 @@ USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/xorg-intel.conf"
 EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
 
+XSETUP_SCRIPT_INTEL = "/etc/optimus-manager/xsetup-intel.sh"
+XSETUP_SCRIPT_NVIDIA = "/etc/optimus-manager/xsetup-nvidia.sh"
+
 LOG_DIR_PATH = "/var/log/optimus-manager/"
 BOOT_SETUP_LOGFILE_NAME = "boot_setup.log"
 PRIME_SETUP_LOGFILE_NAME = "prime_setup.log"
