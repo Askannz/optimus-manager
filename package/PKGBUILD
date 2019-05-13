@@ -8,7 +8,7 @@ arch=('any')
 url="https://github.com/Askannz/optimus-manager"
 license=('MIT')
 conflicts=("optimus-manager")
-provides=("optimus-manager")
+provides=("optimus-manager=$pkgver")
 depends=('python' 'python-setuptools' 'python-dbus' 'mesa-demos' 'xorg-xrandr')
 optdepends=('bbswitch: alternative power switching method'
             'xf86-video-intel: provides the Xorg intel driver')
