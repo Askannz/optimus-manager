@@ -324,7 +324,7 @@ def _check_number_of_sessions():
     nb_desktop_sessions = sessions.get_number_of_desktop_sessions(ignore_gdm=True)
 
     if nb_desktop_sessions > 1:
-        print("WARNING : There are %d other(s) desktop sessions open. The GPU switch will not become effective until you have manually"
+        print("WARNING : There are %d other desktop sessions open. The GPU switch will not become effective until you have manually"
               " logged out from ALL desktop sessions.\n"
               "Continue ? (y/N)" % (nb_desktop_sessions - 1))
 
