@@ -120,4 +120,4 @@ See the [FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-commo
 
 Credit
 ----------
-The Intel and Nvidia logos are from the [FlatWoken project](https://github.com/alecive/FlatWoken) created by Alessandro Roncone.
+The Qt tray app was created by [Shatur95](https://github.com/Shatur95).
