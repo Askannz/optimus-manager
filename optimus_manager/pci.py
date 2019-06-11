@@ -1,3 +1,5 @@
+import re
+
 from optimus_manager.bash import exec_bash, BashError
 
 NVIDIA_VENDOR_ID = "10de"
@@ -31,9 +33,13 @@ def get_bus_ids(notation_fix=True):
 
         bus_id = items[0]
 
-        # Notation quirk
         if notation_fix:
-            bus_id = bus_id.replace(".", ":")
+            # Xorg expects bus IDs separated by colons in decimal instead of
+            # hexadecimal format without any leading zeroes and prefixed with
+            # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            bus_id = "PCI:" + ":".join(
+                str(int(field, 16)) for field in re.split("[.:]", bus_id)
+            )
 
         pci_class = items[1]
         vendor_id, product_id = items[2].split(":")
