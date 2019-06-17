@@ -169,7 +169,7 @@ def _print_startup_mode_and_exit():
 
     if kernel_parameters["startup_mode"] is not None:
         print("\nNote : the startup mode for the current boot was set to \"%s\" with"
-              " a kernel parameter. Kernel parameters override value above." % kernel_parameters["startup_mode"])
+              " a kernel parameter. Kernel parameters override the value above.\n" % kernel_parameters["startup_mode"])
 
     sys.exit(0)
 
