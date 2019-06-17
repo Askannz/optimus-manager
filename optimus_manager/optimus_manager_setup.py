@@ -4,7 +4,8 @@ import time
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import read_startup_mode, read_requested_mode, write_requested_mode, VarError
+import optimus_manager.var as var
+from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
@@ -84,11 +85,22 @@ def _get_config():
 
 def _get_startup_mode():
 
-    try:
-        startup_mode = read_startup_mode()
-    except VarError as e:
-        print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-        startup_mode = envs.DEFAULT_STARTUP_MODE
+    kernel_parameters = get_kernel_parameters()
+
+    if kernel_parameters["startup_mode"] is None:
+
+        print("No kernel parameter set for startup, reading from file")
+
+        try:
+            startup_mode = var.read_startup_mode()
+        except var.VarError as e:
+            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+            startup_mode = envs.DEFAULT_STARTUP_MODE
+
+    else:
+
+        print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
+        startup_mode = kernel_parameters["startup_mode"]
 
     return startup_mode
 
@@ -97,17 +109,17 @@ def _write_gpu_mode(config, mode):
 
     try:
         print("Writing requested mode")
-        write_requested_mode(mode)
+        var.write_requested_mode(mode)
 
-    except VarError as e:
+    except var.VarError as e:
         print("Cannot write requested mode : %s" % str(e))
 
 
 def _get_requested_mode():
 
     try:
-        requested_mode = read_requested_mode()
-    except VarError as e:
+        requested_mode = var.read_requested_mode()
+    except var.VarError as e:
         print("Cannot read requested mode : %s" % str(e))
         sys.exit(1)
 
