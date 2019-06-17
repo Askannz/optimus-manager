@@ -6,6 +6,7 @@ import socket
 import optimus_manager.envs as envs
 import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
+from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 import optimus_manager.sessions as sessions
@@ -156,13 +157,20 @@ def _print_next_mode_and_exit():
 
 def _print_startup_mode_and_exit():
 
+    kernel_parameters = get_kernel_parameters()
+
     try:
         startup_mode = read_startup_mode()
     except VarError as e:
         print("Error reading startup mode : %s" % str(e))
         sys.exit(1)
 
-    print("Current startup GPU mode : %s" % startup_mode)
+    print("GPU mode for next startup : %s" % startup_mode)
+
+    if kernel_parameters["startup_mode"] is not None:
+        print("\nNote : the startup mode for the current boot was set to \"%s\" with"
+              " a kernel parameter. Kernel parameters override value above." % kernel_parameters["startup_mode"])
+
     sys.exit(0)
 
 
