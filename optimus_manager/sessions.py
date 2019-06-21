@@ -1,4 +1,5 @@
 import dbus
+from optimus_manager.bash import exec_bash, BashError
 
 
 class SessionsError(Exception):
@@ -37,6 +38,12 @@ def logout_current_desktop_session():
         deepin = session_bus.get_object('com.deepin.SessionManager', '/com/deepin/SessionManager')
         deepin.RequestLogout()
     except dbus.exceptions.DBusException:
+        pass
+
+    # i3
+    try:
+        exec_bash("i3-msg exit")
+    except BashError:
         pass
 
 
