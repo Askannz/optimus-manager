@@ -32,6 +32,14 @@ def logout_current_desktop_session():
     except dbus.exceptions.DBusException:
         pass
 
+    # Deepin
+    try:
+        deepin = session_bus.get_object('com.deepin.SessionManager', '/com/deepin/SessionManager')
+        deepin.RequestLogout()
+    except dbus.exceptions.DBusException:
+        pass
+
+
 
 def is_there_a_wayland_session():
 
