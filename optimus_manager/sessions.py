@@ -10,35 +10,38 @@ def logout_current_desktop_session():
 
     print("Logging out the current desktop session")
 
-    session_bus = dbus.SessionBus()
-
-    # KDE Plasma
     try:
-        kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
-        kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
+        session_bus = dbus.SessionBus()
     except dbus.exceptions.DBusException:
         pass
+    else:
+        # KDE Plasma
+        try:
+            kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
+            kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
+        except dbus.exceptions.DBusException:
+            pass
 
-    # GNOME
-    try:
-        gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
-        gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
-    except dbus.exceptions.DBusException:
-        pass
+        # GNOME
+        try:
+            gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
+            gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
+        except dbus.exceptions.DBusException:
+            pass
 
-    # XFCE
-    try:
-        xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
-        xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
-    except dbus.exceptions.DBusException:
-        pass
+        # XFCE
+        try:
+            xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
+            xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
+        except dbus.exceptions.DBusException:
+            pass
 
-    # Deepin
-    try:
-        deepin = session_bus.get_object('com.deepin.SessionManager', '/com/deepin/SessionManager')
-        deepin.RequestLogout()
-    except dbus.exceptions.DBusException:
-        pass
+        # Deepin
+        try:
+            deepin = session_bus.get_object('com.deepin.SessionManager', '/com/deepin/SessionManager')
+            deepin.RequestLogout()
+        except dbus.exceptions.DBusException:
+            pass
 
     # i3
     try:

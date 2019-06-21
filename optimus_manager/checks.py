@@ -82,7 +82,15 @@ def is_bumblebeed_service_active():
 
 def _is_service_active(service_name):
 
-    system_bus = dbus.SystemBus()
+    try:
+        system_bus = dbus.SystemBus()
+    except dbus.exceptions.DBusException:
+        print("WARNING : Cannot communicate with the DBus system bus to check status of %s. Is DBus running ? Falling back to bash commands" % service_name)
+        return _is_service_active_bash(service_name)
+    else:
+        return _is_service_active_dbus(system_bus, service_name)
+
+def _is_service_active_dbus(system_bus, service_name):
 
     systemd = system_bus.get_object("org.freedesktop.systemd1", "/org/freedesktop/systemd1")
 
@@ -96,3 +104,13 @@ def _is_service_active(service_name):
     state = properties_manager.Get("org.freedesktop.systemd1.Unit", "SubState")
 
     return (state == "running")
+
+
+def _is_service_active_bash(service_name):
+
+    try:
+        exec_bash("systemctl is-active %s" % service_name)
+    except BashError:
+        return False
+    else:
+        return True
