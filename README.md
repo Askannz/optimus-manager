@@ -100,6 +100,14 @@ AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-ma
 
 A Gnome Shell extension is also available here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
 
+#### Kernel parameter
+
+As an alternative to the `--set-startup` command, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
+
+Simply add `optimus-manager.startup=intel` or `optimus-manager.startup=nvidia` to your kernel parameters list. Note that this parameter overrides whatever startup mode was set with `optimus-manager --set-startup`.
+
+Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
+
 Configuration
 ----------
 
