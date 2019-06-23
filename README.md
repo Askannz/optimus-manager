@@ -81,7 +81,7 @@ Run
 
 *WARNING :* Switching GPUs automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-You can disable auto-logout in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin and i3. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
 You can also specify which GPU you want to be used by default when the system boots :
 
