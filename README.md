@@ -69,7 +69,7 @@ To uninstall the program, simply remove the `optimus-manager` package. The auto-
 
 You can also force cleanup by running `optimus-manager --cleanup`.
 
-Not that simply disabling the daemon will not prevent `optimus-manager` from running, as most of the GPU setup process happens in scripts directly run by the login manager.
+You can also disable optimus-manager by disabling the systemd service `optimus-manager.service` (needs a reboot to be applied).
 
 Usage
 ----------
