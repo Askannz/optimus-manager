@@ -60,6 +60,8 @@ After reboot, the optimus-manager daemon should have been started automatically,
 
 * **Bumblebee :** optimus-manager is incompatible with Bumblebee since both tools would be trying to control GPU power switching at the same time. If Bumblebee is installed, you must disable its daemon (`sudo systemctl disable bumblebeed.service`, then reboot). This is particularly important for Manjaro users since Bumblebee is installed by default.
 
+* **GPU monitoring apps** : if you have an application (or tray widget) that automatically monitors the Nvidia GPU for things like load, temperature, VRAM usage, etc, make sure it is not running before switching to Intel mode. Those applications work by constantly polling the nvidia driver, which may prevent it from being unloaded by optimus-manager.
+
 Uninstallation
 ----------
 
