@@ -69,7 +69,7 @@ To uninstall the program, simply remove the `optimus-manager` package. The auto-
 
 You can also force cleanup by running `optimus-manager --cleanup`.
 
-Not that simply disabling the daemon will not prevent `optimus-manager` from running, as most of the GPU setup process happens in scripts directly run by the login manager.
+You can also disable optimus-manager by disabling the systemd service `optimus-manager.service` (needs a reboot to be applied).
 
 Usage
 ----------
@@ -81,7 +81,7 @@ Run
 
 *WARNING :* Switching GPUs automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-You can disable auto-logout in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin and i3. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
 You can also specify which GPU you want to be used by default when the system boots :
 
@@ -99,6 +99,14 @@ The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt)
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
 A Gnome Shell extension is also available here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+
+#### Kernel parameter
+
+As an alternative to the `--set-startup` command, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
+
+Simply add `optimus-manager.startup=intel` or `optimus-manager.startup=nvidia` to your kernel parameters list. Note that this parameter overrides whatever startup mode was set with `optimus-manager --set-startup`.
+
+Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
 Configuration
 ----------
