@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from os.path import dirname, join
 from setuptools import setup
 from optimus_manager import __version__

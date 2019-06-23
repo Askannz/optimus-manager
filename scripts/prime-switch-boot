@@ -1,5 +1,5 @@
 #!/bin/bash
 
-/usr/bin/python -u /usr/bin/optimus-manager-setup --setup-boot 2>&1 | tee -a /var/log/optimus-manager/boot_setup.log
+/usr/bin/python3 -u /usr/bin/optimus-manager-setup --setup-boot 2>&1 | tee -a /var/log/optimus-manager/boot_setup.log
 
  
