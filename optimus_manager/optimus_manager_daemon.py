@@ -8,11 +8,15 @@ import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
+from optimus_manager.logging import crop_logs
 
 
 def main():
 
     print("Optimus Manager (Daemon) version %s" % envs.VERSION)
+
+    print("Automatic log cropping")
+    crop_logs()
 
     print("Loading config file")
     config = _get_config()

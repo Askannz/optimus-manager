@@ -25,3 +25,6 @@ LOG_DIR_PATH = "/var/log/optimus-manager/"
 BOOT_SETUP_LOGFILE_NAME = "boot_setup.log"
 PRIME_SETUP_LOGFILE_NAME = "prime_setup.log"
 GPU_SETUP_LOGFILE_NAME = "gpu_setup.log"
+LOGGING_SEPARATOR_SUFFIX = " ==================== "
+LOG_MAX_SIZE = 20000
+LOG_CROPPED_SIZE = 10000

@@ -9,6 +9,7 @@ from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
+from optimus_manager.logging import print_timestamp_separator
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
 
     args = parser.parse_args()
 
-    _print_timestamp_separator()
+    print_timestamp_separator()
     print("Optimus Manager (Setup script) version %s" % envs.VERSION)
 
     if args.setup_boot:
@@ -174,12 +175,6 @@ def _set_DPI(config):
         set_DPI(config)
     except XorgSetupError as e:
         print("Error : cannot set DPI value : %s" % str(e))
-
-
-def _print_timestamp_separator():
-
-    time_str = time.strftime("%Y-%m-%d %I:%M:%S %p %z ")
-    print("\n" + time_str + ("=" * 20) + "\n")
 
 
 if __name__ == '__main__':
