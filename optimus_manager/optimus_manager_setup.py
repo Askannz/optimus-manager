@@ -9,6 +9,7 @@ from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
+from optimus_manager.checks import is_daemon_active
 from optimus_manager.logging import print_timestamp_separator
 
 
@@ -53,6 +54,9 @@ def main():
     elif args.setup_prime:
         print("Setting up PRIME")
 
+        print("Checking status of optimus-manager.service")
+        _abort_if_service_inactive()
+
         print("Loading config")
         config = _get_config()
 
@@ -61,6 +65,9 @@ def main():
 
     elif args.setup_gpu:
         print("Setting up the GPU")
+
+        print("Checking status of optimus-manager.service")
+        _abort_if_service_inactive()
 
         print("Cleaning up leftover Xorg conf")
         cleanup_xorg_conf()
@@ -71,6 +78,11 @@ def main():
         requested_mode = _get_requested_mode()
         print("Requested mode :", requested_mode)
         _setup_gpu(config, requested_mode)
+
+def _abort_if_service_inactive():
+    if not is_daemon_active():
+        print("ERROR : the optimus-manager service is not running. Aborting.")
+        sys.exit(0)
 
 
 def _get_config():
