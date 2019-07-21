@@ -48,6 +48,12 @@ def logout_current_desktop_session():
         exec_bash("i3-msg exit")
     except BashError:
         pass
+    
+    # openbox
+    try:
+        exec_bash("openbox --exit")
+    except BashError:
+        pass
 
 
 
