@@ -89,7 +89,7 @@ You can also specify which GPU you want to be used by default when the system bo
 optimus-manager --set-startup MODE
 ```
 
-Where `MODE` can be `intel`, `nvidia`, or `nvidia_once`. The last one is a special mode which makes your system use the Nvidia GPU at boot, but for one boot only. After that it reverts to `intel` mode. This can be useful to test your Nvidia configuration and make sure you do not end up with an unusable X server.
+Where `MODE` can be `intel`, `nvidia`.
 
 #### System Tray App
 
