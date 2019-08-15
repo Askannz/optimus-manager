@@ -61,7 +61,7 @@ def read_startup_mode():
             if len(content) > 0 and content[-1] == "\n":
                 content = content[:-1]
 
-            if content in ["intel", "nvidia", "nvidia_once"]:
+            if content in ["intel", "nvidia"]:
                 mode = content
             else:
                 raise VarError("Invalid value : %s" % content)
@@ -73,7 +73,7 @@ def read_startup_mode():
 
 def write_startup_mode(mode):
 
-    assert mode in ["intel", "nvidia", "nvidia_once"]
+    assert mode in ["intel", "nvidia"]
 
     folder_path, filename = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 

@@ -90,8 +90,6 @@ def _process_command(config, msg):
         _write_startup_mode("nvidia")
     elif msg == "startup_intel":
         _write_startup_mode("intel")
-    elif msg == "startup_nvidia_once":
-        _write_startup_mode("nvidia_once")
     else:
         print("Invalid command !")
 
