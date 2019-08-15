@@ -31,7 +31,7 @@ def main():
                              "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia, nvidia_once (starts with Nvidia and reverts to Intel for the next boot)")
+                             "intel, nvidia")
 
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation and skip all warnings when switching GPUs.")
@@ -374,7 +374,7 @@ def _send_command(cmd):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia", "nvidia_once"]:
+    if startup_arg not in ["intel", "nvidia"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 
