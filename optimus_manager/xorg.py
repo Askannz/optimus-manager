@@ -16,8 +16,6 @@ def configure_xorg(config, requested_gpu_mode):
     bus_ids = get_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
-    print(requested_gpu_mode)
-
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "intel":
@@ -207,8 +205,6 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
 
     text += "EndSection\n"
-
-    print(text)
 
     return text
 
