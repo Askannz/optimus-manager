@@ -9,7 +9,7 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, requested_gpu_mode):
 
-    assert requested_gpu_mode in ["intel", "nvidia"]
+    assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
 
     if requested_gpu_mode == "intel":
         _unload_nvidia_modules(config)
@@ -18,7 +18,10 @@ def setup_kernel_state(config, requested_gpu_mode):
     elif requested_gpu_mode == "nvidia":
         _power_switch_on(config)
         _load_nvidia_modules(config)
-
+        
+    elif requested_gpu_mode == "hybrid":
+        _power_switch_on(config)
+        _load_nvidia_modules(config)
 
 def _load_nvidia_modules(config):
 
