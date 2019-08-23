@@ -153,6 +153,8 @@ def _setup_gpu(config, requested_mode):
 
     except XorgSetupError as e:
         print("Cannot setup GPU : Xorg setup error : %s" % str(e))
+        print("Cleaning up Xorg config and exiting.")
+        cleanup_xorg_conf()
         sys.exit(1)
 
 
