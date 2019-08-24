@@ -106,6 +106,8 @@ def set_DPI(config):
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
+    options = config["nvidia"]["options"].replace(" ", "").split(",")
+
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
            "\tModulePath \"/usr/lib32/nvidia\"\n" \
@@ -116,62 +118,69 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
            "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
            "EndSection\n\n"
 
-    text += "Section \"Module\"\n" \
-            "\tLoad \"modesetting\"\n" \
+    text += "Section \"ServerLayout\"\n" \
+            "\tIdentifier \"layout\"\n" \
+            "\tScreen 0 \"nvidia\"\n" \
+            "\tInactive \"intel\"\n" \
             "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
             "\tIdentifier \"nvidia\"\n" \
             "\tDriver \"nvidia\"\n"
-
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
-    text += "\tOption \"AllowEmptyInitialConfiguration\"\n"
-
-    options = config["nvidia"]["options"].replace(" ", "").split(",")
-
     if "overclocking" in options:
         text += "\tOption \"Coolbits\" \"28\"\n"
-
     if "triple_buffer" in options:
         text += "\tOption \"TripleBuffer\" \"true\"\n"
-
     if "nvidia" in xorg_extra.keys():
         for line in xorg_extra["nvidia"]:
             text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
 
-    text += "EndSection\n"
+    text += "Section \"Screen\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDevice \"nvidia\"\n" \
+            "\tOption \"AllowEmptyInitialConfiguration\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"intel\"\n" \
+            "\tDriver \"modesetting\"\n"
+    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+    text += "EndSection\n\n"
+
+    text += "Section \"Screen\"\n" \
+            "\tIdentifier \"intel\"\n" \
+            "\tDevice \"intel\"\n" \
+            "EndSection\n\n"
 
     return text
 
 
 def _generate_intel(config, bus_ids, xorg_extra):
 
-    text = "Section \"Device\"\n" \
-           "\tIdentifier \"intel\"\n"
-
     if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
         print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
-        text += "\tDriver \"modesetting\"\n"
+        driver = "modesetting"
     else:
-        text += "\tDriver \"%s\"\n" % config["intel"]["driver"]
-
-    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
-
-    if config["intel"]["accel"] != "":
-        text += "\tOption \"AccelMethod\" \"%s\"\n" % config["intel"]["accel"]
-
-    if config["intel"]["tearfree"] != "":
-        bool_str = {"yes": "true", "no": "false"}[config["intel"]["tearfree"]]
-        text += "\tOption \"TearFree\" \"%s\"\n" % bool_str
+        driver = config["intel"]["driver"]
 
     dri = int(config["intel"]["DRI"])
-    text += "\tOption \"DRI\" \"%d\"\n" % dri
 
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"intel\"\n"
+    text += "\tDriver \"%s\"\n" % driver
+    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+    if config["intel"]["accel"] != "":
+        text += "\tOption \"AccelMethod\" \"%s\"\n" % config["intel"]["accel"]
+    if config["intel"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["intel"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
     if "intel" in xorg_extra.keys():
         for line in xorg_extra["intel"]:
             text += ("\t" + line + "\n")
-
-    text += "EndSection\n"
+    text += "EndSection\n\n"
 
     return text
 
