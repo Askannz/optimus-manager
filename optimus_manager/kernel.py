@@ -17,6 +17,8 @@ def setup_kernel_state(config, requested_gpu_mode):
 
     elif requested_gpu_mode == "nvidia":
         _power_switch_on(config)
+        if config["optimus"]["pci_reset"] == "yes":
+            _reset_PCI_nvidia()
         _load_nvidia_modules(config)
 
 
@@ -164,3 +166,13 @@ def _set_PCI_power_mode(requested_gpu_state):
         pci.set_power_management((requested_gpu_state == "OFF"))
     except pci.PCIError as e:
         print("WARNING : Cannot set PCI power management : %s" % str(e))
+
+def _reset_PCI_nvidia():
+
+    for module_name in ["bbswitch", "nouveau", "nvidia", "nvidia_modeset", "nvidia_drm"]:
+        if checks.is_module_loaded(module_name):
+            print("WARNING : module %s is still loaded, not performing PCI reset action." % module_name)
+            return
+
+    print("Resetting Nvidia PCI device")
+    pci.reset_nvidia()

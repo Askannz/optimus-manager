@@ -43,6 +43,14 @@ def is_module_available(module_name):
     else:
         return True
 
+def is_module_loaded(module_name):
+
+    try:
+        exec_bash("lsmod | grep -E \"^%s \"" % module_name)
+    except BashError:
+        return False
+    else:
+        return True
 
 def get_current_display_manager():
 

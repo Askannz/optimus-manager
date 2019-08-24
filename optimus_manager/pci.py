@@ -13,9 +13,12 @@ class PCIError(Exception):
 def set_power_management(enabled):
 
     if enabled:
-        _set_mode("auto")
+        _write_to_pci("power/control", "auto")
     else:
-        _set_mode("on")
+        _write_to_pci("power/control", "on")
+
+def reset_nvidia():
+    _write_to_pci("reset", "1")
 
 
 def get_bus_ids(notation_fix=True):
@@ -67,14 +70,14 @@ def get_bus_ids(notation_fix=True):
     return bus_ids
 
 
-def _set_mode(mode):
+def _write_to_pci(relative_path, string):
 
     bus_ids = get_bus_ids(notation_fix=False)
-    pci_path = "/sys/bus/pci/devices/0000:%s/power/control" % bus_ids["nvidia"]
+    pci_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
 
     try:
         with open(pci_path, "w") as f:
-            f.write(mode)
+            f.write(string)
     except FileNotFoundError:
         raise PCIError("Cannot find Nvidia PCI path at %s" % pci_path)
     except IOError:
