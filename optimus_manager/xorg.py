@@ -190,30 +190,32 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
 
     text = "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"iGPU\"\n" \
+           "\tScreen 0 \"intel\"\n" \
+           "\tInactive \"nvidia\"\n" \
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
-            "\tIdentifier \"iGPU\"\n" \
+            "\tIdentifier \"intel\"\n" \
             "\tDriver \"modesetting\"\n"
-
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
-
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
-           "\tIdentifier \"iGPU\"\n" \
-           "\tDevice \"iGPU\"\n" \
+           "\tIdentifier \"intel\"\n" \
+           "\tDevice \"intel\"\n" \
            "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
             "\tIdentifier \"nvidia\"\n" \
             "\tDriver \"nvidia\"\n"
-
     text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
-
     text += "EndSection\n"
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDevice \"nvidia\"\n" \
+           "EndSection\n\n"
 
     return text
 
