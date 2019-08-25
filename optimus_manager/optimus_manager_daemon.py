@@ -82,7 +82,7 @@ def _wait_for_command(server_socket):
 def _process_command(config, msg):
 
     # GPU switching
-    if msg == "intel" or msg == "nvidia":
+    if msg == "intel" or msg == "nvidia" or msg == "hybrid":
         _write_gpu_mode(config, msg)
 
     # Startup modes

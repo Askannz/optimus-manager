@@ -20,6 +20,8 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid":
+        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
     manjaro_hacks.remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -184,6 +186,36 @@ def _generate_intel(config, bus_ids, xorg_extra):
 
     return text
 
+def _generate_hybrid(config, bus_ids, xorg_extra):
+
+    text = "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"iGPU\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+           "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"iGPU\"\n" \
+            "\tDriver \"modesetting\"\n"
+
+    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+
+    text += "EndSection\n\n"
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"iGPU\"\n" \
+           "\tDevice \"iGPU\"\n" \
+           "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n"
+
+    text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
+
+    text += "EndSection\n"
+
+    return text
 
 def _write_xorg_conf(xorg_conf_text):
 
