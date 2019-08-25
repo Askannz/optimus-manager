@@ -20,6 +20,8 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid":
+        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
     manjaro_hacks.remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -124,18 +126,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "\tInactive \"intel\"\n" \
             "EndSection\n\n"
 
-    text += "Section \"Device\"\n" \
-            "\tIdentifier \"nvidia\"\n" \
-            "\tDriver \"nvidia\"\n"
-    text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
-    if "overclocking" in options:
-        text += "\tOption \"Coolbits\" \"28\"\n"
-    if "triple_buffer" in options:
-        text += "\tOption \"TripleBuffer\" \"true\"\n"
-    if "nvidia" in xorg_extra.keys():
-        for line in xorg_extra["nvidia"]:
-            text += ("\t" + line + "\n")
-    text += "EndSection\n\n"
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
@@ -158,6 +149,54 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
 
 def _generate_intel(config, bus_ids, xorg_extra):
+    text = _make_intel_device_section(config, bus_ids, xorg_extra)
+    return text
+
+def _generate_hybrid(config, bus_ids, xorg_extra):
+
+    text = "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"intel\"\n" \
+           "\tInactive \"nvidia\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+           "EndSection\n\n"
+
+    text += _make_intel_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"intel\"\n" \
+           "\tDevice \"intel\"\n" \
+           "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDevice \"nvidia\"\n" \
+           "EndSection\n\n"
+
+    return text
+
+def _make_nvidia_device_section(config, bus_ids, xorg_extra):
+
+    options = config["nvidia"]["options"].replace(" ", "").split(",")
+
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDriver \"nvidia\"\n"
+    text += "\tBusID \"%s\"\n" % bus_ids["nvidia"]
+    if "overclocking" in options:
+        text += "\tOption \"Coolbits\" \"28\"\n"
+    if "triple_buffer" in options:
+        text += "\tOption \"TripleBuffer\" \"true\"\n"
+    if "nvidia" in xorg_extra.keys():
+        for line in xorg_extra["nvidia"]:
+            text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
+
+    return text
+
+def _make_intel_device_section(config, bus_ids, xorg_extra):
 
     if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
         print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
@@ -183,7 +222,6 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
-
 
 def _write_xorg_conf(xorg_conf_text):
 

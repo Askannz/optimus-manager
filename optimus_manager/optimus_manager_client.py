@@ -185,7 +185,7 @@ def _check_daemon_active():
 
 def _get_switch_mode(switch_arg):
 
-    if switch_arg not in ["auto", "intel", "nvidia"]:
+    if switch_arg not in ["auto", "intel", "nvidia", "hybrid"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
@@ -374,7 +374,7 @@ def _send_command(cmd):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia"]:
+    if startup_arg not in ["intel", "nvidia", "hybrid"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 
