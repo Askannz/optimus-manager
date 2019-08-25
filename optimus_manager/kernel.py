@@ -1,4 +1,3 @@
-import time
 import optimus_manager.checks as checks
 import optimus_manager.pci as pci
 from optimus_manager.acpi_data import ACPI_METHODS
@@ -47,6 +46,8 @@ def _setup_intel_mode(config):
             except KernelSetupError as e:
                 print("ERROR : cannot load bbswitch. Moving on. Error is : %s" % str(e))
             else:
+                if config["optimus"]["pci_remove"] == "yes":
+                    pci.remove_nvidia()
                 _set_bbswitch_state("OFF")
 
     elif config["optimus"]["switching"] == "acpi_call":
@@ -61,6 +62,8 @@ def _setup_intel_mode(config):
             except KernelSetupError as e:
                 print("ERROR : cannot load acpi_call. Moving on. Error is : %s" % str(e))
             else:
+                if config["optimus"]["pci_remove"] == "yes":
+                    pci.remove_nvidia()
                 _set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
@@ -95,15 +98,33 @@ def _set_base_state(config):
     _unload_nvidia_modules()
     _unload_nouveau()
 
-    if checks.is_module_loaded("bbswitch"):
-        _set_bbswitch_state("ON")
+    if not pci.is_nvidia_visible():
 
-    # Unlike bbswitch, It's better to ignore acpi_call altogether if the config
-    # file does not ask for it. The user could have this module loaded for other purposes,
-    # and we don't want to fire a volley of ACPI commands unless strictly necessary.
-    if checks.is_module_loaded("acpi_call") and \
-       config["optimus"]["switching"] == "acpi_call":
-       _set_acpi_call_state("ON")
+        print("Nvidia card not visible in PCI bus")
+
+        if checks.is_module_loaded("bbswitch"):
+            _set_bbswitch_state("ON")
+
+        # Unlike bbswitch, It's better to ignore acpi_call altogether if the config
+        # file does not ask for it. The user could have this module loaded for other purposes,
+        # and we don't want to fire a volley of ACPI commands unless strictly necessary.
+        if checks.is_module_loaded("acpi_call") and \
+        config["optimus"]["switching"] == "acpi_call":
+            _set_acpi_call_state("ON")
+
+        print("Rescanning PCI bus")
+        pci.rescan()
+
+        if not pci.is_nvidia_visible():
+            raise KernelSetupError("Rescaning Nvidia PCI device failed")
+
+    else:
+
+        if checks.is_module_loaded("bbswitch"):
+            _set_bbswitch_state("ON")
+        if checks.is_module_loaded("acpi_call") and \
+        config["optimus"]["switching"] == "acpi_call":
+            _set_acpi_call_state("ON")
 
     pci.set_power_state("on")
 
@@ -217,5 +238,3 @@ def _set_acpi_call_state(state):
         raise KernelSetupError("Cannot open /proc/acpi/call")
     except IOError:
         raise KernelSetupError("Error writing to /proc/acpi/call")
-
-    time.sleep(1)

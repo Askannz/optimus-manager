@@ -1,5 +1,5 @@
+import os
 import re
-
 from optimus_manager.bash import exec_bash, BashError
 
 NVIDIA_VENDOR_ID = "10de"
@@ -11,13 +11,27 @@ class PCIError(Exception):
 
 
 def set_power_state(mode):
-    _write_to_pci_path("power/control", mode)
+    _write_to_nvidia_path("power/control", mode)
 
 def get_power_state():
-    return _read_pci_path("power/control")
+    return _read_from_nvidia_path("power/control")
 
 def reset_nvidia():
-    _write_to_pci_path("reset", "1")
+    _write_to_nvidia_path("reset", "1")
+
+def remove_nvidia():
+    _write_to_nvidia_path("remove", "1")
+
+def is_nvidia_visible():
+    bus_ids = get_bus_ids(notation_fix=False)
+    if "nvidia" not in bus_ids.keys():
+        return False
+    pci_path = "/sys/bus/pci/devices/0000:%s/" % bus_ids["nvidia"]
+    return os.path.isdir(pci_path)
+
+def rescan():
+    _write_to_pci_path("/sys/bus/pci/rescan", "1")
+
 
 def get_bus_ids(notation_fix=True):
 
@@ -59,38 +73,40 @@ def get_bus_ids(notation_fix=True):
                 raise PCIError("Multiple Intel GPUs found !")
             bus_ids["intel"] = bus_id
 
-    if "nvidia" not in bus_ids.keys():
-        raise PCIError("Cannot find Nvidia GPU in PCI devices list.")
-
     if "intel" not in bus_ids.keys():
         raise PCIError("Cannot find Intel GPU in PCI devices list.")
 
     return bus_ids
 
 
-def _write_to_pci_path(relative_path, string):
-
+def _write_to_nvidia_path(relative_path, string):
     bus_ids = get_bus_ids(notation_fix=False)
-    pci_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
+    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
+    _write_to_pci_path(absolute_path, string)
+
+def _read_from_nvidia_path(relative_path):
+    bus_ids = get_bus_ids(notation_fix=False)
+    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
+    return _read_pci_path(absolute_path)
+
+
+def _write_to_pci_path(pci_path, string):
 
     try:
         with open(pci_path, "w") as f:
             f.write(string)
     except FileNotFoundError:
-        raise PCIError("Cannot find Nvidia PCI path at %s" % pci_path)
+        raise PCIError("Cannot find PCI path at %s" % pci_path)
     except IOError:
         raise PCIError("Error writing to %s" % pci_path)
 
-def _read_pci_path(relative_path):
-
-    bus_ids = get_bus_ids(notation_fix=False)
-    pci_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
+def _read_pci_path(pci_path):
 
     try:
         with open(pci_path, "r") as f:
             string = f.read()
     except FileNotFoundError:
-        raise PCIError("Cannot find Nvidia PCI path at %s" % pci_path)
+        raise PCIError("Cannot find PCI path at %s" % pci_path)
     except IOError:
         raise PCIError("Error reading from %s" % pci_path)
 
