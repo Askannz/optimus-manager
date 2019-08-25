@@ -1,5 +1,7 @@
+import time
 import optimus_manager.checks as checks
 import optimus_manager.pci as pci
+from optimus_manager.acpi_data import ACPI_METHODS
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -47,6 +49,20 @@ def _setup_intel_mode(config):
             else:
                 _set_bbswitch_state("OFF")
 
+    elif config["optimus"]["switching"] == "acpi_call":
+
+        if not checks.is_module_available("acpi_call"):
+            print("ERROR : module acpi_call is not available for the current kernel." 
+                  " Is acpi_call or acpi_call-dkms installed ? Moving on...")
+
+        else:
+            try:
+                _load_acpi_call()
+            except KernelSetupError as e:
+                print("ERROR : cannot load acpi_call. Moving on. Error is : %s" % str(e))
+            else:
+                _set_acpi_call_state("OFF")
+
     elif config["optimus"]["switching"] == "none":
         pass
 
@@ -54,6 +70,8 @@ def _setup_intel_mode(config):
     if config["optimus"]["pci_power_control"] == "yes":
         if config["optimus"]["switching"] == "bbswitch":
             print("bbswitch is enabled, pci_power_control option ignored.")
+        elif config["optimus"]["switching"] == "acpi_call":
+            print("acpi_call is enabled, pci_power_control option ignored.")
         else:
             pci.set_power_state("auto")
 
@@ -76,8 +94,17 @@ def _set_base_state(config):
 
     _unload_nvidia_modules()
     _unload_nouveau()
+
     if checks.is_module_loaded("bbswitch"):
         _set_bbswitch_state("ON")
+
+    # Unlike bbswitch, It's better to ignore acpi_call altogether if the config
+    # file does not ask for it. The user could have this module loaded for other purposes,
+    # and we don't want to fire a volley of ACPI commands unless strictly necessary.
+    if checks.is_module_loaded("acpi_call") and \
+       config["optimus"]["switching"] == "acpi_call":
+       _set_acpi_call_state("ON")
+
     pci.set_power_state("on")
 
     if config["optimus"]["pci_reset"] == "yes":
@@ -129,7 +156,7 @@ def _unload_nouveau():
 def _load_bbswitch():
 
     if not checks.is_module_available("bbswitch"):
-        print("Module bbswitch not available for current kernel. Skipping bbswitch power switching.")
+        print("Module bbswitch not available for current kernel.")
         return
 
     print("Loading bbswitch module")
@@ -137,6 +164,18 @@ def _load_bbswitch():
         exec_bash("modprobe bbswitch")
     except BashError as e:
         raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
+
+def _load_acpi_call():
+
+    if not checks.is_module_available("acpi_call"):
+        print("Module acpi_call not available for current kernel.")
+        return
+
+    print("Loading acpi_call module")
+    try:
+        exec_bash("modprobe acpi_call")
+    except BashError as e:
+        raise KernelSetupError("Cannot load acpi_call : %s" % str(e))
 
 def _get_PAT_parameter_value(config):
 
@@ -162,3 +201,21 @@ def _set_bbswitch_state(state):
         raise KernelSetupError("Cannot open /proc/acpi/bbswitch")
     except IOError:
         raise KernelSetupError("Error writing to /proc/acpi/bbswitch")
+
+def _set_acpi_call_state(state):
+
+    assert state in ["OFF", "ON"]
+
+    print("Setting GPU power to %s via acpi_call" % state)
+
+    try:
+        for off_str, on_str in ACPI_METHODS:
+            string = off_str if state == "OFF" else on_str
+            with open("/proc/acpi/call", "w") as f:
+                f.write(string)
+    except FileNotFoundError:
+        raise KernelSetupError("Cannot open /proc/acpi/call")
+    except IOError:
+        raise KernelSetupError("Error writing to /proc/acpi/call")
+
+    time.sleep(1)
