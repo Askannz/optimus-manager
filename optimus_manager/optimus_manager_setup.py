@@ -10,7 +10,7 @@ from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
 from optimus_manager.checks import is_daemon_active
-from optimus_manager.logging import print_timestamp_separator
+from optimus_manager.logging_utils import print_timestamp_separator
 
 
 def main():
