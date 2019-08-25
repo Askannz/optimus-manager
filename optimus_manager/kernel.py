@@ -27,11 +27,25 @@ def _setup_intel_mode(config):
     
     # Handling power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
-        _load_nouveau(config)
+
+        try:
+            _load_nouveau(config)
+        except KernelSetupError as e:
+            print("ERROR : cannot load nouveau. Moving on. Error is : %s" % str(e))
 
     elif config["optimus"]["switching"] == "bbswitch":
-        _load_bbswitch()
-        _set_bbswitch_state("OFF")
+
+        if not checks.is_module_available("bbswitch"):
+            print("ERROR : module bbswitch is not available for the current kernel." 
+                  " Is bbswitch or bbswitch-dkms installed ? Moving on...")
+
+        else:
+            try:
+                _load_bbswitch()
+            except KernelSetupError as e:
+                print("ERROR : cannot load bbswitch. Moving on. Error is : %s" % str(e))
+            else:
+                _set_bbswitch_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
         pass
