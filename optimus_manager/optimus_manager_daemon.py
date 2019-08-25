@@ -8,7 +8,7 @@ import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
 from optimus_manager.xorg import cleanup_xorg_conf
-from optimus_manager.logging import crop_logs
+from optimus_manager.logging_utils import crop_logs
 
 
 def main():
