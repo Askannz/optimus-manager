@@ -374,7 +374,7 @@ def _send_command(cmd):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia"]:
+    if startup_arg not in ["intel", "nvidia", "hybrid"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 

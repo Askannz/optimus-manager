@@ -90,6 +90,8 @@ def _process_command(config, msg):
         _write_startup_mode("nvidia")
     elif msg == "startup_intel":
         _write_startup_mode("intel")
+    elif msg == "startup_hybrid":
+        _write_startup_mode("hybrid")
     else:
         print("Invalid command !")
 
