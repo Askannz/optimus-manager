@@ -12,37 +12,78 @@ def setup_kernel_state(config, requested_gpu_mode):
     assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
 
     if requested_gpu_mode == "intel":
-        _unload_nvidia_modules(config)
-        _power_switch_off(config)
+        _setup_intel_mode(config)
 
     elif requested_gpu_mode == "nvidia":
-        _power_switch_on(config)
-        if config["optimus"]["pci_reset"] == "yes":
-            _reset_PCI_nvidia()
-        _load_nvidia_modules(config)
+        _setup_nvidia_mode(config)
         
     elif requested_gpu_mode == "hybrid":
-        _power_switch_on(config)
-        _load_nvidia_modules(config)
+        _setup_hybrid_mode(config)
+
+def _setup_intel_mode(config):
+
+    # Resetting the Nvidia card to its base state
+    _set_base_state(config)
+    
+    # Handling power switching according to the switching backend
+    if config["optimus"]["switching"] == "nouveau":
+        _load_nouveau(config)
+
+    elif config["optimus"]["switching"] == "bbswitch":
+        _load_bbswitch()
+        _set_bbswitch_state("OFF")
+
+    elif config["optimus"]["switching"] == "none":
+        pass
+
+    # Handling PCI power control
+    if config["optimus"]["pci_power_control"] == "yes":
+        if config["optimus"]["switching"] == "bbswitch":
+            print("bbswitch is enabled, pci_power_control option ignored.")
+        else:
+            pci.set_power_state("auto")
+
+def _setup_nvidia_mode(config):
+
+    _set_base_state(config)
+    _load_nvidia_modules(config)
+
+def _setup_hybrid_mode(config):
+
+    _set_base_state(config)
+    _load_nvidia_modules(config)
+
+def _set_base_state(config):
+
+    # Base state :
+    # - no kernel module loaded on the card
+    # - bbswitch state to ON if bbswitch is loaded
+    # - PCI power state to "on"
+
+    _unload_nvidia_modules()
+    _unload_nouveau()
+    if checks.is_module_loaded("bbswitch"):
+        _set_bbswitch_state("ON")
+    pci.set_power_state("on")
+
+    if config["optimus"]["pci_reset"] == "yes":
+        pci.reset_nvidia()
 
 def _load_nvidia_modules(config):
 
     print("Loading Nvidia modules")
 
     pat_value = _get_PAT_parameter_value(config)
+    modeset_value = 1 if config["nvidia"]["modeset"] == "yes" else 0
 
     try:
         exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
-        if config["nvidia"]["modeset"] == "yes":
-            exec_bash("modprobe nvidia_drm modeset=1")
-        else:
-            exec_bash("modprobe nvidia_drm modeset=0")
+        exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
 
     except BashError as e:
         raise KernelSetupError("Cannot load Nvidia modules : %s" % str(e))
 
-
-def _unload_nvidia_modules(config):
+def _unload_nvidia_modules():
 
     print("Unloading Nvidia modules")
 
@@ -51,6 +92,37 @@ def _unload_nvidia_modules(config):
     except BashError as e:
         raise KernelSetupError("Cannot unload Nvidia modules : %s" % str(e))
 
+def _load_nouveau(config):
+
+    print("Loading nouveau module")
+
+    modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
+
+    try:
+        exec_bash("modprobe nouveau modeset=%d" % modeset_value)
+    except BashError as e:
+        raise KernelSetupError("Cannot load nouveau : %s" % str(e))
+
+def _unload_nouveau():
+
+    print("Unloading nouveau module")
+
+    try:
+        exec_bash("modprobe -r nouveau")
+    except BashError as e:
+        raise KernelSetupError("Cannot unload nouveau : %s" % str(e))
+
+def _load_bbswitch():
+
+    if not checks.is_module_available("bbswitch"):
+        print("Module bbswitch not available for current kernel. Skipping bbswitch power switching.")
+        return
+
+    print("Loading bbswitch module")
+    try:
+        exec_bash("modprobe bbswitch")
+    except BashError as e:
+        raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
 
 def _get_PAT_parameter_value(config):
 
@@ -63,119 +135,16 @@ def _get_PAT_parameter_value(config):
 
     return pat_value
 
+def _set_bbswitch_state(state):
 
-def _power_switch_off(config):
+    assert state in ["OFF", "ON"]
 
-    # Modules
-
-    if config["optimus"]["switching"] == "bbswitch":
-        _load_bbswitch()
-        _set_bbswitch_mode("OFF")
-
-    elif config["optimus"]["switching"] == "nouveau":
-        _load_nouveau(config)
-
-    else:
-        print("Power switching backend is disabled.")
-
-    # PCI power management
-
-    if config["optimus"]["pci_power_control"] == "yes":
-
-        if config["optimus"]["switching"] == "bbswitch":
-            print("bbswitch is enabled, pci_power_control option ignored.")
-        else:
-            _set_PCI_power_mode("OFF")
-
-
-def _power_switch_on(config):
-
-    # Modules
-
-    _unload_nouveau(config)
-
-    if config["optimus"]["switching"] == "bbswitch":
-        _load_bbswitch()
-        _set_bbswitch_mode("ON")
-
-    elif config["optimus"]["switching"] == "nouveau":
-        pass
-
-    else:
-        print("Power switching backend is disabled.")
-
-    # PCI power management
-    if config["optimus"]["pci_power_control"] == "yes":
-
-        if config["optimus"]["switching"] == "bbswitch":
-            print("bbswitch is enabled, pci_power_control option ignored.")
-        else:
-            _set_PCI_power_mode("ON")
-
-
-def _load_bbswitch():
-
-    if not checks.is_module_available("bbswitch"):
-        print("Module bbswitch not available for current kernel. Skipping bbswitch power switching.")
-
-    else:
-        print("Loading bbswitch module")
-        try:
-            exec_bash("modprobe bbswitch")
-        except BashError as e:
-            raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
-
-
-def _set_bbswitch_mode(requested_gpu_state):
-
-    assert requested_gpu_state in ["OFF", "ON"]
-
-    print("Setting GPU power to %s via bbswitch" % requested_gpu_state)
-    exec_bash("echo %s | tee /proc/acpi/bbswitch" % requested_gpu_state)
-
-    current_gpu_state = ("ON" if checks.is_gpu_powered() else "OFF")
-
-    if current_gpu_state != requested_gpu_state:
-        raise KernelSetupError("bbswitch failed to set the GPU to %s" % requested_gpu_state)
-    else:
-        print("bbswitch reports that the GPU is %s" % current_gpu_state)
-
-
-def _load_nouveau(config):
-
-    modeset_value = {"yes": 1, "no": 0}[config["intel"]["modeset"]]
-
-    print("Loading nouveau module")
+    print("Setting GPU power to %s via bbswitch" % state)
 
     try:
-        exec_bash("modprobe nouveau modeset=%d" % modeset_value)
-    except BashError as e:
-        raise KernelSetupError("Cannot load nouveau : %s" % str(e))
-
-
-def _unload_nouveau(config):
-
-    try:
-        exec_bash("modprobe -r nouveau")
-    except BashError as e:
-        raise KernelSetupError("Cannot unload nouveau : %s" % str(e))
-
-
-def _set_PCI_power_mode(requested_gpu_state):
-
-    assert requested_gpu_state in ["OFF", "ON"]
-
-    try:
-        pci.set_power_management((requested_gpu_state == "OFF"))
-    except pci.PCIError as e:
-        print("WARNING : Cannot set PCI power management : %s" % str(e))
-
-def _reset_PCI_nvidia():
-
-    for module_name in ["bbswitch", "nouveau", "nvidia", "nvidia_modeset", "nvidia_drm"]:
-        if checks.is_module_loaded(module_name):
-            print("WARNING : module %s is still loaded, not performing PCI reset action." % module_name)
-            return
-
-    print("Resetting Nvidia PCI device")
-    pci.reset_nvidia()
+        with open("/proc/acpi/bbswitch", "w") as f:
+            f.write(state)
+    except FileNotFoundError:
+        raise KernelSetupError("Cannot open /proc/acpi/bbswitch")
+    except IOError:
+        raise KernelSetupError("Error writing to /proc/acpi/bbswitch")

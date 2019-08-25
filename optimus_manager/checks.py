@@ -7,12 +7,6 @@ class CheckError(Exception):
     pass
 
 
-def is_gpu_powered():
-
-    state = exec_bash("cat /proc/acpi/bbswitch | cut -d' ' -f 2").stdout.decode('utf-8')[:-1]
-    return state == "ON"
-
-
 def is_pat_available():
     try:
         exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
