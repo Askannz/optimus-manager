@@ -185,7 +185,7 @@ def _check_daemon_active():
 
 def _get_switch_mode(switch_arg):
 
-    if switch_arg not in ["auto", "intel", "nvidia"]:
+    if switch_arg not in ["auto", "intel", "nvidia", "hybrid"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
