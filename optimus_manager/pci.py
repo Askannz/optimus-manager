@@ -10,16 +10,14 @@ class PCIError(Exception):
     pass
 
 
-def set_power_management(enabled):
+def set_power_state(mode):
+    _write_to_pci_path("power/control", mode)
 
-    if enabled:
-        _write_to_pci("power/control", "auto")
-    else:
-        _write_to_pci("power/control", "on")
+def get_power_state():
+    return _read_pci_path("power/control")
 
 def reset_nvidia():
-    _write_to_pci("reset", "1")
-
+    _write_to_pci_path("reset", "1")
 
 def get_bus_ids(notation_fix=True):
 
@@ -70,7 +68,7 @@ def get_bus_ids(notation_fix=True):
     return bus_ids
 
 
-def _write_to_pci(relative_path, string):
+def _write_to_pci_path(relative_path, string):
 
     bus_ids = get_bus_ids(notation_fix=False)
     pci_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
@@ -82,3 +80,18 @@ def _write_to_pci(relative_path, string):
         raise PCIError("Cannot find Nvidia PCI path at %s" % pci_path)
     except IOError:
         raise PCIError("Error writing to %s" % pci_path)
+
+def _read_pci_path(relative_path):
+
+    bus_ids = get_bus_ids(notation_fix=False)
+    pci_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
+
+    try:
+        with open(pci_path, "r") as f:
+            string = f.read()
+    except FileNotFoundError:
+        raise PCIError("Cannot find Nvidia PCI path at %s" % pci_path)
+    except IOError:
+        raise PCIError("Error reading from %s" % pci_path)
+
+    return string
