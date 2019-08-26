@@ -28,10 +28,10 @@ def main():
 
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : intel, nvidia, auto (checks the current mode and switch to the other).")
+                             "Possible modes : intel, nvidia, hybrid, auto (auto-detects the mode you may want to switch to).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia")
+                             "intel, nvidia, hybrid")
 
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation and skip all warnings when switching GPUs.")
