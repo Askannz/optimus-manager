@@ -19,6 +19,8 @@ def main():
                                                  "https://github.com/Askannz/optimus-manager")
     parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
 
+    parser.add_argument('--status', action='store_true',
+                        help="Print current status of optimus-manager")
     parser.add_argument('--print-mode', action='store_true',
                         help="Print the GPU mode that your current desktop session is running on.")
     parser.add_argument('--print-next-mode', action='store_true',
@@ -47,16 +49,24 @@ def main():
     # Arguments switch
 
     if args.version:
-        _print_version_and_exit()
+        _print_version()
+        sys.exit(0)
 
     elif args.print_mode:
-        _print_current_mode_and_exit()
+        _print_current_mode()
+        sys.exit(0)
 
     elif args.print_next_mode:
-        _print_next_mode_and_exit()
+        _print_next_mode()
+        sys.exit(0)
 
     elif args.print_startup:
-        _print_startup_mode_and_exit()
+        _print_startup_mode()
+        sys.exit(0)
+
+    elif args.status:
+        _print_status()
+        sys.exit(0)
 
     elif args.switch:
 
@@ -125,37 +135,31 @@ def _get_config():
     return config
 
 
-def _print_version_and_exit():
-
+def _print_version():
     print("Optimus Manager (Client) version %s" % envs.VERSION)
-    sys.exit(0)
 
 
-def _print_current_mode_and_exit():
+def _print_current_mode():
 
     try:
         mode = checks.read_gpu_mode()
     except checks.CheckError as e:
-        print("Error reading mode : %s" % str(e))
-        sys.exit(1)
+        print("Error reading current mode : %s" % str(e))
 
     print("Current GPU mode : %s" % mode)
-    sys.exit(0)
 
 
-def _print_next_mode_and_exit():
+def _print_next_mode():
 
     try:
         requested_mode = read_requested_mode()
     except VarError as e:
         print("Error reading requested GPU mode : %s" % str(e))
-        sys.exit(1)
 
     print("GPU mode requested for next login : %s" % requested_mode)
-    sys.exit(0)
 
 
-def _print_startup_mode_and_exit():
+def _print_startup_mode():
 
     kernel_parameters = get_kernel_parameters()
 
@@ -163,7 +167,6 @@ def _print_startup_mode_and_exit():
         startup_mode = read_startup_mode()
     except VarError as e:
         print("Error reading startup mode : %s" % str(e))
-        sys.exit(1)
 
     print("GPU mode for next startup : %s" % startup_mode)
 
@@ -171,8 +174,13 @@ def _print_startup_mode_and_exit():
         print("\nNote : the startup mode for the current boot was set to \"%s\" with"
               " a kernel parameter. Kernel parameters override the value above.\n" % kernel_parameters["startup_mode"])
 
-    sys.exit(0)
+def _print_status():
 
+    _print_version()
+    print("")
+    _print_current_mode()
+    _print_next_mode()
+    _print_startup_mode()
 
 def _check_daemon_active():
 
