@@ -99,8 +99,22 @@ def _remove_config_copy():
 
 def _copy_user_config():
 
-    if os.path.isfile(envs.USER_CONFIG_PATH):
-        shutil.copy(envs.USER_CONFIG_PATH, envs.USER_CONFIG_COPY_PATH)
+    try:
+        temp_config_path = var.read_temp_conf_path_var()
+    except var.VarError:
+        config_path = envs.USER_CONFIG_PATH
+    else:
+        print("Using temporary configuration %s" % temp_config_path)
+        var.remove_temp_conf_path_var()
+        if os.path.isfile(temp_config_path):
+            config_path = temp_config_path
+        else:
+            print("Warning : temporary config file at %s not found."
+                  " Using normal config file %s instead." % (temp_config_path, envs.USER_CONFIG_PATH))
+            config_path = envs.USER_CONFIG_PATH
+
+    if os.path.isfile(config_path):
+        shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
 
 def _get_config():
 

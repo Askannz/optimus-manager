@@ -115,3 +115,39 @@ def remove_dpi_var():
         os.remove(envs.DPI_VAR_PATH)
     except FileNotFoundError:
         pass
+
+def read_temp_conf_path_var():
+
+    try:
+        with open(envs.TEMP_CONFIG_PATH_VAR_PATH, 'r') as f:
+            content = f.read()
+
+            if len(content) > 0 and content[-1] == "\n":
+                content = content[:-1]
+
+            return content
+
+    except FileNotFoundError:
+        raise VarError("File %s not found." % envs.TEMP_CONFIG_PATH_VAR_PATH)
+    except IOError:
+        raise VarError("Cannot open or read %s" % envs.TEMP_CONFIG_PATH_VAR_PATH)
+
+def write_temp_conf_path_var(path):
+
+    folder_path, filename = os.path.split(envs.TEMP_CONFIG_PATH_VAR_PATH)
+
+    if not os.path.isdir(folder_path):
+        os.makedirs(folder_path)
+
+    try:
+        with open(envs.TEMP_CONFIG_PATH_VAR_PATH, 'w') as f:
+            f.write(path)
+    except IOError:
+        raise VarError("Cannot open or write to %s" % envs.TEMP_CONFIG_PATH_VAR_PATH)
+
+def remove_temp_conf_path_var():
+
+    try:
+        os.remove(envs.TEMP_CONFIG_PATH_VAR_PATH)
+    except FileNotFoundError:
+        pass

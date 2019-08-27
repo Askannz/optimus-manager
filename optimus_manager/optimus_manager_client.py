@@ -36,6 +36,11 @@ def main():
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
                              "intel, nvidia, hybrid")
 
+    parser.add_argument('--temp-config', metavar='PATH', action='store',
+                        help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
+                             " power switching configurations without ending up with an unbootable setup.")
+    
+
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation and skip all warnings when switching GPUs.")
     parser.add_argument('--cleanup', action='store_true',
@@ -108,6 +113,9 @@ def main():
 
     elif args.set_startup:
         _set_startup_and_exit(args.set_startup)
+
+    elif args.temp_config:
+        _set_temp_config_and_exit(args.temp_config)
 
     elif args.cleanup:
         _cleanup_xorg_and_exit()
@@ -392,6 +400,17 @@ def _set_startup_and_exit(startup_arg):
 
     print("setting startup mode to : %s" % startup_arg)
     command = {"type": "startup", "args": {"mode": startup_arg}}
+    _send_command(command)
+    sys.exit(0)
+
+def _set_temp_config_and_exit(path):
+
+    if not os.path.isfile(path):
+        print("ERROR : no such config file : %s" % path)
+        sys.exit(1)
+
+    print("setting temp config file path to : %s" % path)
+    command = {"type": "temp_config", "args": {"path": path}}
     _send_command(command)
     sys.exit(0)
 

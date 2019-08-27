@@ -90,37 +90,22 @@ def _process_command(config, msg):
 
     try:
         if command["type"] == "switch":
-            _write_gpu_mode(config, command["args"]["mode"])
+            print("Writing requested GPU mode %s" % command["args"]["mode"])
+            var.write_requested_mode(command["args"]["mode"])
         
         elif command["type"] == "startup":
-            _write_startup_mode(command["args"]["mode"])
+            print("Writing startup mode %s" % command["args"]["mode"])
+            var.write_startup_mode(command["args"]["mode"])
 
+        elif command["type"] == "temp_config":
+            print("Writing temporary config file path %s" % command["args"]["path"])
+            var.write_temp_conf_path_var(command["args"]["path"])
 
         else:
             print("Invalid command  \"%s\" ! Unknown type %s" % (msg, command["type"]))
 
     except KeyError as e:
-        print("Invalid command  \"%s\" ! Key error %s" % (msg, str(e)))
-
-
-def _write_gpu_mode(config, mode):
-
-    try:
-        print("Writing requested mode")
-        var.write_requested_mode(mode)
-
-    except var.VarError as e:
-        print("Cannot write requested mode : %s" % str(e))
-
-
-def _write_startup_mode(mode):
-
-    try:
-        var.write_startup_mode(mode)
-
-    except var.VarError as e:
-
-        print("Cannot write startup mode : %s" % str(e))
+        print("Invalid command  \"%s\" ! Key error : %s" % (msg, str(e)))
 
 
 class _SignalHandler:
