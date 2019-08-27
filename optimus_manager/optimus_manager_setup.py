@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import sys
+import os
+import shutil
 import time
 import argparse
 import optimus_manager.envs as envs
@@ -28,6 +30,12 @@ def main():
 
     if args.setup_boot:
         print("Setting up boot")
+
+        print("Removing config copy")
+        _remove_config_copy()
+
+        print("Copying user config")
+        _copy_user_config()
 
         if is_xorg_running():
             print("Error : attempting to run the initial boot setup while a X server is already running !"
@@ -84,6 +92,15 @@ def _abort_if_service_inactive():
         print("ERROR : the optimus-manager service is not running. Aborting.")
         sys.exit(0)
 
+def _remove_config_copy():
+
+    if os.path.isfile(envs.USER_CONFIG_COPY_PATH):
+        os.remove(envs.USER_CONFIG_COPY_PATH)
+
+def _copy_user_config():
+
+    if os.path.isfile(envs.USER_CONFIG_PATH):
+        shutil.copy(envs.USER_CONFIG_PATH, envs.USER_CONFIG_COPY_PATH)
 
 def _get_config():
 
