@@ -4,9 +4,10 @@ import os
 import signal
 import select
 import socket
+import json
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
-from optimus_manager.var import write_startup_mode, write_requested_mode, VarError
+import optimus_manager.var as var
 from optimus_manager.xorg import cleanup_xorg_conf
 from optimus_manager.logging_utils import crop_logs
 
@@ -81,37 +82,43 @@ def _wait_for_command(server_socket):
 
 def _process_command(config, msg):
 
-    # GPU switching
-    if msg == "intel" or msg == "nvidia" or msg == "hybrid":
-        _write_gpu_mode(config, msg)
+    try:
+        command = json.loads(msg)
+    except json.decoder.JSONDecodeError:
+        print("Invalid command  \"%s\" ! (JSON decode error)" % msg)
+        return
 
-    # Startup modes
-    elif msg == "startup_nvidia":
-        _write_startup_mode("nvidia")
-    elif msg == "startup_intel":
-        _write_startup_mode("intel")
-    elif msg == "startup_hybrid":
-        _write_startup_mode("hybrid")
-    else:
-        print("Invalid command !")
+    try:
+        if command["type"] == "switch":
+            _write_gpu_mode(config, command["args"]["mode"])
+        
+        elif command["type"] == "startup":
+            _write_startup_mode(command["args"]["mode"])
+
+
+        else:
+            print("Invalid command  \"%s\" ! Unknown type %s" % (msg, command["type"]))
+
+    except KeyError as e:
+        print("Invalid command  \"%s\" ! Key error %s" % (msg, str(e)))
 
 
 def _write_gpu_mode(config, mode):
 
     try:
         print("Writing requested mode")
-        write_requested_mode(mode)
+        var.write_requested_mode(mode)
 
-    except VarError as e:
+    except var.VarError as e:
         print("Cannot write requested mode : %s" % str(e))
 
 
 def _write_startup_mode(mode):
 
     try:
-        write_startup_mode(mode)
+        var.write_startup_mode(mode)
 
-    except VarError as e:
+    except var.VarError as e:
 
         print("Cannot write startup mode : %s" % str(e))
 
