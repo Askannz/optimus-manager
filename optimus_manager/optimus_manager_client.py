@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import socket
+import json
 import optimus_manager.envs as envs
 import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
@@ -118,7 +119,8 @@ def main():
 def gpu_switch(config, switch_mode):
 
     print("Switching to mode : %s" % switch_mode)
-    _send_command(switch_mode)
+    command = {"type": "switch", "args": {"mode": switch_mode}}
+    _send_command(command)
 
     if config["optimus"]["auto_logout"] == "yes":
         sessions.logout_current_desktop_session()
@@ -364,12 +366,14 @@ def _ask_confirmation():
         return False
 
 
-def _send_command(cmd):
+def _send_command(command):
+
+    msg = json.dumps(command).encode('utf-8')
 
     try:
         client = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         client.connect(envs.SOCKET_PATH)
-        client.send(cmd.encode('utf-8'))
+        client.send(msg)
         client.close()
 
     except (ConnectionRefusedError, OSError):
@@ -387,7 +391,8 @@ def _set_startup_and_exit(startup_arg):
         sys.exit(1)
 
     print("setting startup mode to : %s" % startup_arg)
-    _send_command("startup_" + startup_arg)
+    command = {"type": "startup", "args": {"mode": startup_arg}}
+    _send_command(command)
     sys.exit(0)
 
 
