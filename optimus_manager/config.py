@@ -15,15 +15,16 @@ def load_config():
     base_config.read(envs.DEFAULT_CONFIG_PATH)
     validate_config(base_config)
 
-    if not os.path.isfile(envs.USER_CONFIG_PATH):
+    if not os.path.isfile(envs.USER_CONFIG_COPY_PATH):
+        print("No user config at %s" % envs.USER_CONFIG_COPY_PATH)
         return base_config
 
     try:
         user_config = configparser.ConfigParser()
-        user_config.read([envs.DEFAULT_CONFIG_PATH, envs.USER_CONFIG_PATH])
+        user_config.read([envs.DEFAULT_CONFIG_PATH, envs.USER_CONFIG_COPY_PATH])
     except configparser.ParsingError as e:
         print("ERROR : error parsing config file %s. Falling back to default config %s. Error is : %s"
-              % (envs.USER_CONFIG_PATH, envs.DEFAULT_CONFIG_PATH, str(e)))
+              % (envs.USER_CONFIG_COPY_PATH, envs.DEFAULT_CONFIG_PATH, str(e)))
         return base_config
 
     corrected_config = validate_config(user_config, fallback_config=base_config)
