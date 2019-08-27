@@ -8,7 +8,7 @@ import optimus_manager.envs as envs
 import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 from optimus_manager.kernel_parameters import get_kernel_parameters
-from optimus_manager.var import read_requested_mode, read_startup_mode, VarError
+from optimus_manager.var import read_requested_mode, read_startup_mode, read_temp_conf_path_var, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 import optimus_manager.sessions as sessions
 
@@ -184,6 +184,15 @@ def _print_startup_mode():
         print("\nNote : the startup mode for the current boot was set to \"%s\" with"
               " a kernel parameter. Kernel parameters override the value above.\n" % kernel_parameters["startup_mode"])
 
+def _print_temp_config_path():
+
+    try:
+        path = read_temp_conf_path_var()
+    except VarError:
+        print("Temporary config path: no")
+    else:
+        print("Temporary config path: %s" % path)
+
 def _print_status():
 
     _print_version()
@@ -191,6 +200,7 @@ def _print_status():
     _print_current_mode()
     _print_next_mode()
     _print_startup_mode()
+    _print_temp_config_path()
 
 def _check_daemon_active():
 
