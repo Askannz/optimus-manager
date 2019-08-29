@@ -73,13 +73,7 @@ def get_gpus_bus_ids(notation_fix=True):
     if len(intel_ids_list) > 1:
         raise PCIError("Multiple Intel GPUs found !")
 
-    if len(nvidia_ids_list) == 0:
-        raise PCIError("Cannot find Nvidia GPU in PCI devices list.")
-
-    if len(intel_ids_list) == 0:
-        raise PCIError("Cannot find Intel GPU in PCI devices list.")
-
-    bus_ids = {"nvidia": nvidia_ids_list[0], "intel": intel_ids_list[0]}
+    bus_ids = {"nvidia": nvidia_ids_list[:1], "intel": intel_ids_list[:1]}
 
     return bus_ids
 
@@ -109,10 +103,7 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
         pci_class = items[1]
         vendor_id, product_id = items[2].split(":")
 
-        if re.fullmatch(match_pci_class, pci_class):
-            continue
-
-        if re.fullmatch(match_vendor_id, vendor_id):
+        if re.fullmatch(match_pci_class, pci_class) and re.fullmatch(match_vendor_id, vendor_id):
             bus_ids_list.append(bus_id)
 
     return bus_ids_list
