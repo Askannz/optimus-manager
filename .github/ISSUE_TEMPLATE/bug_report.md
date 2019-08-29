@@ -16,6 +16,7 @@ Please include :
 - Your desktop manager (KDE, GNOME, Cinnamon...), if you have one
 - You display manager (SDDM, GDM, LightDM...), if you have one. If you do not know, you are probably using the one coming with your desktop manager.
 - Your laptop model, if you think it could be related to the problem
+- The version of optimus-manager you are using : latest stable release (optimus-manager), or the latest Git version (optimus-manager-git)
 
 **Logs**
 If you are able to, please attach all the logs you can find in `/var/log/optimus-manager/`. *Do not directly copy paste the logs into the GitHub issue.* Join them as text files or save them to pastebins (https://pastebin.com/) and post the links here.
