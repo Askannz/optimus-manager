@@ -115,11 +115,10 @@ def _set_base_state(config):
         print("Rescanning PCI bus")
         pci.rescan()
 
-        print("Sending hot PCI reset command")
-        _hot_reset()
+        _pci_reset(config)
 
         if not pci.is_nvidia_visible():
-            raise KernelSetupError("Rescaning Nvidia PCI device failed")
+            raise KernelSetupError("Rescanning Nvidia PCI device failed")
 
     else:
 
@@ -129,10 +128,10 @@ def _set_base_state(config):
         config["optimus"]["switching"] == "acpi_call":
             _set_acpi_call_state("ON")
 
+        _pci_reset(config)
+
     pci.set_power_state("on")
 
-    if config["optimus"]["pci_reset"] == "yes":
-        pci.reset_nvidia()
 
 def _load_nvidia_modules(config):
 
@@ -242,9 +241,18 @@ def _set_acpi_call_state(state):
     except IOError:
         raise KernelSetupError("Error writing to /proc/acpi/call")
 
-def _hot_reset():
+def _pci_reset(config):
+
+    if config["pci_reset"] == "no":
+        return
 
     try:
-        exec_bash("setpci -s 00:01.0 0x488.l=0x2000000:0x2000000")
-    except BashError as e:
-        print("ERROR : failed to trigger a hot PCI reset : %s" % str(e))
+        if config["pci_reset"] == "function_level":
+            print("Performing function-level reset of Nvidia")
+            pci.function_level_reset_nvidia()
+        elif config["pci_reset"] == "hot_reset":
+            print("Performing hot reset of PCI bridge")
+            pci.hot_reset_nvidia()
+
+    except pci.PCIError as e:
+        print("Failed to perform PCI reset : %s" % str(e))
