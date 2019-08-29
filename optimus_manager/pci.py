@@ -16,8 +16,15 @@ def set_power_state(mode):
 def get_power_state():
     return _read_from_nvidia_path("power/control")
 
-def reset_nvidia():
+def function_level_reset_nvidia():
     _write_to_nvidia_path("reset", "1")
+
+def hot_reset_nvidia():
+
+    try:
+        exec_bash("setpci -s 00:01.0 0x488.l=0x2000000:0x2000000")
+    except BashError as e:
+        raise PCIError("ERROR : failed to trigger a hot PCI reset : %s" % str(e))
 
 def remove_nvidia():
     _write_to_nvidia_path("remove", "1")
