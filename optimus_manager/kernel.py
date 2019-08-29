@@ -250,7 +250,13 @@ def _pci_reset(config):
         if config["optimus"]["pci_reset"] == "function_level":
             print("Performing function-level reset of Nvidia")
             pci.function_level_reset_nvidia()
+
         elif config["optimus"]["pci_reset"] == "hot_reset":
+
+            if config["optimus"]["pci_remove"] == "no":
+                print("Option pci_reset=hot_reset ignored because pci_remove=no. Not resetting.")
+                return
+
             print("Performing hot reset of PCI bridge")
             pci.hot_reset_nvidia()
 
