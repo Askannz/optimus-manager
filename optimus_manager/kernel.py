@@ -243,14 +243,14 @@ def _set_acpi_call_state(state):
 
 def _pci_reset(config):
 
-    if config["pci_reset"] == "no":
+    if config["optimus"]["pci_reset"] == "no":
         return
 
     try:
-        if config["pci_reset"] == "function_level":
+        if config["optimus"]["pci_reset"] == "function_level":
             print("Performing function-level reset of Nvidia")
             pci.function_level_reset_nvidia()
-        elif config["pci_reset"] == "hot_reset":
+        elif config["optimus"]["pci_reset"] == "hot_reset":
             print("Performing hot reset of PCI bridge")
             pci.hot_reset_nvidia()
 
