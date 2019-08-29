@@ -24,10 +24,24 @@ def function_level_reset_nvidia():
 
 def hot_reset_nvidia():
 
+    bus_ids = get_gpus_bus_ids(notation_fix=False)
+
+    nvidia_pci_bridges_ids_list = _get_connected_pci_bridges(bus_ids["nvidia"])
+
+    if len(nvidia_pci_bridges_ids_list) == 0:
+        raise PCIError("PCI hot reset : cannot find PCI bridge connected to Nvidia card")
+
+    if len(nvidia_pci_bridges_ids_list) > 1:
+        raise PCIError("PCI hot reset : found more than one PCI bridge connected to Nvidia card")
+
+    nvidia_pci_bridge = nvidia_pci_bridges_ids_list[0]
+
+    print("Triggering PCI hot reset to bridge %s" % nvidia_pci_bridge)
+
     try:
-        exec_bash("setpci -s 00:01.0 0x488.l=0x2000000:0x2000000")
+        exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)
     except BashError as e:
-        raise PCIError("ERROR : failed to trigger a hot PCI reset : %s" % str(e))
+        raise PCIError("ERROR : failed to trigger a PCI hot reset : %s" % str(e))
 
 def remove_nvidia():
     _write_to_nvidia_path("remove", "1")
@@ -138,6 +152,23 @@ def _read_pci_path(pci_path):
 
     return string
 
-def _get_connected_pci_bridge(pci_id):
+def _get_connected_pci_bridges(pci_id):
 
+    pci_bridges_ids_list = _get_bus_ids(match_pci_class=PCI_BRIDGE_PCI_CLASS_PATTERN,
+                                        match_vendor_id=".+",
+                                        notation_fix=False)
 
+    connected_pci_bridges_ids_list = []
+
+    for pci_bridge_id in pci_bridges_ids_list:
+
+        absolute_path = "/sys/bus/pci/devices/0000:%s/" % pci_bridge_id
+
+        for dir_name in os.listdir(absolute_path):
+            dir_path = os.path.join(absolute_path, dir_name)
+
+            if os.path.isdir(dir_path) and dir_name == "0000:%s" % pci_id:
+                connected_pci_bridges_ids_list.append(pci_bridge_id)
+                break
+
+    return connected_pci_bridges_ids_list
