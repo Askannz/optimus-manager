@@ -2,7 +2,7 @@ import os
 from optimus_manager.bash import exec_bash, BashError
 from optimus_manager.var import read_requested_mode, VarError
 import optimus_manager.envs as envs
-from optimus_manager.pci import get_bus_ids
+from optimus_manager.pci import get_gpus_bus_ids
 from optimus_manager.config import load_extra_xorg_options
 from optimus_manager import manjaro_hacks
 
@@ -13,7 +13,7 @@ class XorgSetupError(Exception):
 
 def configure_xorg(config, requested_gpu_mode):
 
-    bus_ids = get_bus_ids()
+    bus_ids = get_gpus_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
     if requested_gpu_mode == "nvidia":
