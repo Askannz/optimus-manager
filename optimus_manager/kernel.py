@@ -115,6 +115,9 @@ def _set_base_state(config):
         print("Rescanning PCI bus")
         pci.rescan()
 
+        print("Sending hot PCI reset command")
+        _hot_reset()
+
         if not pci.is_nvidia_visible():
             raise KernelSetupError("Rescaning Nvidia PCI device failed")
 
@@ -238,3 +241,10 @@ def _set_acpi_call_state(state):
         raise KernelSetupError("Cannot open /proc/acpi/call")
     except IOError:
         raise KernelSetupError("Error writing to /proc/acpi/call")
+
+def _hot_reset():
+
+    try:
+        exec_bash("setpci -s 00:01.0 0x488.l=0x2000000:0x2000000")
+    except BashError as e:
+        print("ERROR : failed to trigger a hot PCI reset : %s" % str(e))
