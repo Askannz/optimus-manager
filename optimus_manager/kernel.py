@@ -1,6 +1,7 @@
+import optimus_manager.var as var
 import optimus_manager.checks as checks
 import optimus_manager.pci as pci
-from optimus_manager.acpi_data import ACPI_METHODS
+from optimus_manager.acpi_data import ACPI_STRINGS
 from optimus_manager.bash import exec_bash, BashError
 
 
@@ -232,14 +233,36 @@ def _set_acpi_call_state(state):
     print("Setting GPU power to %s via acpi_call" % state)
 
     try:
-        for off_str, on_str in ACPI_METHODS:
-            string = off_str if state == "OFF" else on_str
+        acpi_strings_list = var.read_acpi_call_strings()
+        print("Found saved ACPI strings")
+
+    except var.VarError:
+        acpi_strings_list = ACPI_STRINGS
+        print("No ACPI string saved, trying them all (expect kernel messages spam)")
+
+    working_strings = []
+
+    for off_str, on_str in acpi_strings_list:
+
+        string = off_str if state == "OFF" else on_str
+
+        try:
             with open("/proc/acpi/call", "w") as f:
                 f.write(string)
-    except FileNotFoundError:
-        raise KernelSetupError("Cannot open /proc/acpi/call")
-    except IOError:
-        raise KernelSetupError("Error writing to /proc/acpi/call")
+
+            with open("/proc/acpi/call", "r") as f:
+                output = f.read()
+        except FileNotFoundError:
+            raise KernelSetupError("Cannot open /proc/acpi/call")
+        except IOError:
+            continue
+
+        if not "Error" in output:
+            print("ACPI string %s works, saving" % string)
+            working_strings.append((off_str, on_str))
+
+    var.write_acpi_call_strings(working_strings)
+
 
 def _pci_reset(config):
 
