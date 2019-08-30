@@ -36,7 +36,7 @@ def hot_reset_nvidia():
 
     nvidia_pci_bridge = nvidia_pci_bridges_ids_list[0]
 
-    print("Triggering PCI hot reset to bridge %s" % nvidia_pci_bridge)
+    print("Triggering PCI hot reset of bridge %s" % nvidia_pci_bridge)
 
     try:
         exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)

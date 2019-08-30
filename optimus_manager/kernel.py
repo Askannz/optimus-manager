@@ -18,7 +18,7 @@ def setup_kernel_state(config, requested_gpu_mode):
 
     elif requested_gpu_mode == "nvidia":
         _setup_nvidia_mode(config)
-        
+
     elif requested_gpu_mode == "hybrid":
         _setup_hybrid_mode(config)
 
@@ -26,7 +26,7 @@ def _setup_intel_mode(config):
 
     # Resetting the Nvidia card to its base state
     _set_base_state(config)
-    
+
     # Handling power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
 
@@ -37,45 +37,25 @@ def _setup_intel_mode(config):
 
     elif config["optimus"]["switching"] == "bbswitch":
 
-        if not checks.is_module_available("bbswitch"):
-            print("ERROR : module bbswitch is not available for the current kernel." 
-                  " Is bbswitch or bbswitch-dkms installed ? Moving on...")
-
-        else:
-            try:
-                _load_bbswitch()
-            except KernelSetupError as e:
-                print("ERROR : cannot load bbswitch. Moving on. Error is : %s" % str(e))
-            else:
-                if config["optimus"]["pci_remove"] == "yes":
-                    pci.remove_nvidia()
-                _set_bbswitch_state("OFF")
+        if config["optimus"]["pci_remove"] == "yes":
+            pci.remove_nvidia()
+        _set_bbswitch_state("OFF")
 
     elif config["optimus"]["switching"] == "acpi_call":
 
-        if not checks.is_module_available("acpi_call"):
-            print("ERROR : module acpi_call is not available for the current kernel." 
-                  " Is acpi_call or acpi_call-dkms installed ? Moving on...")
-
-        else:
-            try:
-                _load_acpi_call()
-            except KernelSetupError as e:
-                print("ERROR : cannot load acpi_call. Moving on. Error is : %s" % str(e))
-            else:
-                if config["optimus"]["pci_remove"] == "yes":
-                    pci.remove_nvidia()
-                _set_acpi_call_state("OFF")
+        if config["optimus"]["pci_remove"] == "yes":
+            pci.remove_nvidia()
+        _set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
         pass
 
     # Handling PCI power control
     if config["optimus"]["pci_power_control"] == "yes":
-        if config["optimus"]["switching"] == "bbswitch":
-            print("bbswitch is enabled, pci_power_control option ignored.")
-        elif config["optimus"]["switching"] == "acpi_call":
-            print("acpi_call is enabled, pci_power_control option ignored.")
+
+        switching_mode = config["optimus"]["switching"]
+        if switching_mode == "bbswitch" or switching_mode == "acpi_call":
+            print("%s is enabled, pci_power_control option ignored." % switching_mode)
         else:
             pci.set_power_state("auto")
 
@@ -91,45 +71,52 @@ def _setup_hybrid_mode(config):
 
 def _set_base_state(config):
 
-    # Base state :
-    # - no kernel module loaded on the card
-    # - bbswitch state to ON if bbswitch is loaded
-    # - PCI power state to "on"
-
     _unload_nvidia_modules()
     _unload_nouveau()
 
+    switching_mode = config["optimus"]["switching"]
+
+    try:
+        if switching_mode == "bbswitch":
+            _load_bbswitch()
+        elif switching_mode == "acpi_call":
+            _load_acpi_call()
+    except KernelSetupError as e:
+        print("ERROR : error loading modules for %s. Continuing anyways. Error is : %s" % (switching_mode, str(e)))
+        if not checks.is_module_available(switching_mode):
+            print("%s is not available for the current kernel. Is the corresponding package installed ?")
+
+
+    if checks.is_module_loaded("bbswitch"):
+        try:
+            _set_bbswitch_state("ON")
+        except KernelSetupError as e:
+            print("ERROR : setting bbswitch state. Continuing anyways. Error is : %s" % str(e))
+
+    if checks.is_module_loaded("acpi_call"):
+
+        try:
+            last_acpi_call_state = var.read_last_acpi_call_state()
+            should_send_acpi_call = (last_acpi_call_state == "OFF")
+        except var.VarError:
+            should_send_acpi_call = False
+
+        if should_send_acpi_call:
+            try:
+                _set_acpi_call_state("ON")
+            except KernelSetupError as e:
+                print("ERROR : setting acpi_call state. Continuing anyways. Error is : %s" % str(e))            
+
+
     if not pci.is_nvidia_visible():
 
-        print("Nvidia card not visible in PCI bus")
-
-        if checks.is_module_loaded("bbswitch"):
-            _set_bbswitch_state("ON")
-
-        # Unlike bbswitch, It's better to ignore acpi_call altogether if the config
-        # file does not ask for it. The user could have this module loaded for other purposes,
-        # and we don't want to fire a volley of ACPI commands unless strictly necessary.
-        if checks.is_module_loaded("acpi_call") and \
-        config["optimus"]["switching"] == "acpi_call":
-            _set_acpi_call_state("ON")
-
-        print("Rescanning PCI bus")
+        print("Nvidia card not visible in PCI bus, rescanning")
         pci.rescan()
-
-        _pci_reset(config)
 
         if not pci.is_nvidia_visible():
             raise KernelSetupError("Rescanning Nvidia PCI device failed")
 
-    else:
-
-        if checks.is_module_loaded("bbswitch"):
-            _set_bbswitch_state("ON")
-        if checks.is_module_loaded("acpi_call") and \
-        config["optimus"]["switching"] == "acpi_call":
-            _set_acpi_call_state("ON")
-
-        _pci_reset(config)
+    _pci_reset(config)
 
     pci.set_power_state("on")
 
@@ -150,7 +137,7 @@ def _load_nvidia_modules(config):
 
 def _unload_nvidia_modules():
 
-    print("Unloading Nvidia modules")
+    print("Unloading Nvidia modules (if any)")
 
     try:
         exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia")
@@ -170,7 +157,7 @@ def _load_nouveau(config):
 
 def _unload_nouveau():
 
-    print("Unloading nouveau module")
+    print("Unloading nouveau module (if any)")
 
     try:
         exec_bash("modprobe -r nouveau")
@@ -180,8 +167,7 @@ def _unload_nouveau():
 def _load_bbswitch():
 
     if not checks.is_module_available("bbswitch"):
-        print("Module bbswitch not available for current kernel.")
-        return
+        raise KernelSetupError("Module bbswitch not available for current kernel.")
 
     print("Loading bbswitch module")
     try:
@@ -192,8 +178,7 @@ def _load_bbswitch():
 def _load_acpi_call():
 
     if not checks.is_module_available("acpi_call"):
-        print("Module acpi_call not available for current kernel.")
-        return
+        raise KernelSetupError("Module acpi_call not available for current kernel.")
 
     print("Loading acpi_call module")
     try:
@@ -225,6 +210,7 @@ def _set_bbswitch_state(state):
         raise KernelSetupError("Cannot open /proc/acpi/bbswitch")
     except IOError:
         raise KernelSetupError("Error writing to /proc/acpi/bbswitch")
+
 
 def _set_acpi_call_state(state):
 
@@ -261,6 +247,7 @@ def _set_acpi_call_state(state):
             print("ACPI string %s works, saving" % string)
             working_strings.append((off_str, on_str))
 
+    var.write_last_acpi_call_state(state)
     var.write_acpi_call_strings(working_strings)
 
 

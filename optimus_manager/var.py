@@ -178,3 +178,39 @@ def read_acpi_call_strings():
         raise VarError("File %s not found." % envs.ACPI_CALL_STRING_VAR_PATH)
     except (IOError, json.decoder.JSONDecodeError):
         raise VarError("Cannot open or read %s" % envs.ACPI_CALL_STRING_VAR_PATH)
+
+def write_last_acpi_call_state(state):
+
+    folder_path, filename = os.path.split(envs.LAST_ACPI_CALL_STATE_VAR)
+
+    if not os.path.isdir(folder_path):
+        os.makedirs(folder_path)
+
+    try:
+        with open(envs.LAST_ACPI_CALL_STATE_VAR, 'w') as f:
+            f.write(state)
+    except IOError:
+        raise VarError("Cannot open or write to %s" % envs.LAST_ACPI_CALL_STATE_VAR)
+
+def read_last_acpi_call_state():
+
+    try:
+        with open(envs.LAST_ACPI_CALL_STATE_VAR, 'r') as f:
+            content = f.read()
+
+            if len(content) > 0 and content[-1] == "\n":
+                content = content[:-1]
+
+            return content
+
+    except FileNotFoundError:
+        raise VarError("File %s not found." % envs.LAST_ACPI_CALL_STATE_VAR)
+    except IOError:
+        raise VarError("Cannot open or read %s" % envs.LAST_ACPI_CALL_STATE_VAR)
+
+def remove_last_acpi_call_state():
+
+    try:
+        os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
+    except FileNotFoundError:
+        pass
