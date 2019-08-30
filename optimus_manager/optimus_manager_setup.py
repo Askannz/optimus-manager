@@ -34,6 +34,9 @@ def main():
         print("Removing config copy")
         _remove_config_copy()
 
+        print("removing last acpi_call state (if any)")
+        var.remove_last_acpi_call_state()
+
         print("Copying user config")
         _copy_user_config()
 
