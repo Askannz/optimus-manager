@@ -2,7 +2,7 @@
 # This script only provides commands to turn the GPU off, so I had to guess the corresponding commands
 # for turning it on. May or may not be correct.
 
-ACPI_METHODS = [
+ACPI_STRINGS = [
 
 # OFF command, ON command
 ("\\_SB.PCI0.P0P1.VGA._OFF", "\\_SB.PCI0.P0P1.VGA._ON"),

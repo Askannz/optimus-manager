@@ -1,4 +1,5 @@
 import os
+import json
 import optimus_manager.envs as envs
 
 
@@ -151,3 +152,29 @@ def remove_temp_conf_path_var():
         os.remove(envs.TEMP_CONFIG_PATH_VAR_PATH)
     except FileNotFoundError:
         pass
+
+def write_acpi_call_strings(call_strings_list):
+
+    folder_path, filename = os.path.split(envs.ACPI_CALL_STRING_VAR_PATH)
+
+    if not os.path.isdir(folder_path):
+        os.makedirs(folder_path)
+
+    try:
+        with open(envs.ACPI_CALL_STRING_VAR_PATH, 'w') as f:
+            json.dump(call_strings_list, f)
+    except IOError:
+        raise VarError("Cannot open or write to %s" % envs.ACPI_CALL_STRING_VAR_PATH)
+
+def read_acpi_call_strings():
+
+    try:
+        with open(envs.ACPI_CALL_STRING_VAR_PATH, 'r') as f:
+            call_strings_list = json.load(f)
+
+        return call_strings_list
+
+    except FileNotFoundError:
+        raise VarError("File %s not found." % envs.ACPI_CALL_STRING_VAR_PATH)
+    except (IOError, json.decoder.JSONDecodeError):
+        raise VarError("Cannot open or read %s" % envs.ACPI_CALL_STRING_VAR_PATH)
