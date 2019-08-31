@@ -45,7 +45,7 @@ def _setup_intel_mode(config):
 
         if config["optimus"]["pci_remove"] == "yes":
             _try_remove_pci()
-        _set_acpi_call_state("OFF")
+        _try_set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
         pass
@@ -86,12 +86,8 @@ def _set_base_state(config):
         if not checks.is_module_available(switching_mode):
             print("%s is not available for the current kernel. Is the corresponding package installed ?")
 
-
     if checks.is_module_loaded("bbswitch"):
-        try:
-            _set_bbswitch_state("ON")
-        except KernelSetupError as e:
-            print("ERROR : setting bbswitch state. Continuing anyways. Error is : %s" % str(e))
+        _try_set_bbswitch_state("ON")
 
     if checks.is_module_loaded("acpi_call"):
 
@@ -102,10 +98,7 @@ def _set_base_state(config):
             should_send_acpi_call = False
 
         if should_send_acpi_call:
-            try:
-                _set_acpi_call_state("ON")
-            except KernelSetupError as e:
-                print("ERROR : setting acpi_call state. Continuing anyways. Error is : %s" % str(e))            
+            _try_set_acpi_call_state("ON")          
 
 
     if not pci.is_nvidia_visible():
@@ -113,11 +106,7 @@ def _set_base_state(config):
         print("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-        if not pci.is_nvidia_visible():
-            raise KernelSetupError("Rescanning Nvidia PCI device failed")
-
-    _pci_reset(config)
-
+    _try_pci_reset(config)
     _try_set_pci_power_state("on")
 
 
@@ -261,6 +250,8 @@ def _try_rescan_pci():
 
     try:
         pci.rescan()
+        if not pci.is_nvidia_visible():
+            print("ERROR : Nvidia card not showing up in PCI bus. Continuing anyways.")
     except pci.PCIError as e:
         print("ERROR : cannot rescan PCI bus. Continuing. Error is : %s" % str(e))
 
@@ -270,6 +261,28 @@ def _try_set_pci_power_state(state):
         pci.set_power_state(state)
     except pci.PCIError as e:
         print("ERROR : cannot set PCI power management state. Continuing. Error is : %s" % str(e))
+
+def _try_pci_reset(config):
+
+    try:
+        _pci_reset(config)
+    except KernelSetupError as e:
+        print("ERROR : Nvidia PCI reset failed. Continuing. Error is : %s" % str(e))
+
+def _try_set_acpi_call_state(state):
+
+    try:
+        _set_acpi_call_state(state)
+    except KernelSetupError as e:
+        print("ERROR : setting acpi_call to %s. Continuing anyways. Error is : %s" % (state, str(e)))
+
+
+def _try_set_bbswitch_state(state):
+
+    try:
+        _set_bbswitch_state(state)
+    except KernelSetupError as e:
+        print("ERROR : setting bbswitch to %s. Continuing anyways. Error is : %s" % (state, str(e)))
 
 def _pci_reset(config):
 
@@ -283,12 +296,8 @@ def _pci_reset(config):
 
         elif config["optimus"]["pci_reset"] == "hot_reset":
 
-            if config["optimus"]["pci_remove"] == "no":
-                print("Option pci_reset=hot_reset ignored because pci_remove=no. Not resetting.")
-                return
-
-            print("Performing hot reset of PCI bridge")
+            print("Starting hot reset sequence")
             pci.hot_reset_nvidia()
 
     except pci.PCIError as e:
-        print("Failed to perform PCI reset : %s" % str(e))
+        raise KernelSetupError("Failed to perform PCI reset : %s" % str(e))
