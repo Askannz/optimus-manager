@@ -68,10 +68,10 @@ def get_gpus_bus_ids(notation_fix=True):
                                   notation_fix=notation_fix)
 
     if len(nvidia_ids_list) > 1:
-        raise PCIError("Multiple Nvidia GPUs found !")
+        print("WARNING : Multiple Nvidia GPUs found ! Picking the first one.")
 
     if len(intel_ids_list) > 1:
-        raise PCIError("Multiple Intel GPUs found !")
+        print("WARNING : Multiple Intel GPUs found ! Picking the first one.")
 
     bus_ids = {}
     if len(nvidia_ids_list) > 0:
