@@ -126,12 +126,22 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
 
 def _write_to_nvidia_path(relative_path, string):
+
     bus_ids = get_gpus_bus_ids(notation_fix=False)
+
+    if "nvidia" not in bus_ids.keys():
+        raise PCIError("Nvidia not in PCI bus")
+
     absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
     _write_to_pci_path(absolute_path, string)
 
 def _read_from_nvidia_path(relative_path):
+
     bus_ids = get_gpus_bus_ids(notation_fix=False)
+
+    if "nvidia" not in bus_ids.keys():
+        raise PCIError("Nvidia not in PCI bus")
+
     absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
     return _read_pci_path(absolute_path)
 
