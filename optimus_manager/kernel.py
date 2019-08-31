@@ -24,10 +24,19 @@ def setup_kernel_state(config, requested_gpu_mode):
 
 def _setup_intel_mode(config):
 
-    # Resetting the Nvidia card to its base state
+    # Resetting the system to its base state
     _set_base_state(config)
 
-    # Handling power switching according to the switching backend
+    # PCI remove
+    if config["optimus"]["pci_remove"] == "yes":
+
+        switching_mode = config["optimus"]["switching"]
+        if switching_mode == "nouveau" or switching_mode == "bbswitch":
+            print("%s is selected, pci_remove option ignored." % switching_mode)
+        else:
+            _try_remove_pci()
+
+    # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
 
         try:
@@ -36,21 +45,15 @@ def _setup_intel_mode(config):
             print("ERROR : cannot load nouveau. Moving on. Error is : %s" % str(e))
 
     elif config["optimus"]["switching"] == "bbswitch":
-
-        if config["optimus"]["pci_remove"] == "yes":
-            _try_remove_pci()
         _set_bbswitch_state("OFF")
 
     elif config["optimus"]["switching"] == "acpi_call":
-
-        if config["optimus"]["pci_remove"] == "yes":
-            _try_remove_pci()
         _try_set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
         pass
 
-    # Handling PCI power control
+    # PCI power control
     if config["optimus"]["pci_power_control"] == "yes":
 
         switching_mode = config["optimus"]["switching"]
@@ -98,8 +101,7 @@ def _set_base_state(config):
             should_send_acpi_call = False
 
         if should_send_acpi_call:
-            _try_set_acpi_call_state("ON")          
-
+            _try_set_acpi_call_state("ON")        
 
     if not pci.is_nvidia_visible():
 
@@ -107,6 +109,12 @@ def _set_base_state(config):
         _try_rescan_pci()
 
     _try_pci_reset(config)
+
+    if switching_mode == "bbswitch":
+        _load_bbswitch()
+    else:
+        _unload_bbswitch()
+
     _try_set_pci_power_state("on")
 
 
@@ -163,6 +171,15 @@ def _load_bbswitch():
         exec_bash("modprobe bbswitch")
     except BashError as e:
         raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
+
+def _unload_bbswitch():
+
+    print("Unloading bbswitch module (if any)")
+
+    try:
+        exec_bash("modprobe -r bbswitch")
+    except BashError as e:
+        raise KernelSetupError("Cannot unload bbswitch : %s" % str(e))
 
 def _load_acpi_call():
 
@@ -266,6 +283,7 @@ def _try_set_pci_power_state(state):
 def _try_pci_reset(config):
 
     try:
+        _unload_bbswitch()
         _pci_reset(config)
     except KernelSetupError as e:
         print("ERROR : Nvidia PCI reset failed. Continuing. Error is : %s" % str(e))
