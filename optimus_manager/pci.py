@@ -26,6 +26,9 @@ def hot_reset_nvidia():
 
     bus_ids = get_gpus_bus_ids(notation_fix=False)
 
+    if "nvidia" not in bus_ids.keys():
+        raise PCIError("Nvidia not in PCI bus")
+
     nvidia_pci_bridges_ids_list = _get_connected_pci_bridges(bus_ids["nvidia"])
 
     if len(nvidia_pci_bridges_ids_list) == 0:
@@ -36,12 +39,20 @@ def hot_reset_nvidia():
 
     nvidia_pci_bridge = nvidia_pci_bridges_ids_list[0]
 
-    print("Triggering PCI hot reset of bridge %s" % nvidia_pci_bridge)
+    print("Removing Nvidia from PCI bridge")
+    remove_nvidia()
 
+    print("Triggering PCI hot reset of bridge %s" % nvidia_pci_bridge)
     try:
         exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)
     except BashError as e:
-        raise PCIError("ERROR : failed to trigger a PCI hot reset : %s" % str(e))
+        raise PCIError("failed to run setpci command : %s" % str(e))
+
+    print("Rescanning PCI bus")
+    rescan()
+
+    if not is_nvidia_visible():
+        raise PCIError("failed to bring Nvidia card back")
 
 def remove_nvidia():
     _write_to_nvidia_path("remove", "1")
