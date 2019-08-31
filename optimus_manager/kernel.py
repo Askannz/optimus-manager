@@ -38,13 +38,13 @@ def _setup_intel_mode(config):
     elif config["optimus"]["switching"] == "bbswitch":
 
         if config["optimus"]["pci_remove"] == "yes":
-            pci.remove_nvidia()
+            _try_remove_pci()
         _set_bbswitch_state("OFF")
 
     elif config["optimus"]["switching"] == "acpi_call":
 
         if config["optimus"]["pci_remove"] == "yes":
-            pci.remove_nvidia()
+            _try_remove_pci()
         _set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
@@ -57,7 +57,7 @@ def _setup_intel_mode(config):
         if switching_mode == "bbswitch" or switching_mode == "acpi_call":
             print("%s is enabled, pci_power_control option ignored." % switching_mode)
         else:
-            pci.set_power_state("auto")
+            _try_set_pci_power_state("auto")
 
 def _setup_nvidia_mode(config):
 
@@ -111,14 +111,14 @@ def _set_base_state(config):
     if not pci.is_nvidia_visible():
 
         print("Nvidia card not visible in PCI bus, rescanning")
-        pci.rescan()
+        _try_rescan_pci()
 
         if not pci.is_nvidia_visible():
             raise KernelSetupError("Rescanning Nvidia PCI device failed")
 
     _pci_reset(config)
 
-    pci.set_power_state("on")
+    _try_set_pci_power_state("on")
 
 
 def _load_nvidia_modules(config):
@@ -250,6 +250,26 @@ def _set_acpi_call_state(state):
     var.write_last_acpi_call_state(state)
     var.write_acpi_call_strings(working_strings)
 
+def _try_remove_pci():
+
+    try:
+        pci.remove_nvidia()
+    except pci.PCIError as e:
+        print("ERROR : cannot remove Nvidia from PCI bus. Continuing. Error is : %s" % str(e))
+
+def _try_rescan_pci():
+
+    try:
+        pci.rescan()
+    except pci.PCIError as e:
+        print("ERROR : cannot rescan PCI bus. Continuing. Error is : %s" % str(e))
+
+def _try_set_pci_power_state(state):
+
+    try:
+        pci.set_power_state(state)
+    except pci.PCIError as e:
+        print("ERROR : cannot set PCI power management state. Continuing. Error is : %s" % str(e))
 
 def _pci_reset(config):
 
