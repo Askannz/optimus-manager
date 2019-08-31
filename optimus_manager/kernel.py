@@ -27,15 +27,6 @@ def _setup_intel_mode(config):
     # Resetting the system to its base state
     _set_base_state(config)
 
-    # PCI remove
-    if config["optimus"]["pci_remove"] == "yes":
-
-        switching_mode = config["optimus"]["switching"]
-        if switching_mode == "nouveau" or switching_mode == "bbswitch":
-            print("%s is selected, pci_remove option ignored." % switching_mode)
-        else:
-            _try_remove_pci()
-
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
 
@@ -53,12 +44,24 @@ def _setup_intel_mode(config):
     elif config["optimus"]["switching"] == "none":
         pass
 
+    # PCI remove
+    if config["optimus"]["pci_remove"] == "yes":
+
+        switching_mode = config["optimus"]["switching"]
+        if switching_mode == "nouveau" or switching_mode == "bbswitch":
+            print("%s is selected, pci_remove option ignored." % switching_mode)
+        else:
+            print("Removing Nvidia from PCI bus")
+            _try_remove_pci()
+
     # PCI power control
     if config["optimus"]["pci_power_control"] == "yes":
 
         switching_mode = config["optimus"]["switching"]
         if switching_mode == "bbswitch" or switching_mode == "acpi_call":
             print("%s is enabled, pci_power_control option ignored." % switching_mode)
+        elif config["optimus"]["pci_remove"] == "yes":
+            print("pci_remove is enabled, pci_power_control option ignored." % switching_mode)
         else:
             _try_set_pci_power_state("auto")
 
