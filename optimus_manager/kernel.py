@@ -222,6 +222,7 @@ def _set_acpi_call_state(state):
         string = off_str if state == "OFF" else on_str
 
         try:
+            print("Sending ACPI string %s" % string)
             with open("/proc/acpi/call", "w") as f:
                 f.write(string)
 
@@ -251,7 +252,7 @@ def _try_rescan_pci():
     try:
         pci.rescan()
         if not pci.is_nvidia_visible():
-            print("ERROR : Nvidia card not showing up in PCI bus. Continuing anyways.")
+            print("ERROR : Nvidia card not showing up in PCI bus after rescan. Continuing anyways.")
     except pci.PCIError as e:
         print("ERROR : cannot rescan PCI bus. Continuing. Error is : %s" % str(e))
 
