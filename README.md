@@ -77,7 +77,7 @@ Usage
 Run
 * `optimus-manager --switch nvidia` to switch to the Nvidia GPU
 * `optimus-manager --switch intel` to switch to the Intel GPU.
-* `optimus-manager --switch auto` to automatically detect which mode you are currently running in and switch to the other.
+* `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to intel if you are in nvidia or hybrid mode, and to nvidia otherwise)
 
 *WARNING :* Switching GPUs automatically logs you out, so make sure you save your work and close all your applications before doing so.
 

@@ -226,8 +226,10 @@ def _get_switch_mode(switch_arg):
 
         if gpu_mode == "nvidia":
             switch_mode = "intel"
-        else:
+        elif gpu_mode == "intel":
             switch_mode = "nvidia"
+        elif gpu_mode == "hybrid":
+            switch_mode = "intel"
 
         print("Switching to : %s" % switch_mode)
 
