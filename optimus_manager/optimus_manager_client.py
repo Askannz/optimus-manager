@@ -80,6 +80,7 @@ def main():
 
         switch_mode = _get_switch_mode(args.switch)
 
+        _check_power_switching(config)
         _check_bbswitch_module(config)
         _check_nvidia_module(switch_mode)
         _check_patched_GDM()
@@ -237,6 +238,15 @@ def _get_switch_mode(switch_arg):
         switch_mode = switch_arg
 
     return switch_mode
+
+
+def _check_power_switching(config):
+
+    if config["optimus"]["switching"] == "none" and config["optimus"]["pci_power_control"] == "no":
+        print("WARNING : no power management option is currently enabled (this is the default since v1.2)."
+              " Switching between GPUs will work but you will likely experience poor battery life.\n"
+              "Follow instructions at https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options"
+              " to enable power management.\n")
 
 
 def _check_bbswitch_module(config):
