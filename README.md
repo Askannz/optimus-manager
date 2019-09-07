@@ -1,7 +1,7 @@
 optimus-manager
 ==================
 
-**IMPORTANT :** this README is for version v1.1. If you are still using the previous version (v1.0), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.0-README
+**IMPORTANT :** this README is for version v1.2. If you are still using the previous version (v1.1), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.1-README
 
 This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU configuration).
 
@@ -16,7 +16,7 @@ optimus-manager *might* still work with other display managers but you have to c
 
 Introduction
 ----------
-GPU offloading with Nvidia cards is not supported on Linux, which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between the Nvidia GPU and your screen.
+GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between the Nvidia GPU and your screen.
 
 This is essentially a port to Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
@@ -42,9 +42,7 @@ Naturally, you must have the proprietary nvidia driver installed on your system.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
-Reboot your computer after installation (this is necessary for the new display manager configuration to take effect).
-
-After reboot, the optimus-manager daemon should have been started automatically, but you can check its status with `systemctl status optimus-manager.service`.
+After installation, the optimus-manager daemon should have been started automatically, but you can check its status with `systemctl status optimus-manager.service`.
 
 **Important notes :**
 
@@ -76,10 +74,11 @@ Usage
 
 Run
 * `optimus-manager --switch nvidia` to switch to the Nvidia GPU
-* `optimus-manager --switch intel` to switch to the Intel GPU.
-* `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to intel if you are in nvidia or hybrid mode, and to nvidia otherwise)
+* `optimus-manager --switch intel` to switch to the Intel GPU and power the Nvidia GPU off
+* `optimus-manager --switch hybrid` to switch to the Intel GPU but leave the Nvidia GPU available for CUDA and [PRIME Render offload](http://download.nvidia.com/XFree86/Linux-x86_64/435.17/README/primerenderoffload.html)
+* `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to `intel` if you are in `nvidia` or `hybrid` mode, and to `nvidia` otherwise)
 
-*WARNING :* Switching GPUs automatically logs you out, so make sure you save your work and close all your applications before doing so.
+*WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
 Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, and Openbox. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
@@ -89,7 +88,7 @@ You can also specify which GPU you want to be used by default when the system bo
 optimus-manager --set-startup MODE
 ```
 
-Where `MODE` can be `intel`, `nvidia`.
+Where `MODE` can be `intel`, `nvidia`, `hybrid`.
 
 #### System Tray App
 
@@ -108,6 +107,13 @@ Simply add `optimus-manager.startup=intel` or `optimus-manager.startup=nvidia` t
 
 Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
+Power management
+----------
+
+Since version v1.2, power management is disabled by default, so the Nvidia GPU will stay powered on (eating battery life) until manual configuration is done. This choice was made because there is no catch-all configuration that works for all laptop models, and incorrect configurations often break the boot process.
+
+Please refer to [the guide on power management](https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options) in the Wiki.
+
 Configuration
 ----------
 
@@ -117,7 +123,7 @@ Any parameter not specified in your config file will take value from the default
 
 Please refer to the comments in the [default config file](https://github.com/Askannz/optimus-manager/blob/master/optimus-manager.conf) for descriptions of the available parameters. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
 
-Some config changes will not be effective until you computer is rebooted or the optimus-manager service is restarted.
+No config changes will be effective until you computer is rebooted or the optimus-manager service is restarted.
 
 You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf` and `/etc/optimus-manager/xorg-nvidia.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
 
