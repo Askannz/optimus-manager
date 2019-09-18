@@ -102,7 +102,7 @@ def _set_base_state(config):
     # - bbswitch state to ON if bbswitch is loaded
     # - PCI power state to "on"
 
-    _unload_nvidia_modules(config)
+    _unload_nvidia_modules()
     _unload_nouveau()
 
     if not pci.is_nvidia_visible():
@@ -161,7 +161,7 @@ def _load_nvidia_modules(config):
     except BashError as e:
         raise KernelSetupError("Cannot load Nvidia modules : %s" % str(e))
 
-def _unload_nvidia_modules(config):
+def _unload_nvidia_modules():
 
     print("Unloading Nvidia modules")
 
