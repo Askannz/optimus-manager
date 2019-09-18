@@ -1,5 +1,6 @@
 import optimus_manager.checks as checks
 import optimus_manager.pci as pci
+import optimus_manager.envs as envs
 from optimus_manager.acpi_data import ACPI_METHODS
 from optimus_manager.bash import exec_bash, BashError
 
@@ -65,9 +66,15 @@ def _setup_intel_mode(config):
                 if config["optimus"]["pci_remove"] == "yes":
                     pci.remove_nvidia()
                 _set_acpi_call_state("OFF")
-
+    
     elif config["optimus"]["switching"] == "none":
-        pass
+
+        print("Running %s" % envs.NVIDIA_MANUAL_DISABLE_SCRIPT)
+
+        try:
+            exec_bash(envs.NVIDIA_MANUAL_DISABLE_SCRIPT)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_DISABLE_SCRIPT, str(e)))
 
     # Handling PCI power control
     if config["optimus"]["pci_power_control"] == "yes":
@@ -87,7 +94,7 @@ def _setup_hybrid_mode(config):
 
     _set_base_state(config)
     _load_nvidia_modules(config)
-
+    
 def _set_base_state(config):
 
     # Base state :
@@ -95,13 +102,13 @@ def _set_base_state(config):
     # - bbswitch state to ON if bbswitch is loaded
     # - PCI power state to "on"
 
-    _unload_nvidia_modules()
+    _unload_nvidia_modules(config)
     _unload_nouveau()
 
     if not pci.is_nvidia_visible():
 
         print("Nvidia card not visible in PCI bus")
-
+            
         if checks.is_module_loaded("bbswitch"):
             _set_bbswitch_state("ON")
 
@@ -111,6 +118,15 @@ def _set_base_state(config):
         if checks.is_module_loaded("acpi_call") and \
         config["optimus"]["switching"] == "acpi_call":
             _set_acpi_call_state("ON")
+        
+        elif config["optimus"]["switching"] == "none":
+            
+            print("Running %s" % envs.NVIDIA_MANUAL_ENABLE_SCRIPT)
+
+            try:
+                exec_bash(envs.NVIDIA_MANUAL_ENABLE_SCRIPT)
+            except BashError as e:
+                print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_ENABLE_SCRIPT, str(e)))
 
         print("Rescanning PCI bus")
         pci.rescan()
@@ -132,7 +148,7 @@ def _set_base_state(config):
         pci.reset_nvidia()
 
 def _load_nvidia_modules(config):
-
+    
     print("Loading Nvidia modules")
 
     pat_value = _get_PAT_parameter_value(config)
@@ -145,7 +161,7 @@ def _load_nvidia_modules(config):
     except BashError as e:
         raise KernelSetupError("Cannot load Nvidia modules : %s" % str(e))
 
-def _unload_nvidia_modules():
+def _unload_nvidia_modules(config):
 
     print("Unloading Nvidia modules")
 
