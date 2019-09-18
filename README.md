@@ -123,7 +123,7 @@ You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf`
 
 If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh` (for Intel mode) and `/etc/optimus-manager/xsetup-nvidia.sh` (for Nvidia mode).
 
-Finally, if you need to run some spcific code prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if bbswitch is not supported), you can write the commands to `/etc/optimus-manager/nvidia-pre-enable.sh` and `/etc/optimus-manager/nvidia-post-disable.sh`.
+Finally, if you need to run some spcific code prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if bbswitch is not supported), you can write the commands to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
 FAQ / Troubleshooting
 ----------
