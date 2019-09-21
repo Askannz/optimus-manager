@@ -75,7 +75,7 @@ post_upgrade() {
     bold=$(tput bold)
     red=$(tput setaf 1)
     normal=$(tput sgr0)
-    echo "${bold}${red}optimus-manager : if you are upgrading from version v0.8 or earlier, please reboot before attempting a GPU switch.${normal}"
+    echo "${bold}${red}optimus-manager : warning : power management is disabled by default since v1.2. See https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options${normal}"
 }
 
 post_remove() {
