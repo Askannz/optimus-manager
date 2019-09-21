@@ -42,7 +42,13 @@ def _setup_intel_mode(config):
         _try_set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
-        pass
+
+        print("Running %s" % envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
+
+        try:
+            exec_bash(envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH, str(e)))
 
     # PCI remove
     if config["optimus"]["pci_remove"] == "yes":
@@ -74,7 +80,7 @@ def _setup_hybrid_mode(config):
 
     _set_base_state(config)
     _load_nvidia_modules(config)
-
+    
 def _set_base_state(config):
 
     _unload_nvidia_modules()
@@ -122,7 +128,7 @@ def _set_base_state(config):
 
 
 def _load_nvidia_modules(config):
-
+    
     print("Loading Nvidia modules")
 
     pat_value = _get_PAT_parameter_value(config)
