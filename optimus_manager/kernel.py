@@ -335,6 +335,8 @@ def _try_custom_set_power_state(state):
     elif state == "OFF":
         script_path = envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH
 
+    print("Running %s" % script_path)
+
     try:
         exec_bash(script_path)
     except BashError as e:
