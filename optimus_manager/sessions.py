@@ -61,6 +61,12 @@ def logout_current_desktop_session():
     except BashError:
         pass
 
+    # bspwm
+    try:
+        exec_bash("bspc quit")
+    except BashError:
+        pass
+
 
 def is_there_a_wayland_session():
 
