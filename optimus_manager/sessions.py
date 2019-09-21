@@ -55,6 +55,12 @@ def logout_current_desktop_session():
     except BashError:
         pass
 
+    # AwesomeWM
+    try:
+        exec_bash("awesome-client \"awesome.quit()\"")
+    except BashError:
+        pass
+
     # bspwm
     try:
         exec_bash("bspc quit")
