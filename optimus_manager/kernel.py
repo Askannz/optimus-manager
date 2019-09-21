@@ -69,12 +69,12 @@ def _setup_intel_mode(config):
     
     elif config["optimus"]["switching"] == "none":
 
-        print("Running %s" % envs.NVIDIA_MANUAL_DISABLE_SCRIPT)
+        print("Running %s" % envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
 
         try:
-            exec_bash(envs.NVIDIA_MANUAL_DISABLE_SCRIPT)
+            exec_bash(envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
         except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_DISABLE_SCRIPT, str(e)))
+            print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH, str(e)))
 
     # Handling PCI power control
     if config["optimus"]["pci_power_control"] == "yes":
@@ -121,12 +121,12 @@ def _set_base_state(config):
         
         elif config["optimus"]["switching"] == "none":
             
-            print("Running %s" % envs.NVIDIA_MANUAL_ENABLE_SCRIPT)
+            print("Running %s" % envs.NVIDIA_MANUAL_ENABLE_SCRIPT_PATH)
 
             try:
-                exec_bash(envs.NVIDIA_MANUAL_ENABLE_SCRIPT)
+                exec_bash(envs.NVIDIA_MANUAL_ENABLE_SCRIPT_PATH)
             except BashError as e:
-                print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_ENABLE_SCRIPT, str(e)))
+                print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_ENABLE_SCRIPT_PATH, str(e)))
 
         print("Rescanning PCI bus")
         pci.rescan()
