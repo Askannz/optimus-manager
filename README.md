@@ -80,7 +80,7 @@ Run
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, and Openbox. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, Openbox, AwesomeWM, and bspwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
 You can also specify which GPU you want to be used by default when the system boots :
 
@@ -127,7 +127,9 @@ No config changes will be effective until you computer is rebooted or the optimu
 
 You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf` and `/etc/optimus-manager/xorg-nvidia.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
 
-Finally, if you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh` (for Intel mode) and `/etc/optimus-manager/xsetup-nvidia.sh` (for Nvidia mode).
+If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh` (for Intel mode) and `/etc/optimus-manager/xsetup-nvidia.sh` (for Nvidia mode).
+
+Finally, if you need to run some specific code prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if bbswitch is not supported), you can write the commands to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
 FAQ / Troubleshooting
 ----------

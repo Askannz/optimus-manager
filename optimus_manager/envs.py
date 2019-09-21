@@ -25,6 +25,9 @@ EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
 XSETUP_SCRIPT_INTEL = "/etc/optimus-manager/xsetup-intel.sh"
 XSETUP_SCRIPT_NVIDIA = "/etc/optimus-manager/xsetup-nvidia.sh"
 
+NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"
+NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"
+
 LOG_DIR_PATH = "/var/log/optimus-manager/"
 BOOT_SETUP_LOGFILE_NAME = "boot_setup.log"
 PRIME_SETUP_LOGFILE_NAME = "prime_setup.log"
