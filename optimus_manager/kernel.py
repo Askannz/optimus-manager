@@ -1,3 +1,4 @@
+import optimus_manager.envs as envs
 import optimus_manager.var as var
 import optimus_manager.checks as checks
 import optimus_manager.pci as pci
@@ -42,13 +43,7 @@ def _setup_intel_mode(config):
         _try_set_acpi_call_state("OFF")
 
     elif config["optimus"]["switching"] == "none":
-
-        print("Running %s" % envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
-
-        try:
-            exec_bash(envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH, str(e)))
+        _try_custom_set_power_state("OFF")
 
     # PCI remove
     if config["optimus"]["pci_remove"] == "yes":
@@ -123,6 +118,9 @@ def _set_base_state(config):
         _load_bbswitch()
     else:
         _unload_bbswitch()
+
+    if switching_mode == "none":
+        _try_custom_set_power_state("ON")
 
     _try_set_pci_power_state("on")
 
@@ -329,3 +327,16 @@ def _pci_reset(config):
 
     except pci.PCIError as e:
         raise KernelSetupError("Failed to perform PCI reset : %s" % str(e))
+
+def _try_custom_set_power_state(state):
+
+    if state == "ON":
+        script_path = envs.NVIDIA_MANUAL_ENABLE_SCRIPT_PATH
+    elif state == "OFF":
+        script_path = envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH
+
+    try:
+        exec_bash(script_path)
+    except BashError as e:
+        print("ERROR : cannot run %s. Continuing anyways. Error is : %s"
+              % (script_path, str(e)))
