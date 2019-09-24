@@ -5,7 +5,6 @@ import optimus_manager.pci as pci
 from optimus_manager.acpi_data import ACPI_STRINGS
 from optimus_manager.bash import exec_bash, BashError
 
-
 class KernelSetupError(Exception):
     pass
 
@@ -107,6 +106,9 @@ def _set_base_state(config):
         if should_send_acpi_call:
             _try_set_acpi_call_state("ON")        
 
+    if switching_mode == "none":
+        _try_custom_set_power_state("ON")
+        
     if not pci.is_nvidia_visible():
 
         print("Nvidia card not visible in PCI bus, rescanning")
@@ -118,9 +120,6 @@ def _set_base_state(config):
         _load_bbswitch()
     else:
         _unload_bbswitch()
-
-    if switching_mode == "none":
-        _try_custom_set_power_state("ON")
 
     _try_set_pci_power_state("on")
 
@@ -186,7 +185,8 @@ def _unload_bbswitch():
     try:
         exec_bash("modprobe -r bbswitch")
     except BashError as e:
-        raise KernelSetupError("Cannot unload bbswitch : %s" % str(e))
+        if not "Module bbswitch not found" in str(e):
+            raise KernelSetupError("Cannot unload bbswitch : %s" % str(e))
 
 def _load_acpi_call():
 
