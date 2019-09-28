@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
+import shutil
 import signal
 import select
 import socket
@@ -101,11 +102,24 @@ def _process_command(config, msg):
             print("Writing temporary config file path %s" % command["args"]["path"])
             var.write_temp_conf_path_var(command["args"]["path"])
 
+        elif command["type"] == "user_config":
+            _replace_user_config(command["args"]["path"])
+
         else:
             print("Invalid command  \"%s\" ! Unknown type %s" % (msg, command["type"]))
 
     except KeyError as e:
         print("Invalid command  \"%s\" ! Key error : %s" % (msg, str(e)))
+
+
+def _replace_user_config(source_path):
+
+    if not os.path.isfile(source_path):
+        print("ERROR : cannot replace persistent config : %s does not exist" % source_path)
+        return
+
+    print("Replacing user config at %s with file %s" % (envs.USER_CONFIG_PATH, source_path))
+    shutil.copy(source_path, envs.USER_CONFIG_PATH)
 
 
 class _SignalHandler:
