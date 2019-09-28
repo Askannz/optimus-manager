@@ -16,7 +16,6 @@ def load_config():
     validate_config(base_config)
 
     if not os.path.isfile(envs.USER_CONFIG_COPY_PATH):
-        print("No user config at %s" % envs.USER_CONFIG_COPY_PATH)
         return base_config
 
     try:
