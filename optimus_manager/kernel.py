@@ -114,7 +114,8 @@ def _set_base_state(config):
         print("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-    _try_pci_reset(config)
+    if config["optimus"]["pci_reset"] != "no":
+        _try_pci_reset(config)
 
     if switching_mode == "bbswitch":
         _load_bbswitch()
@@ -312,16 +313,12 @@ def _try_set_bbswitch_state(state):
 
 def _pci_reset(config):
 
-    if config["optimus"]["pci_reset"] == "no":
-        return
-
     try:
         if config["optimus"]["pci_reset"] == "function_level":
             print("Performing function-level reset of Nvidia")
             pci.function_level_reset_nvidia()
 
         elif config["optimus"]["pci_reset"] == "hot_reset":
-
             print("Starting hot reset sequence")
             pci.hot_reset_nvidia()
 
