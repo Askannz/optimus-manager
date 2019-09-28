@@ -246,7 +246,9 @@ def _check_power_switching(config):
         print("WARNING : no power management option is currently enabled (this is the default since v1.2)."
               " Switching between GPUs will work but you will likely experience poor battery life.\n"
               "Follow instructions at https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options"
-              " to enable power management.\n")
+              " to enable power management.\n"
+              "If you have already enabled the new Runtime D3 power management inside the Nvidia driver (for Turing+ GPU + Coffee Lake+ CPU),"
+              " you can safely ignore this warning.")
 
 
 def _check_bbswitch_module(config):
