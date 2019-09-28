@@ -1,4 +1,5 @@
 import os
+import re
 import dbus
 from optimus_manager.bash import exec_bash, BashError
 
@@ -16,16 +17,14 @@ def is_pat_available():
 
 
 def read_gpu_mode():
-    try:
-        exec_bash("glxinfo")
-    except BashError as e:
-        raise CheckError("Cannot find the current mode : %s" % str(e))
 
-    try:
-        exec_bash("glxinfo | grep NVIDIA")
+    if _is_gl_provider_nvidia():
         return "nvidia"
-    except BashError:
-        return "intel"
+    else:
+        if _is_offloading_available():
+            return "hybrid"
+        else:
+            return "intel"
 
 
 def is_module_available(module_name):
@@ -65,6 +64,20 @@ def using_patched_GDM():
 
     return (os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2))
 
+def _is_offloading_available():
+
+    try:
+        ret = exec_bash("xrandr --listproviders")
+    except BashError as e:
+        raise CheckError("Cannot list xrand providers : %s" % str(e))
+
+    stdout = ret.stdout.decode('utf-8')[:-1]
+
+    for line in stdout.splitlines():
+        if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
+            return True
+    return False
+
 
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
@@ -80,6 +93,20 @@ def is_daemon_active():
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
+
+def _is_gl_provider_nvidia():
+
+    try:
+        ret = exec_bash("glxinfo")
+    except BashError as e:
+        raise CheckError("Cannot run glxinfo : %s" % str(e))
+
+    stdout = ret.stdout.decode('utf-8')[:-1]
+
+    for line in stdout.splitlines():
+        if "server glx vendor string: NVIDIA Corporation" in line:
+            return True
+    return False
 
 
 def _is_service_active(service_name):
