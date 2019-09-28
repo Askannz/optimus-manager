@@ -30,6 +30,8 @@ def _setup_intel_mode(config, available_modules):
     # Resetting the system to its base state
     _set_base_state(config, available_modules)
 
+    print("Setting up Intel state")
+
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
         _try_load_nouveau(config, available_modules)
@@ -67,14 +69,20 @@ def _setup_intel_mode(config, available_modules):
 def _setup_nvidia_mode(config, available_modules):
 
     _set_base_state(config, available_modules)
+
+    print("Setting up Nvidia state")
     _load_nvidia_modules(config, available_modules)
 
 def _setup_hybrid_mode(config, available_modules):
 
     _set_base_state(config, available_modules)
+
+    print("Setting up Hybrid state")
     _load_nvidia_modules(config, available_modules)
 
 def _set_base_state(config, available_modules):
+
+    print("Setting up base state")
 
     _unload_nvidia_modules(available_modules)
     _unload_nouveau(available_modules)
