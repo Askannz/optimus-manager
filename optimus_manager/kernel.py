@@ -13,27 +13,26 @@ def setup_kernel_state(config, requested_gpu_mode):
 
     assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
 
+    available_modules = _get_available_modules()
+    print("Available kernel modules : %s" % str(available_modules))
+
     if requested_gpu_mode == "intel":
-        _setup_intel_mode(config)
+        _setup_intel_mode(config, available_modules)
 
     elif requested_gpu_mode == "nvidia":
-        _setup_nvidia_mode(config)
+        _setup_nvidia_mode(config, available_modules)
 
     elif requested_gpu_mode == "hybrid":
-        _setup_hybrid_mode(config)
+        _setup_hybrid_mode(config, available_modules)
 
-def _setup_intel_mode(config):
+def _setup_intel_mode(config, available_modules):
 
     # Resetting the system to its base state
-    _set_base_state(config)
+    _set_base_state(config, available_modules)
 
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
-
-        try:
-            _load_nouveau(config)
-        except KernelSetupError as e:
-            print("ERROR : cannot load nouveau. Moving on. Error is : %s" % str(e))
+        _try_load_nouveau(config, available_modules)
 
     elif config["optimus"]["switching"] == "bbswitch":
         _set_bbswitch_state("OFF")
@@ -65,32 +64,26 @@ def _setup_intel_mode(config):
         else:
             _try_set_pci_power_state("auto")
 
-def _setup_nvidia_mode(config):
+def _setup_nvidia_mode(config, available_modules):
 
-    _set_base_state(config)
-    _load_nvidia_modules(config)
+    _set_base_state(config, available_modules)
+    _load_nvidia_modules(config, available_modules)
 
-def _setup_hybrid_mode(config):
+def _setup_hybrid_mode(config, available_modules):
 
-    _set_base_state(config)
-    _load_nvidia_modules(config)
-    
-def _set_base_state(config):
+    _set_base_state(config, available_modules)
+    _load_nvidia_modules(config, available_modules)
 
-    _unload_nvidia_modules()
-    _unload_nouveau()
+def _set_base_state(config, available_modules):
+
+    _unload_nvidia_modules(available_modules)
+    _unload_nouveau(available_modules)
 
     switching_mode = config["optimus"]["switching"]
-
-    try:
-        if switching_mode == "bbswitch":
-            _load_bbswitch()
-        elif switching_mode == "acpi_call":
-            _load_acpi_call()
-    except KernelSetupError as e:
-        print("ERROR : error loading modules for %s. Continuing anyways. Error is : %s" % (switching_mode, str(e)))
-        if not checks.is_module_available(switching_mode):
-            print("%s is not available for the current kernel. Is the corresponding package installed ?")
+    if switching_mode == "bbswitch":
+        _try_load_bbswitch(available_modules)
+    elif switching_mode == "acpi_call":
+        _try_load_acpi_call(available_modules)
 
     if checks.is_module_loaded("bbswitch"):
         _try_set_bbswitch_state("ON")
@@ -108,97 +101,102 @@ def _set_base_state(config):
 
     if switching_mode == "none":
         _try_custom_set_power_state("ON")
-        
-    if not pci.is_nvidia_visible():
 
+    if not pci.is_nvidia_visible():
         print("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
     if config["optimus"]["pci_reset"] != "no":
-        _try_pci_reset(config)
+        _try_pci_reset(config, available_modules)
 
     if switching_mode == "bbswitch":
-        _load_bbswitch()
+        # Re-loading bbswitch in case it was unloaded before PCI reset
+        _try_load_bbswitch(available_modules)
     else:
-        _unload_bbswitch()
+        _try_unload_bbswitch(available_modules)
 
     _try_set_pci_power_state("on")
 
 
-def _load_nvidia_modules(config):
-    
-    print("Loading Nvidia modules")
+def _get_available_modules():
+    MODULES = ["nouveau", "bbswitch", "acpi_call", "nvidia", "nvidia_drm", "nvidia_modeset"]
+    return [module for module in MODULES if checks.is_module_available(module)]
+
+def _load_nvidia_modules(config, available_modules):
 
     pat_value = _get_PAT_parameter_value(config)
     modeset_value = 1 if config["nvidia"]["modeset"] == "yes" else 0
 
-    try:
-        exec_bash("modprobe nvidia NVreg_UsePageAttributeTable=%d" % pat_value)
-        exec_bash("modprobe nvidia_drm modeset=%d" % modeset_value)
+    _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
+    _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
 
-    except BashError as e:
-        raise KernelSetupError("Cannot load Nvidia modules : %s" % str(e))
-
-def _unload_nvidia_modules():
-
-    print("Unloading Nvidia modules (if any)")
-
-    try:
-        exec_bash("modprobe -r nvidia_drm nvidia_modeset nvidia_uvm nvidia")
-    except BashError as e:
-        raise KernelSetupError("Cannot unload Nvidia modules : %s" % str(e))
-
-def _load_nouveau(config):
-
-    print("Loading nouveau module")
-
+def _load_nouveau(config, available_modules):
     modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
+    _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
+
+def _try_load_nouveau(config, available_modules):
+    try:
+        _load_nouveau(config, available_modules)
+    except KernelSetupError as e:
+        print("ERROR : cannot load nouveau. Continuing anyways. Error is : %s" %  str(e))
+
+def _try_load_bbswitch(available_modules):
+    try:
+        _load_module(available_modules, "bbswitch")
+    except KernelSetupError as e:
+        print("ERROR : cannot load bbswitch. Continuing anyways. Error is : %s" %  str(e))
+
+def _try_load_acpi_call(available_modules):
+    try:
+        _load_module(available_modules, "acpi_call")
+    except KernelSetupError as e:
+        print("ERROR : cannot load acpi_call. Continuing anyways. Error is : %s" %  str(e))
+
+
+def _unload_nvidia_modules(available_modules):
+    _unload_modules(available_modules, ["nvidia_drm", "nvidia_modeset", "nvidia_uvm", "nvidia"])
+
+def _unload_nouveau(available_modules):
+    _unload_modules(available_modules, ["nouveau"])
+
+def _try_unload_bbswitch(available_modules):
+    try:
+        _unload_modules(available_modules, ["bbswitch"])
+    except KernelSetupError as e:
+        print("ERROR : cannot unload bbswitch. Continuing anyways. Error is : %s" %  str(e))
+
+def _unload_bbswitch(available_modules):
+    _unload_modules(available_modules, ["bbswitch"])
+
+def _load_module(available_modules, module, options=None):
+
+    options = options or ""
+
+    print("Loading module %s" % module)
+
+    if module not in available_modules:
+        raise KernelSetupError("ERROR : module %s is not available for current kernel."
+                               " Is the corresponding package installed ?" % module)
+    try:
+        exec_bash("modprobe %s %s" % (module, options))
+    except BashError as e:
+        raise KernelSetupError("error running modprobe for %s : %s" % (module, str(e)))
+
+def _unload_modules(available_modules, modules_list):
+
+    modules_to_unload = [m for m in modules_list if m in available_modules]
+
+    if len(modules_to_unload) == 0:
+        return
+
+    print("Unloading modules %s (if loaded)" % str(modules_to_unload))
 
     try:
-        exec_bash("modprobe nouveau modeset=%d" % modeset_value)
+        # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
+        exec_bash("modprobe -r " + " ".join(modules_to_unload))
     except BashError as e:
-        raise KernelSetupError("Cannot load nouveau : %s" % str(e))
+        raise KernelSetupError("Cannot unload modules %s : %s" % (str(modules_to_unload), str(e)))
 
-def _unload_nouveau():
-
-    print("Unloading nouveau module (if any)")
-
-    try:
-        exec_bash("modprobe -r nouveau")
-    except BashError as e:
-        raise KernelSetupError("Cannot unload nouveau : %s" % str(e))
-
-def _load_bbswitch():
-
-    if not checks.is_module_available("bbswitch"):
-        raise KernelSetupError("Module bbswitch not available for current kernel.")
-
-    print("Loading bbswitch module")
-    try:
-        exec_bash("modprobe bbswitch")
-    except BashError as e:
-        raise KernelSetupError("Cannot load bbswitch : %s" % str(e))
-
-def _unload_bbswitch():
-
-    print("Unloading bbswitch module (if any)")
-
-    try:
-        exec_bash("modprobe -r bbswitch")
-    except BashError as e:
-        if not "Module bbswitch not found" in str(e):
-            raise KernelSetupError("Cannot unload bbswitch : %s" % str(e))
-
-def _load_acpi_call():
-
-    if not checks.is_module_available("acpi_call"):
-        raise KernelSetupError("Module acpi_call not available for current kernel.")
-
-    print("Loading acpi_call module")
-    try:
-        exec_bash("modprobe acpi_call")
-    except BashError as e:
-        raise KernelSetupError("Cannot load acpi_call : %s" % str(e))
 
 def _get_PAT_parameter_value(config):
 
@@ -288,11 +286,10 @@ def _try_set_pci_power_state(state):
     except pci.PCIError as e:
         print("ERROR : cannot set PCI power management state. Continuing. Error is : %s" % str(e))
 
-def _try_pci_reset(config):
+def _try_pci_reset(config, available_modules):
 
     try:
-        _unload_bbswitch()
-        _pci_reset(config)
+        _pci_reset(config, available_modules)
     except KernelSetupError as e:
         print("ERROR : Nvidia PCI reset failed. Continuing. Error is : %s" % str(e))
 
@@ -311,7 +308,9 @@ def _try_set_bbswitch_state(state):
     except KernelSetupError as e:
         print("ERROR : setting bbswitch to %s. Continuing anyways. Error is : %s" % (state, str(e)))
 
-def _pci_reset(config):
+def _pci_reset(config, available_modules):
+
+    _unload_bbswitch(available_modules)
 
     try:
         if config["optimus"]["pci_reset"] == "function_level":
