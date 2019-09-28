@@ -183,7 +183,7 @@ def _load_module(available_modules, module, options=None):
     print("Loading module %s" % module)
 
     if module not in available_modules:
-        raise KernelSetupError("ERROR : module %s is not available for current kernel."
+        raise KernelSetupError("module %s is not available for current kernel."
                                " Is the corresponding package installed ?" % module)
     try:
         exec_bash("modprobe %s %s" % (module, options))
