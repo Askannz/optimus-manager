@@ -99,8 +99,12 @@ def _process_command(config, msg):
             var.write_startup_mode(command["args"]["mode"])
 
         elif command["type"] == "temp_config":
-            print("Writing temporary config file path %s" % command["args"]["path"])
-            var.write_temp_conf_path_var(command["args"]["path"])
+            if command["args"]["path"] == "":
+                print("Removing temporary config file path")
+                var.remove_temp_conf_path_var()
+            else:
+                print("Writing temporary config file path %s" % command["args"]["path"])
+                var.write_temp_conf_path_var(command["args"]["path"])
 
         elif command["type"] == "user_config":
             _replace_user_config(command["args"]["path"])

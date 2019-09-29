@@ -39,7 +39,8 @@ def main():
     parser.add_argument('--temp-config', metavar='PATH', action='store',
                         help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
                              " power switching configurations without ending up with an unbootable setup.")
-    
+    parser.add_argument('--unset-temp-config', action='store_true', help="Undo --temp-config (unset temp config path)")
+
 
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation and skip all warnings when switching GPUs.")
@@ -117,6 +118,9 @@ def main():
 
     elif args.temp_config:
         _set_temp_config_and_exit(args.temp_config)
+
+    elif args.unset_temp_config:
+        _unset_temp_config_and_exit()
 
     elif args.cleanup:
         _cleanup_xorg_and_exit()
@@ -422,7 +426,7 @@ def _set_startup_and_exit(startup_arg):
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 
-    print("setting startup mode to : %s" % startup_arg)
+    print("Setting startup mode to : %s" % startup_arg)
     command = {"type": "startup", "args": {"mode": startup_arg}}
     _send_command(command)
     sys.exit(0)
@@ -433,8 +437,15 @@ def _set_temp_config_and_exit(path):
         print("ERROR : no such config file : %s" % path)
         sys.exit(1)
 
-    print("setting temp config file path to : %s" % path)
+    print("Setting temp config file path to : %s" % path)
     command = {"type": "temp_config", "args": {"path": path}}
+    _send_command(command)
+    sys.exit(0)
+
+def _unset_temp_config_and_exit():
+
+    print("Unsetting temp config path")
+    command = {"type": "temp_config", "args": {"path": ""}}
     _send_command(command)
     sys.exit(0)
 
