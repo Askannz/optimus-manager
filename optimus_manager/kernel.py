@@ -208,7 +208,7 @@ def _unload_modules(available_modules, modules_list):
 
 def _get_PAT_parameter_value(config):
 
-    pat_value = {"yes": 1, "no": 0}[config["nvidia"]["PAT"]]
+    pat_value = {"yes": 1, "no": 0}[config["nvidia"]["pat"]]
 
     if not checks.is_pat_available():
         print("Warning : Page Attribute Tables are not available on your system.\n"
