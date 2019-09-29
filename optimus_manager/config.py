@@ -13,6 +13,7 @@ def load_config():
 
     base_config = configparser.ConfigParser()
     base_config.read(envs.DEFAULT_CONFIG_PATH)
+    base_config = _parsed_config_to_dict(base_config)
     validate_config(base_config)
 
     if not os.path.isfile(envs.USER_CONFIG_COPY_PATH):
@@ -21,6 +22,7 @@ def load_config():
     try:
         user_config = configparser.ConfigParser()
         user_config.read([envs.DEFAULT_CONFIG_PATH, envs.USER_CONFIG_COPY_PATH])
+        user_config = _parsed_config_to_dict(user_config)
     except configparser.ParsingError as e:
         print("ERROR : error parsing config file %s. Falling back to default config %s. Error is : %s"
               % (envs.USER_CONFIG_COPY_PATH, envs.DEFAULT_CONFIG_PATH, str(e)))
@@ -63,13 +65,9 @@ def validate_config(config, fallback_config=None):
 
                 else:
                     raise ConfigError(error_msg)
-            
 
     # Checking if the config file has no unknown section or option
     for section in config.keys():
-
-        if section == "DEFAULT":
-            continue
 
         if section not in schema.keys():
             print("WARNING : config parsing : unknown section [%s]. Ignoring." % section)
@@ -81,6 +79,23 @@ def validate_config(config, fallback_config=None):
                 del corrected_config[section][option]
 
     return corrected_config
+
+def _parsed_config_to_dict(config):
+
+    config_dict = {}
+
+    for section in config.keys():
+
+        if section == "DEFAULT":
+            continue
+
+        config_dict[section] = {}
+
+        for option in config[section].keys():
+            config_dict[section][option] = config[section][option]
+
+    return config_dict
+
 
 def _validate_option(schema_option_info, config_option_value):
 
