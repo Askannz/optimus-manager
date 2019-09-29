@@ -95,7 +95,7 @@ def setup_PRIME():
 
 def set_DPI(config):
 
-    dpi_str = config["nvidia"]["DPI"]
+    dpi_str = config["nvidia"]["dpi"]
 
     if dpi_str == "":
         return
@@ -204,7 +204,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     else:
         driver = config["intel"]["driver"]
 
-    dri = int(config["intel"]["DRI"])
+    dri = int(config["intel"]["dri"])
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n"
