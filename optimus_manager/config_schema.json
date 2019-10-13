@@ -22,6 +22,7 @@
 		"modeset": ["single_word", ["yes", "no"], false],
 		"pat": ["single_word", ["yes", "no"], false],
 		"dpi": ["integer", true],
+		"ignore_abi": ["single_word", ["yes", "no"], true],
 		"options": ["multi_words", ["overclocking", "triple_buffer"], true]
 	}
 }

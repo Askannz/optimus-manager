@@ -145,6 +145,8 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "\tDevice \"intel\"\n" \
             "EndSection\n\n"
 
+    text += _make_server_flags_section(config, bus_ids, xorg_extra)
+
     return text
 
 
@@ -174,6 +176,8 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
            "\tIdentifier \"nvidia\"\n" \
            "\tDevice \"nvidia\"\n" \
            "EndSection\n\n"
+
+    text += _make_server_flags_section(config, bus_ids, xorg_extra)
 
     return text
 
@@ -222,6 +226,15 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
+
+def _make_server_flags_section(config, bus_ids, xorg_extra):
+    if config["nvidia"]["ignore_abi"] == "yes":
+        return (
+            "Section \"ServerFlags\"\n"
+            "\tOption \"IgnoreABI\" \"1\"\n"
+            "EndSection\n\n"
+        )
+    return ""
 
 def _write_xorg_conf(xorg_conf_text):
 
