@@ -20,9 +20,6 @@ def main():
     print("Automatic log cropping")
     crop_logs()
 
-    print("Loading config file")
-    config = _get_config()
-
     print("Opening UNIX socket")
     server_socket = _open_server_socket()
 
