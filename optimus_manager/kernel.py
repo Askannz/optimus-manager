@@ -62,7 +62,7 @@ def _setup_intel_mode(config, available_modules):
         if switching_mode == "bbswitch" or switching_mode == "acpi_call":
             print("%s is enabled, pci_power_control option ignored." % switching_mode)
         elif config["optimus"]["pci_remove"] == "yes":
-            print("pci_remove is enabled, pci_power_control option ignored." % switching_mode)
+            print("pci_remove is enabled, pci_power_control option ignored.")
         else:
             _try_set_pci_power_state("auto")
 
