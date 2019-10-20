@@ -33,7 +33,7 @@ def write_requested_mode(mode):
 
     assert mode in ["intel", "nvidia", "hybrid"]
 
-    folder_path, filename = os.path.split(envs.REQUESTED_MODE_VAR_PATH)
+    folder_path, _ = os.path.split(envs.REQUESTED_MODE_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
@@ -76,7 +76,7 @@ def write_startup_mode(mode):
 
     assert mode in ["intel", "nvidia", "hybrid"]
 
-    folder_path, filename = os.path.split(envs.STARTUP_MODE_VAR_PATH)
+    folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
@@ -98,7 +98,7 @@ def remove_startup_mode_var():
 
 def write_dpi_var(dpi):
 
-    folder_path, filename = os.path.split(envs.DPI_VAR_PATH)
+    folder_path, _ = os.path.split(envs.DPI_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
@@ -135,7 +135,7 @@ def read_temp_conf_path_var():
 
 def write_temp_conf_path_var(path):
 
-    folder_path, filename = os.path.split(envs.TEMP_CONFIG_PATH_VAR_PATH)
+    folder_path, _ = os.path.split(envs.TEMP_CONFIG_PATH_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
@@ -155,7 +155,7 @@ def remove_temp_conf_path_var():
 
 def write_acpi_call_strings(call_strings_list):
 
-    folder_path, filename = os.path.split(envs.ACPI_CALL_STRING_VAR_PATH)
+    folder_path, _ = os.path.split(envs.ACPI_CALL_STRING_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
@@ -181,7 +181,7 @@ def read_acpi_call_strings():
 
 def write_last_acpi_call_state(state):
 
-    folder_path, filename = os.path.split(envs.LAST_ACPI_CALL_STATE_VAR)
+    folder_path, _ = os.path.split(envs.LAST_ACPI_CALL_STATE_VAR)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)

@@ -62,7 +62,7 @@ def using_patched_GDM():
     folder_path_1 = "/etc/gdm/Prime"
     folder_path_2 = "/etc/gdm3/Prime"
 
-    return (os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2))
+    return os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2)
 
 def _is_offloading_available():
 
@@ -114,7 +114,8 @@ def _is_service_active(service_name):
     try:
         system_bus = dbus.SystemBus()
     except dbus.exceptions.DBusException:
-        print("WARNING : Cannot communicate with the DBus system bus to check status of %s. Is DBus running ? Falling back to bash commands" % service_name)
+        print("WARNING : Cannot communicate with the DBus system bus to check status of %s."
+              " Is DBus running ? Falling back to bash commands" % service_name)
         return _is_service_active_bash(service_name)
     else:
         return _is_service_active_dbus(system_bus, service_name)
@@ -132,7 +133,7 @@ def _is_service_active_dbus(system_bus, service_name):
     properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
     state = properties_manager.Get("org.freedesktop.systemd1.Unit", "SubState")
 
-    return (state == "running")
+    return state == "running"
 
 
 def _is_service_active_bash(service_name):

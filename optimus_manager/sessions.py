@@ -48,7 +48,7 @@ def logout_current_desktop_session():
         exec_bash("i3-msg exit")
     except BashError:
         pass
-    
+
     # openbox
     try:
         exec_bash("openbox --exit")
@@ -76,8 +76,8 @@ def is_there_a_wayland_session():
         session_type = _get_session_type(session)
         if session_type == "wayland":
             return True
-    else:
-        return False
+
+    return False
 
 
 def get_number_of_desktop_sessions(ignore_gdm=True):

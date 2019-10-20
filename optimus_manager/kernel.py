@@ -105,7 +105,7 @@ def _set_base_state(config, available_modules):
             should_send_acpi_call = False
 
         if should_send_acpi_call:
-            _try_set_acpi_call_state("ON")        
+            _try_set_acpi_call_state("ON")
 
     if switching_mode == "none":
         _try_custom_set_power_state("ON")
