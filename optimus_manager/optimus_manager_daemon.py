@@ -35,7 +35,7 @@ def main():
         msg = _wait_for_command(server_socket)
         print("Received command : %s" % msg)
 
-        _process_command(config, msg)
+        _process_command(msg)
 
 
 def _get_config():
@@ -74,14 +74,14 @@ def _setup_signal_handler(server_socket):
 
 def _wait_for_command(server_socket):
 
-    r, _, _ = select.select([server_socket], [], [])
+    select.select([server_socket], [], [])
     datagram = server_socket.recv(1024)
     msg = datagram.decode('utf-8')
 
     return msg
 
 
-def _process_command(config, msg):
+def _process_command(msg):
 
     try:
         command = json.loads(msg)
@@ -93,7 +93,7 @@ def _process_command(config, msg):
         if command["type"] == "switch":
             print("Writing requested GPU mode %s" % command["args"]["mode"])
             var.write_requested_mode(command["args"]["mode"])
-        
+
         elif command["type"] == "startup":
             print("Writing startup mode %s" % command["args"]["mode"])
             var.write_startup_mode(command["args"]["mode"])
@@ -131,6 +131,7 @@ class _SignalHandler:
         self.server_socket = server_socket
 
     def handler(self, signum, frame):
+        #pylint: disable=unused-argument
 
         print("\nProcess stop requested")
 

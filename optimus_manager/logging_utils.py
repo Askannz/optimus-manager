@@ -30,7 +30,7 @@ def _crop_log_file(filepath):
     if len(lines_list) > envs.LOG_MAX_SIZE:
         print("Log file %s has more than %d lines, cropping it to %d"
               % (filepath, envs.LOG_MAX_SIZE, envs.LOG_CROPPED_SIZE))
-        
+
         lines_list = lines_list[-envs.LOG_CROPPED_SIZE:]
 
         with open(filepath, "w") as f:

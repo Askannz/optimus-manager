@@ -2,7 +2,6 @@
 import sys
 import os
 import shutil
-import time
 import argparse
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
@@ -57,7 +56,7 @@ def main():
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
-        _write_gpu_mode(config, startup_mode)
+        _write_gpu_mode(startup_mode)
 
         print("Initial GPU setup")
         _setup_gpu(config, startup_mode)
@@ -152,7 +151,7 @@ def _get_startup_mode():
     return startup_mode
 
 
-def _write_gpu_mode(config, mode):
+def _write_gpu_mode(mode):
 
     try:
         print("Writing requested mode")

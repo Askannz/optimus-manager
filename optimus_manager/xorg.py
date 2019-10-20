@@ -108,8 +108,6 @@ def set_DPI(config):
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
-    options = config["nvidia"]["options"].replace(" ", "").split(",")
-
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
            "\tModulePath \"/usr/lib32/nvidia\"\n" \
