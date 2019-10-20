@@ -12,7 +12,7 @@ Only Xorg sessions are supported (no Wayland).
 
 Supported display managers are : SDDM, LightDM, GDM.
 
-optimus-manager *might* still work with other display managers but you have to configure them manually (see [this FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm)).
+optimus-manager can also work with other display managers (or with no display manager at all) but you have to configure them manually (see [FAQ section 1](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm) [FAQ section 2](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#i-do-not-use-a-display-manager-i-use-startx-or-xinit) ).
 
 Introduction
 ----------
