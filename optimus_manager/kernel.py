@@ -127,7 +127,7 @@ def _set_base_state(config, available_modules):
 
 
 def _get_available_modules():
-    MODULES = ["nouveau", "bbswitch", "acpi_call", "nvidia", "nvidia_drm", "nvidia_modeset"]
+    MODULES = ["nouveau", "bbswitch", "acpi_call", "nvidia", "nvidia_drm", "nvidia_modeset", "nvidia_uvm"]
     return [module for module in MODULES if checks.is_module_available(module)]
 
 def _load_nvidia_modules(config, available_modules):
