@@ -158,10 +158,9 @@ def _print_current_mode():
 
     try:
         mode = checks.read_gpu_mode()
+        print("Current GPU mode : %s" % mode)
     except checks.CheckError as e:
         print("Error reading current mode : %s" % str(e))
-
-    print("Current GPU mode : %s" % mode)
 
 
 def _print_next_mode():
