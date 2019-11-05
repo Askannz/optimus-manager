@@ -193,6 +193,13 @@ def load_extra_xorg_options():
         pass
 
     try:
+        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_AMD_PATH)
+        print("Loaded extra AMD Xorg options (%d lines)" % len(config_lines))
+        xorg_extra["amd"] = config_lines
+    except FileNotFoundError:
+        pass
+
+    try:
         config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_NVIDIA_PATH)
         print("Loaded extra Nvidia Xorg options (%d lines)" % len(config_lines))
         xorg_extra["nvidia"] = config_lines

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import os
-import shutil
 import signal
 import select
 import socket

@@ -22,9 +22,9 @@ def read_gpu_mode():
         return "nvidia"
     else:
         if _is_offloading_available():
-            return "hybrid"
+            return "hybrid-" + get_integrated_gpu()
         else:
-            return "intel"
+            return get_integrated_gpu()
 
 
 def is_module_available(module_name):
@@ -69,7 +69,7 @@ def _is_offloading_available():
     try:
         ret = exec_bash("xrandr --listproviders")
     except BashError as e:
-        raise CheckError("Cannot list xrand providers : %s" % str(e))
+        raise CheckError("Cannot list xrandr providers : %s" % str(e))
 
     stdout = ret.stdout.decode('utf-8')[:-1]
 
@@ -81,6 +81,9 @@ def _is_offloading_available():
 
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
+
+def is_xorg_amd_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
 
 
 def is_login_manager_active():
@@ -107,6 +110,15 @@ def _is_gl_provider_nvidia():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
     return False
+
+
+def get_integrated_gpu():
+
+    try:
+        exec_bash("glxinfo | grep AMD")
+        return "amd"
+    except BashError:
+        return "intel"
 
 
 def _is_service_active(service_name):

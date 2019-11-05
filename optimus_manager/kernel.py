@@ -11,30 +11,36 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, requested_gpu_mode):
 
-    assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
+    assert requested_gpu_mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]
 
     available_modules = _get_available_modules()
     print("Available kernel modules : %s" % str(available_modules))
 
-    if requested_gpu_mode == "intel":
-        _setup_intel_mode(config, available_modules)
-
-    elif requested_gpu_mode == "nvidia":
+    if requested_gpu_mode == "nvidia":
         _setup_nvidia_mode(config, available_modules)
 
-    elif requested_gpu_mode == "hybrid":
+    elif requested_gpu_mode == "intel":
+        _setup_igpu_mode(config, available_modules, "intel")
+
+    elif requested_gpu_mode == "amd":
+        _setup_igpu_mode(config, available_modules, "amd")
+
+    elif requested_gpu_mode == "hybrid-intel":
         _setup_hybrid_mode(config, available_modules)
 
-def _setup_intel_mode(config, available_modules):
+    elif requested_gpu_mode == "hybrid-amd":
+        _setup_hybrid_mode(config, available_modules)
+
+def _setup_igpu_mode(config, available_modules, igpu="intel"):
 
     # Resetting the system to its base state
     _set_base_state(config, available_modules)
 
-    print("Setting up Intel state")
+    print("Setting up %s GPU state" % igpu)
 
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
-        _try_load_nouveau(config, available_modules)
+        _try_load_nouveau(config, available_modules, igpu)
 
     elif config["optimus"]["switching"] == "bbswitch":
         _set_bbswitch_state("OFF")
@@ -138,13 +144,13 @@ def _load_nvidia_modules(config, available_modules):
     _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
     _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
 
-def _load_nouveau(config, available_modules):
-    modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
+def _load_nouveau(config, available_modules, igpu):
+    modeset_value = 1 if config[igpu]["modeset"] == "yes" else 0
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
-def _try_load_nouveau(config, available_modules):
+def _try_load_nouveau(config, available_modules, igpu):
     try:
-        _load_nouveau(config, available_modules)
+        _load_nouveau(config, available_modules, igpu)
     except KernelSetupError as e:
         print("ERROR : cannot load nouveau. Continuing anyways. Error is : %s" %  str(e))
 

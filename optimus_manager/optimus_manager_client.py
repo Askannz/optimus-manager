@@ -31,10 +31,10 @@ def main():
 
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : intel, nvidia, hybrid, auto (auto-detects the mode you may want to switch to).")
+                             "Possible modes : nvidia, intel, amd, hybrid-intel, hybrid-amd, auto (auto-detects the mode you may want to switch to).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia, hybrid")
+                             "nvidia, intel, amd, hybrid-intel, hybrid-amd")
 
     parser.add_argument('--temp-config', metavar='PATH', action='store',
                         help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
@@ -90,6 +90,7 @@ def main():
         _check_xorg_conf()
         _check_MHWD_conf()
         _check_intel_xorg_module(config, switch_mode)
+        _check_amd_xorg_module(config, switch_mode)
         _check_number_of_sessions()
 
         if config["optimus"]["auto_logout"] == "yes":
@@ -217,7 +218,7 @@ def _check_daemon_active():
 
 def _get_switch_mode(switch_arg):
 
-    if switch_arg not in ["auto", "intel", "nvidia", "hybrid"]:
+    if switch_arg not in ["auto", "nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
@@ -228,12 +229,7 @@ def _get_switch_mode(switch_arg):
             print("Error reading current GPU mode: %s" % str(e))
             sys.exit(1)
 
-        if gpu_mode == "nvidia":
-            switch_mode = "intel"
-        elif gpu_mode == "intel":
-            switch_mode = "nvidia"
-        elif gpu_mode == "hybrid":
-            switch_mode = "intel"
+        switch_mode = "intel" if gpu_mode == "nvidia" else "nvidia"
 
         print("Switching to : %s" % switch_mode)
 
@@ -363,7 +359,21 @@ def _check_intel_xorg_module(config, switch_mode):
     if switch_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
         print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
               " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
-              " the package \"xf86-video-intel.\"\n"
+              " the package \"xf86-video-intel\".\n"
+              "Continue ? (y/N)")
+
+        confirmation = _ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+
+def _check_amd_xorg_module(config, switch_mode):
+
+    if switch_mode == "amd" and config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amd_module_available():
+        print("WARNING : The Xorg driver \"amdgpu\" is selected in the configuration file but this driver is not installed."
+              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"amdgpu\" driver from"
+              " the package \"xf86-video-amdgpu\".\n"
               "Continue ? (y/N)")
 
         confirmation = _ask_confirmation()
@@ -421,7 +431,7 @@ def _send_command(command):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia", "hybrid"]:
+    if startup_arg not in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 

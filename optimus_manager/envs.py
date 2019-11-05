@@ -1,3 +1,6 @@
+from optimus_manager.pci import get_available_igpu
+
+
 VERSION = "1.2.2"
 
 SOCKET_PATH = "/tmp/optimus-manager"
@@ -10,7 +13,7 @@ TEMP_CONFIG_PATH_VAR_PATH = "/var/lib/optimus-manager/temp_conf_path"
 ACPI_CALL_STRING_VAR_PATH = "/var/lib/optimus-manager/acpi_call_strings.json"
 LAST_ACPI_CALL_STATE_VAR = "/var/lib/optimus-manager/last_acpi_call_state"
 
-DEFAULT_STARTUP_MODE = "intel"
+DEFAULT_STARTUP_MODE = get_available_igpu()
 
 SYSTEM_CONFIGS_PATH = "/etc/optimus-manager/configs/"
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
@@ -20,9 +23,11 @@ USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 USER_CONFIG_COPY_PATH = "/var/lib/optimus-manager/config_copy.conf"
 
 EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/xorg-intel.conf"
+EXTRA_XORG_OPTIONS_AMD_PATH = "/etc/optimus-manager/xorg-amd.conf"
 EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
 
 XSETUP_SCRIPT_INTEL = "/etc/optimus-manager/xsetup-intel.sh"
+XSETUP_SCRIPT_AMD = "/etc/optimus-manager/xsetup-amd.sh"
 XSETUP_SCRIPT_NVIDIA = "/etc/optimus-manager/xsetup-nvidia.sh"
 
 NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"

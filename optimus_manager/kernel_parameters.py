@@ -8,7 +8,7 @@ def get_kernel_parameters():
     for item in cmdline.split():
         if re.fullmatch("optimus-manager\\.startup=[^ ]+", item):
             startup_mode = item.split("=")[-1]
-            if startup_mode not in ["intel", "nvidia"]:
+            if startup_mode not in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]:
                 print("ERROR : invalid startup mode in kernel parameter : \"%s\". Ignored." % startup_mode)
                 startup_mode = None
             break

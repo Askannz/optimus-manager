@@ -20,8 +20,12 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "intel":
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid":
-        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "amd":
+        xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid-intel":
+        xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid-amd":
+        xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
 
     manjaro_hacks.remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -92,6 +96,15 @@ def setup_PRIME():
         except BashError as e:
             print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
 
+    elif requested_mode == "amd":
+
+        print("Running %s" % envs.XSETUP_SCRIPT_AMD)
+        try:
+            exec_bash(envs.XSETUP_SCRIPT_AMD)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_AMD, str(e)))
+
+
 
 def set_DPI(config):
 
@@ -121,7 +134,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"ServerLayout\"\n" \
             "\tIdentifier \"layout\"\n" \
             "\tScreen 0 \"nvidia\"\n" \
-            "\tInactive \"intel\"\n" \
+            "\tInactive \"igpu\"\n" \
             "EndSection\n\n"
 
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
@@ -133,14 +146,15 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
-            "\tIdentifier \"intel\"\n" \
-            "\tDriver \"modesetting\"\n"
-    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
-    text += "EndSection\n\n"
+            "\tIdentifier \"igpu\"\n" \
+            "\tDriver \"modesetting\"\n" \
+            "EndSection\n\n"
+    ## TODO: check if this is mandatorily required (and if so, generalize it for Intel/AMD) :
+           #"\tBusID \"%s\"\n" % bus_ids["intel"] \  # (between "Driver" and "EndSection")
 
     text += "Section \"Screen\"\n" \
-            "\tIdentifier \"intel\"\n" \
-            "\tDevice \"intel\"\n" \
+            "\tIdentifier \"igpu\"\n" \
+            "\tDevice \"igpu\"\n" \
             "EndSection\n\n"
 
     text += _make_server_flags_section(config, bus_ids, xorg_extra)
@@ -152,28 +166,51 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text = _make_intel_device_section(config, bus_ids, xorg_extra)
     return text
 
-def _generate_hybrid(config, bus_ids, xorg_extra):
+def _generate_amd(config, bus_ids, xorg_extra):
+    text = _make_amd_device_section(config, bus_ids, xorg_extra)
+    return text
+
+def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
     text = "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
            "\tScreen 0 \"intel\"\n" \
-           "\tInactive \"nvidia\"\n" \
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
     text += _make_intel_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
-           "\tIdentifier \"intel\"\n" \
-           "\tDevice \"intel\"\n" \
+            "\tIdentifier \"intel\"\n" \
+            "\tDevice \"intel\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n" \
+            "EndSection\n\n"
+
+    return text
+
+def _generate_hybrid_amd(config, bus_ids, xorg_extra):
+
+    text = "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"amd\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+    text += _make_amd_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDevice \"nvidia\"\n" \
-           "EndSection\n\n"
+            "\tIdentifier \"amd\"\n" \
+            "\tDevice \"amd\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n" \
+            "EndSection\n\n"
 
     text += _make_server_flags_section(config, bus_ids, xorg_extra)
 
@@ -225,6 +262,31 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 
     return text
 
+def _make_amd_device_section(config, bus_ids, xorg_extra):
+
+    if config["amd"]["driver"] == "amdgpu" and not _is_amd_module_available():
+        print("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
+        driver = "modesetting"
+    else:
+        driver = config["amd"]["driver"]
+
+    dri = int(config["amd"]["dri"])
+
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"amd\"\n"
+    text += "\tDriver \"%s\"\n" % driver
+    text += "\tBusID \"%s\"\n" % bus_ids["amd"]
+    if config["amd"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    if "amd" in xorg_extra.keys():
+        for line in xorg_extra["amd"]:
+            text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
+
+    return text
+
 def _make_server_flags_section(config, bus_ids, xorg_extra):
     if config["nvidia"]["ignore_abi"] == "yes":
         return (
@@ -246,3 +308,6 @@ def _write_xorg_conf(xorg_conf_text):
 
 def _is_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
+
+def _is_amd_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
