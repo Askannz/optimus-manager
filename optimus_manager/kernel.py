@@ -36,7 +36,7 @@ def _setup_igpu_mode(config, available_modules, igpu="intel"):
     # Resetting the system to its base state
     _set_base_state(config, available_modules)
 
-    print("Setting up %s GPU state" % igpu)
+    print("Setting up %s-GPU state" % ("AMD" if igpu == "amd" else "Intel"))
 
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
