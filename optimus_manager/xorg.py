@@ -237,6 +237,7 @@ def _make_server_flags_section(config, bus_ids, xorg_extra):
 def _write_xorg_conf(xorg_conf_text):
 
     try:
+        os.makedirs(envs.XORG_CONF_DIR, mode=0o755, exist_ok=True)
         with open(envs.XORG_CONF_PATH, 'w') as f:
             print("Writing to %s" % envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
