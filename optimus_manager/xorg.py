@@ -129,8 +129,12 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
             "\tDevice \"nvidia\"\n" \
-            "\tOption \"AllowEmptyInitialConfiguration\"\n" \
-            "EndSection\n\n"
+            "\tOption \"AllowEmptyInitialConfiguration\"\n"
+
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
             "\tIdentifier \"intel\"\n" \
@@ -165,8 +169,12 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
 
     text += "Section \"Screen\"\n" \
            "\tIdentifier \"intel\"\n" \
-           "\tDevice \"intel\"\n" \
-           "EndSection\n\n"
+           "\tDevice \"intel\"\n"
+
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
 
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
