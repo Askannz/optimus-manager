@@ -92,6 +92,13 @@ def setup_PRIME():
         except BashError as e:
             print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
 
+    elif requested_mode == "hybrid":
+
+        print("Running %s" % envs.XSETUP_SCRIPT_HYBRID)
+        try:
+            exec_bash(envs.XSETUP_SCRIPT_HYBRID)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
 
 def set_DPI(config):
 
