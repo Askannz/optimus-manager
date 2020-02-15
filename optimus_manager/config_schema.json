@@ -31,6 +31,7 @@
 		"pat": ["single_word", ["yes", "no"], false],
 		"dpi": ["integer", true],
 		"ignore_abi": ["single_word", ["yes", "no"], false],
+		"allow_external_gpus": ["single_word", ["yes", "no"], false],
 		"options": ["multi_words", ["overclocking", "triple_buffer"], true]
 	}
 }

@@ -104,7 +104,13 @@ def setup_PRIME():
         except BashError as e:
             print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_AMD, str(e)))
 
+    elif requested_mode in ("hybrid-amd", "hybrid_intel"):
 
+        print("Running %s" % envs.XSETUP_SCRIPT_HYBRID)
+        try:
+            exec_bash(envs.XSETUP_SCRIPT_HYBRID)
+        except BashError as e:
+            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
 
 def set_DPI(config):
 
@@ -142,15 +148,19 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
             "\tDevice \"nvidia\"\n" \
-            "\tOption \"AllowEmptyInitialConfiguration\"\n" \
-            "EndSection\n\n"
+            "\tOption \"AllowEmptyInitialConfiguration\"\n"
+
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
             "\tIdentifier \"igpu\"\n" \
-            "\tDriver \"modesetting\"\n" \
-            "EndSection\n\n"
+            "\tDriver \"modesetting\"\n"
     ## TODO: check if this is mandatorily required (and if so, generalize it for Intel/AMD) :
-           #"\tBusID \"%s\"\n" % bus_ids["intel"] \  # (between "Driver" and "EndSection")
+    #text += "\tBusID \"%s\"\n" % bus_ids["intel"] \  # (between "Driver" and "EndSection")
+    text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"igpu\"\n" \
@@ -182,12 +192,18 @@ def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"intel\"\n" \
-            "\tDevice \"intel\"\n" \
-            "EndSection\n\n"
+            "\tDevice \"intel\"\n"
 
-    text += "Section \"Device\"\n" \
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
-            "\tDriver \"nvidia\"\n" \
+            "\tDevice \"nvidia\"\n" \
             "EndSection\n\n"
 
     return text
@@ -204,12 +220,18 @@ def _generate_hybrid_amd(config, bus_ids, xorg_extra):
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"amd\"\n" \
-            "\tDevice \"amd\"\n" \
-            "EndSection\n\n"
+            "\tDevice \"amd\"\n"
 
-    text += "Section \"Device\"\n" \
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
-            "\tDriver \"nvidia\"\n" \
+            "\tDevice \"nvidia\"\n" \
             "EndSection\n\n"
 
     text += _make_server_flags_section(config, bus_ids, xorg_extra)

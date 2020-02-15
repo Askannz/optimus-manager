@@ -30,6 +30,7 @@ EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
 XSETUP_SCRIPT_INTEL = "/etc/optimus-manager/xsetup-intel.sh"
 XSETUP_SCRIPT_AMD = "/etc/optimus-manager/xsetup-amd.sh"
 XSETUP_SCRIPT_NVIDIA = "/etc/optimus-manager/xsetup-nvidia.sh"
+XSETUP_SCRIPT_HYBRID = "/etc/optimus-manager/xsetup-hybrid.sh"
 
 NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"
 NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"

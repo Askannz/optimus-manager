@@ -16,10 +16,14 @@ optdepends=('bbswitch: alternative power switching method'
 makedepends=('python-setuptools' 'git')
 backup=('etc/optimus-manager/xorg-intel.conf'
         'etc/optimus-manager/xorg-nvidia.conf'
+
         'etc/optimus-manager/xsetup-intel.sh'
         'etc/optimus-manager/xsetup-nvidia.sh'
+        'etc/optimus-manager/xsetup-hybrid.sh'
+
         'etc/optimus-manager/nvidia-enable.sh'
         'etc/optimus-manager/nvidia-disable.sh'
+
         'var/lib/optimus-manager/startup_mode'
         'var/lib/optimus-manager/requested_mode')
 source=("git+https://github.com/Askannz/optimus-manager.git#branch=master")
@@ -66,6 +70,7 @@ package() {
   
   install -Dm755 config/xsetup-intel.sh "$pkgdir/etc/optimus-manager/xsetup-intel.sh"
   install -Dm755 config/xsetup-nvidia.sh "$pkgdir/etc/optimus-manager/xsetup-nvidia.sh"
+  install -Dm755 config/xsetup-hybrid.sh "$pkgdir/etc/optimus-manager/xsetup-hybrid.sh"
 
   install -Dm755 config/nvidia-enable.sh "$pkgdir/etc/optimus-manager/nvidia-enable.sh"
   install -Dm755 config/nvidia-disable.sh "$pkgdir/etc/optimus-manager/nvidia-disable.sh"
