@@ -440,14 +440,16 @@ def _set_startup_and_exit(startup_arg):
     _send_command(command)
     sys.exit(0)
 
-def _set_temp_config_and_exit(path):
+def _set_temp_config_and_exit(rel_path):
 
-    if not os.path.isfile(path):
-        print("ERROR : no such config file : %s" % path)
+    abs_path = os.path.join(os.getcwd(), rel_path)
+
+    if not os.path.isfile(abs_path):
+        print("ERROR : no such config file : %s" % abs_path)
         sys.exit(1)
 
-    print("Setting temp config file path to : %s" % path)
-    command = {"type": "temp_config", "args": {"path": path}}
+    print("Setting temp config file path to : %s" % abs_path)
+    command = {"type": "temp_config", "args": {"path": abs_path}}
     _send_command(command)
     sys.exit(0)
 
