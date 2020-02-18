@@ -3,6 +3,7 @@ import sys
 import os
 import shutil
 import argparse
+from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 import optimus_manager.var as var
@@ -52,7 +53,10 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        startup_mode = _get_startup_mode()
+        if _check_ac_power_connected():
+            startup_mode = "nvidia"
+        else:
+            startup_mode = _get_startup_mode()
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -89,15 +93,18 @@ def main():
         print("Requested mode :", requested_mode)
         _setup_gpu(config, requested_mode)
 
+
 def _abort_if_service_inactive():
     if not is_daemon_active():
         print("ERROR : the optimus-manager service is not running. Aborting.")
         sys.exit(0)
 
+
 def _remove_config_copy():
 
     if os.path.isfile(envs.USER_CONFIG_COPY_PATH):
         os.remove(envs.USER_CONFIG_COPY_PATH)
+
 
 def _copy_user_config():
 
@@ -118,6 +125,7 @@ def _copy_user_config():
     if os.path.isfile(config_path):
         shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
 
+
 def _get_config():
 
     try:
@@ -127,6 +135,19 @@ def _get_config():
         sys.exit(1)
 
     return config
+
+
+def _check_ac_power_connected():
+
+    try:
+        ac_online = exec_bash("cat /sys/class/power_supply/AC/online")
+        is_ac_connected = ac_online.stdout.strip() == b'1'
+        print("AC power is%s connected" % ("" if is_ac_connected else " not"))
+        return is_ac_connected
+    except BashError:
+        print("Could not read AC power state")
+        # Default to normal startup mode
+        return False
 
 
 def _get_startup_mode():
