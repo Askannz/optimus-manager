@@ -52,10 +52,7 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        if config["optimus"]["dynamic_startup_mode"] == "yes" and _check_ac_power_connected():
-            startup_mode = "nvidia"
-        else:
-            startup_mode = _get_startup_mode()
+        startup_mode = _get_startup_mode(config)
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -136,20 +133,10 @@ def _get_config():
     return config
 
 
-def _check_ac_power_connected():
+def _get_startup_mode(config):
 
-    try:
-        with open("/sys/class/power_supply/AC/online", 'r') as f:
-            is_ac_online = f.read(1) == "1"
-            print("AC power is%s connected" % ("" if is_ac_online else " not"))
-            return is_ac_online
-    except IOError:
-        print("Could not read AC power state")
-        # Default to normal startup mode
-        return False
-
-
-def _get_startup_mode():
+    if config["optimus"]["dynamic_startup_mode"] == "yes" and _check_ac_power_connected():
+        return "nvidia"
 
     kernel_parameters = get_kernel_parameters()
 
@@ -169,6 +156,19 @@ def _get_startup_mode():
         startup_mode = kernel_parameters["startup_mode"]
 
     return startup_mode
+
+
+def _check_ac_power_connected():
+
+    try:
+        with open("/sys/class/power_supply/AC/online", 'r') as f:
+            is_ac_online = f.read(1) == "1"
+            print("AC power is%s connected" % ("" if is_ac_online else " not"))
+            return is_ac_online
+    except IOError:
+        print("Could not read AC power state")
+        # Default to normal startup mode
+        return False
 
 
 def _write_gpu_mode(mode):
