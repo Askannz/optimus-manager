@@ -135,20 +135,23 @@ def _get_config():
 
 def _get_startup_mode(config):
 
-    if config["optimus"]["dynamic_startup_mode"] == "yes" and _check_ac_power_connected():
-        return "nvidia"
-
     kernel_parameters = get_kernel_parameters()
 
     if kernel_parameters["startup_mode"] is None:
 
-        print("No kernel parameter set for startup, reading from file")
+        print("No kernel parameter set for startup, checking dynamic startup mode")
 
-        try:
-            startup_mode = var.read_startup_mode()
-        except var.VarError as e:
-            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-            startup_mode = envs.DEFAULT_STARTUP_MODE
+        if config["optimus"]["dynamic_startup_mode"] == "yes" and _check_ac_power_connected():
+            startup_mode = "nvidia"
+        else:
+
+            print("Dynamic startup mode not available, reading from file")
+
+            try:
+                startup_mode = var.read_startup_mode()
+            except var.VarError as e:
+                print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+                startup_mode = envs.DEFAULT_STARTUP_MODE
 
     else:
 
