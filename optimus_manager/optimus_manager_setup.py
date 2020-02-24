@@ -64,7 +64,7 @@ def main():
     elif args.setup_prime:
         print("Setting up PRIME")
 
-        print("Checking status of optimus-manager.service")
+        print("Checking status of optimus-manager")
         _abort_if_service_inactive()
 
         print("Loading config")
@@ -76,7 +76,7 @@ def main():
     elif args.setup_gpu:
         print("Setting up the GPU")
 
-        print("Checking status of optimus-manager.service")
+        print("Checking status of optimus-manager")
         _abort_if_service_inactive()
 
         print("Cleaning up leftover Xorg conf")
