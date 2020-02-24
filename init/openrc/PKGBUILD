@@ -1,0 +1,17 @@
+pkgname=optimus-manager-openrc
+pkgver=20200221
+pkgrel=1
+pkgdesc="OpenRC script for optimus-manager"
+arch=('any')
+url="https://github.com/Askannz/optimus-manager"
+license=('MIT')
+provides=('optimus-manager-openrc')
+depends=('openrc' 'displaymanager-openrc' 'elogind')
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=master")
+sha256sums=('SKIP')
+
+package(){
+
+    install="openrc.install"
+    install -Dm755 ${srcdir}/optimus-manager/openrc/optimus-manager ${pkgdir}/etc/init.d/optimus-manager
+}
