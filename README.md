@@ -47,7 +47,15 @@ Naturally, you must have the proprietary nvidia driver installed on your system.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
-After installation, the optimus-manager daemon should have been started automatically, but you can check its status with `systemctl status optimus-manager.service`.
+For OpenRC or runit you will need to install the corresponding init script package in the init folder using `makepkg -si`
+
+After installation, the optimus-manager daemon should have been started automatically, but you can check its status with:
+
+systemd:`systemctl status optimus-manager.service` 
+
+OpenRC:`rc-service optimus-manager status` 
+
+runit:`sv s optimus-manager`.
 
 **Important notes :**
 
@@ -74,7 +82,11 @@ To uninstall the program, simply remove the `optimus-manager` package. The auto-
 
 You can also force cleanup by running `optimus-manager --cleanup`.
 
-You can also disable optimus-manager by disabling the systemd service `optimus-manager.service` (needs a reboot to be applied).
+You can also disable optimus-manager by disabling the service:
+
+systemd:`optimus-manager.service` 
+
+OpenRC/runit:`optimus-manager` (needs a reboot to be applied).
 
 Usage
 ----------
