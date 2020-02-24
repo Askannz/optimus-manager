@@ -50,10 +50,6 @@ pre_install() {
 
 post_install() {
 
-    echo "optimus-manager : enabling optimus-manager.service"
-    mkdir -p /etc/systemd/system/graphical.target.wants/
-    ln -s /usr/lib/systemd/system/optimus-manager.service /etc/systemd/system/graphical.target.wants/optimus-manager.service
-    
     make_log_folder
     
     bold=$(tput bold)
