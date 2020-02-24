@@ -48,7 +48,7 @@ def is_module_loaded(module_name):
 def get_current_display_manager():
 
     if not os.path.isfile("/etc/systemd/system/display-manager.service"):
-        raise CheckError("No display-manager.service file found")
+        raise CheckError("No display-manager.service file found, ignore this warning if you're not using Systemd.")
 
     dm_service_path = os.path.realpath("/etc/systemd/system/display-manager.service")
     dm_service_filename = os.path.split(dm_service_path)[-1]
@@ -88,7 +88,7 @@ def is_login_manager_active():
 
 
 def is_daemon_active():
-    return _is_service_active("optimus-manager")
+    return _is_service_active_bash("optimus-manager")
 
 
 def is_bumblebeed_service_active():
@@ -117,30 +117,26 @@ def _is_service_active(service_name):
         print("WARNING : Cannot communicate with the DBus system bus to check status of %s."
               " Is DBus running ? Falling back to bash commands" % service_name)
         return _is_service_active_bash(service_name)
-    else:
-        return _is_service_active_dbus(system_bus, service_name)
-
-def _is_service_active_dbus(system_bus, service_name):
-
-    systemd = system_bus.get_object("org.freedesktop.systemd1", "/org/freedesktop/systemd1")
-
-    try:
-        unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
-    except dbus.exceptions.DBusException:
-        return False
-
-    optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
-    properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
-    state = properties_manager.Get("org.freedesktop.systemd1.Unit", "SubState")
-
-    return state == "running"
 
 
 def _is_service_active_bash(service_name):
 
     try:
         exec_bash("systemctl is-active %s" % service_name)
-    except BashError:
-        return False
-    else:
         return True
+    except BashError:
+        pass
+
+    try:
+        exec_bash("rc-service %s status" % service_name)
+        return True
+    except BashError:
+        pass
+
+    try:
+        exec_bash("sv s %s" % service_name)
+        return True
+    except BashError:
+        pass
+
+    return False
