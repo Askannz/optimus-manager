@@ -1,0 +1,18 @@
+pkgname=optimus-manager-runit
+pkgver=20200221
+pkgrel=1
+pkgdesc="runit script for optimus-manager"
+arch=('any')
+url="https://github.com/Askannz/optimus-manager"
+license=('MIT')
+provides=('optimus-manager-runit')
+depends=('elogind')
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=runit_testing")
+sha256sums=('SKIP')
+
+package(){
+
+    install="runit.install"
+
+    install -Dm755 ${srcdir}/optimus-manager/runit/optimus-manager/run ${pkgdir}/etc/runit/sv/optimus-manager/run
+}
