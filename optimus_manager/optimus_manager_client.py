@@ -209,9 +209,7 @@ def _print_status():
 def _check_daemon_active():
 
     if not checks.is_daemon_active():
-        print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-              "sudo systemctl enable optimus-manager\n"
-              "sudo systemctl start optimus-manager\n")
+        print("The optimus-manager service is not running. Please enable and start it.")
         sys.exit(1)
 
 
@@ -413,9 +411,7 @@ def _send_command(command):
 
     except (ConnectionRefusedError, OSError):
         print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-              "\nYou can enable and start it by running those commands as root :\n"
-              "\nsystemctl enable optimus-manager.service\n"
-              "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
+              "\nPlease enable and start it as root\n" % envs.SOCKET_PATH)
         sys.exit(1)
 
 
