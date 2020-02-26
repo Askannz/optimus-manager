@@ -85,6 +85,8 @@ def get_current_display_manager():
 
 def _get_elogind_display_manager():
 
+    if _detect_init_system(init="systemd"):
+        return using_patched_GDM()
     if not os.path.isfile("/etc/init.d/xdm"):
         raise CheckError("No xdm init script fle found")
 
