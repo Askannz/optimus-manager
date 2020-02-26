@@ -100,6 +100,7 @@ def setup_PRIME():
         except BashError as e:
             print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
 
+
 def set_DPI(config):
 
     dpi_str = config["nvidia"]["dpi"]
@@ -163,6 +164,7 @@ def _generate_intel(config, bus_ids, xorg_extra):
     text = _make_intel_device_section(config, bus_ids, xorg_extra)
     return text
 
+
 def _generate_hybrid(config, bus_ids, xorg_extra):
 
     text = "Section \"ServerLayout\"\n" \
@@ -175,8 +177,8 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
     text += _make_intel_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
-           "\tIdentifier \"intel\"\n" \
-           "\tDevice \"intel\"\n"
+            "\tIdentifier \"intel\"\n" \
+            "\tDevice \"intel\"\n"
 
     if config["nvidia"]["allow_external_gpus"] == "yes":
         text += "\tOption \"AllowExternalGpus\"\n"
@@ -186,13 +188,14 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDevice \"nvidia\"\n" \
-           "EndSection\n\n"
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDevice \"nvidia\"\n" \
+            "EndSection\n\n"
 
     text += _make_server_flags_section(config, bus_ids, xorg_extra)
 
     return text
+
 
 def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
@@ -212,6 +215,7 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
+
 
 def _make_intel_device_section(config, bus_ids, xorg_extra):
 
@@ -240,6 +244,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 
     return text
 
+
 def _make_server_flags_section(config, bus_ids, xorg_extra):
     if config["nvidia"]["ignore_abi"] == "yes":
         return (
@@ -248,6 +253,7 @@ def _make_server_flags_section(config, bus_ids, xorg_extra):
             "EndSection\n\n"
         )
     return ""
+
 
 def _write_xorg_conf(xorg_conf_text):
 
