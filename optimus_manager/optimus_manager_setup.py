@@ -12,6 +12,7 @@ from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_runn
 import optimus_manager.processes as processes
 from optimus_manager.checks import is_daemon_active
 from optimus_manager.logging_utils import print_timestamp_separator
+from optimus_manager.checks import _detect_init_system
 
 
 def main():
@@ -64,7 +65,12 @@ def main():
     elif args.setup_prime:
         print("Setting up PRIME")
 
-        print("Checking status of optimus-manager")
+        if _detect_init_system(init="openrc"):
+            print("Checking status of optimus-manager")
+        elif _detect_init_system(init="runit"):
+            print("Checking status of optimus-manager")
+        elif _detect_init_system(init="systemd"):
+            print("Checking the status of optimus-manager.service")
         _abort_if_service_inactive()
 
         print("Loading config")
@@ -76,7 +82,12 @@ def main():
     elif args.setup_gpu:
         print("Setting up the GPU")
 
-        print("Checking status of optimus-manager")
+        if _detect_init_system(init="openrc"):
+            print("Checking status of optimus-manager")
+        elif _detect_init_system(init="runit"):
+            print("Checking status of optimus-manager")
+        elif _detect_init_system(init="systemd"):
+            print("Checking status of optimus-manager.service")
         _abort_if_service_inactive()
 
         print("Cleaning up leftover Xorg conf")
@@ -89,15 +100,18 @@ def main():
         print("Requested mode :", requested_mode)
         _setup_gpu(config, requested_mode)
 
+
 def _abort_if_service_inactive():
     if not is_daemon_active():
         print("ERROR : the optimus-manager service is not running. Aborting.")
         sys.exit(0)
 
+
 def _remove_config_copy():
 
     if os.path.isfile(envs.USER_CONFIG_COPY_PATH):
         os.remove(envs.USER_CONFIG_COPY_PATH)
+
 
 def _copy_user_config():
 
@@ -117,6 +131,7 @@ def _copy_user_config():
 
     if os.path.isfile(config_path):
         shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
+
 
 def _get_config():
 

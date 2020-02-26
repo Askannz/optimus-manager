@@ -10,11 +10,11 @@ from optimus_manager.config import load_config, ConfigError
 from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.var import read_requested_mode, read_startup_mode, read_temp_conf_path_var, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
+from optimus_manager.checks import _detect_init_system
 import optimus_manager.sessions as sessions
 
 
 def main():
-
     # Arguments parsing
     parser = argparse.ArgumentParser(description="Client program for the Optimus Manager tool.\n"
                                                  "https://github.com/Askannz/optimus-manager")
@@ -40,7 +40,6 @@ def main():
                         help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
                              " power switching configurations without ending up with an unbootable setup.")
     parser.add_argument('--unset-temp-config', action='store_true', help="Undo --temp-config (unset temp config path)")
-
 
     parser.add_argument('--no-confirm', action='store_true',
                         help="Do not ask for confirmation and skip all warnings when switching GPUs.")
@@ -130,7 +129,6 @@ def main():
 
 
 def gpu_switch(config, switch_mode):
-
     print("Switching to mode : %s" % switch_mode)
     command = {"type": "switch", "args": {"mode": switch_mode}}
     _send_command(command)
@@ -140,7 +138,6 @@ def gpu_switch(config, switch_mode):
 
 
 def _get_config():
-
     try:
         config = load_config()
     except ConfigError as e:
@@ -155,7 +152,6 @@ def _print_version():
 
 
 def _print_current_mode():
-
     try:
         mode = checks.read_gpu_mode()
         print("Current GPU mode : %s" % mode)
@@ -164,7 +160,6 @@ def _print_current_mode():
 
 
 def _print_next_mode():
-
     try:
         requested_mode = read_requested_mode()
     except VarError as e:
@@ -174,7 +169,6 @@ def _print_next_mode():
 
 
 def _print_startup_mode():
-
     kernel_parameters = get_kernel_parameters()
 
     try:
@@ -188,8 +182,8 @@ def _print_startup_mode():
         print("\nNote : the startup mode for the current boot was set to \"%s\" with"
               " a kernel parameter. Kernel parameters override the value above.\n" % kernel_parameters["startup_mode"])
 
-def _print_temp_config_path():
 
+def _print_temp_config_path():
     try:
         path = read_temp_conf_path_var()
     except VarError:
@@ -197,8 +191,8 @@ def _print_temp_config_path():
     else:
         print("Temporary config path: %s" % path)
 
-def _print_status():
 
+def _print_status():
     _print_version()
     print("")
     _print_current_mode()
@@ -206,15 +200,27 @@ def _print_status():
     _print_startup_mode()
     _print_temp_config_path()
 
-def _check_daemon_active():
 
+def _check_daemon_active():
     if not checks.is_daemon_active():
-        print("The optimus-manager service is not running. Please enable and start it.")
+        if _detect_init_system(init="openrc"):
+            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                  "sudo rc-service enable optimus-manager\n"
+                  "sudo rc-service start optimus-manager\n")
+        elif _detect_init_system(init="runit"):
+            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                  "sudo ln -s /etc/runit/run/sv/optimus-manager /var/run/runit\n"
+                  "sudo sv u optimus-manager\n")
+        elif _detect_init_system(init="systemd"):
+            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                  "sudo systemctl enable optimus-manager\n"
+                  "sudo systemctl start optimus-manager\n")
+        else:
+            print("ERROR: unsupported init system detected!")
         sys.exit(1)
 
 
 def _get_switch_mode(switch_arg):
-
     if switch_arg not in ["auto", "intel", "nvidia", "hybrid"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
@@ -242,7 +248,6 @@ def _get_switch_mode(switch_arg):
 
 
 def _check_power_switching(config):
-
     if config["optimus"]["switching"] == "none" and config["optimus"]["pci_power_control"] == "no":
         print("WARNING : no power management option is currently enabled (this is the default since v1.2)."
               " Switching between GPUs will work but you will likely experience poor battery life.\n"
@@ -253,7 +258,6 @@ def _check_power_switching(config):
 
 
 def _check_bbswitch_module(config):
-
     if config["optimus"]["switching"] == "bbswitch" and not checks.is_module_available("bbswitch"):
         print("WARNING : bbswitch is enabled in the configuration file but the bbswitch module does"
               " not seem to be available for the current kernel. Power switching will not work.\n"
@@ -262,7 +266,6 @@ def _check_bbswitch_module(config):
 
 
 def _check_nvidia_module(switch_mode):
-
     if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
         print("WARNING : the nvidia module does not seem to be available for the current kernel."
               " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,\n"
@@ -275,7 +278,6 @@ def _check_nvidia_module(switch_mode):
 
 
 def _check_wayland():
-
     try:
         wayland_session_present = sessions.is_there_a_wayland_session()
     except sessions.SessionsError as e:
@@ -294,7 +296,6 @@ def _check_wayland():
 
 
 def _check_xorg_conf():
-
     if is_there_a_default_xorg_conf_file():
         print("WARNING : Found a Xorg config file at /etc/X11/xorg.conf. If you did not"
               " create it yourself, it was likely generated by your distribution or by an Nvidia utility.\n"
@@ -309,7 +310,6 @@ def _check_xorg_conf():
 
 
 def _check_MHWD_conf():
-
     if is_there_a_MHWD_file():
         print("WARNING : Found a Xorg config file at /etc/X11/xorg.conf.d/90-mhwd.conf that was auto-generated"
               " by the Manjaro driver utility (MHWD). This will likely interfere with GPU switching, so"
@@ -323,12 +323,12 @@ def _check_MHWD_conf():
 
 
 def _check_bumblebeed():
-
     if checks.is_bumblebeed_service_active():
-        print("WARNING : The Bumblebee service (bumblebeed.service) is running, and this can interfere with optimus-manager."
-              " Before attempting a GPU switch, it is recommended that you disable this service (sudo systemctl disable bumblebeed.service)"
-              " then REBOOT your computer.\n"
-              "Ignore this warning and proceed with GPU switching now ? (y/N)")
+        print(
+            "WARNING : The Bumblebee service (bumblebeed.service) is running, and this can interfere with optimus-manager."
+            " Before attempting a GPU switch, it is recommended that you disable this service (sudo systemctl disable bumblebeed.service)"
+            " then REBOOT your computer.\n"
+            "Ignore this warning and proceed with GPU switching now ? (y/N)")
 
         confirmation = _ask_confirmation()
 
@@ -337,7 +337,6 @@ def _check_bumblebeed():
 
 
 def _check_patched_GDM():
-
     try:
         dm_name = checks.get_current_display_manager()
     except checks.CheckError as e:
@@ -357,12 +356,12 @@ def _check_patched_GDM():
 
 
 def _check_intel_xorg_module(config, switch_mode):
-
     if switch_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
-        print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
-              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
-              " the package \"xf86-video-intel.\"\n"
-              "Continue ? (y/N)")
+        print(
+            "WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
+            " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
+            " the package \"xf86-video-intel.\"\n"
+            "Continue ? (y/N)")
 
         confirmation = _ask_confirmation()
 
@@ -371,13 +370,13 @@ def _check_intel_xorg_module(config, switch_mode):
 
 
 def _check_number_of_sessions():
-
     nb_desktop_sessions = sessions.get_number_of_desktop_sessions(ignore_gdm=True)
 
     if nb_desktop_sessions > 1:
-        print("WARNING : There are %d other desktop sessions open. The GPU switch will not become effective until you have manually"
-              " logged out from ALL desktop sessions.\n"
-              "Continue ? (y/N)" % (nb_desktop_sessions - 1))
+        print(
+            "WARNING : There are %d other desktop sessions open. The GPU switch will not become effective until you have manually"
+            " logged out from ALL desktop sessions.\n"
+            "Continue ? (y/N)" % (nb_desktop_sessions - 1))
 
         confirmation = _ask_confirmation()
 
@@ -386,7 +385,6 @@ def _check_number_of_sessions():
 
 
 def _ask_confirmation():
-
     ans = input("> ").lower()
 
     if ans == "y":
@@ -400,7 +398,6 @@ def _ask_confirmation():
 
 
 def _send_command(command):
-
     msg = json.dumps(command).encode('utf-8')
 
     try:
@@ -410,13 +407,24 @@ def _send_command(command):
         client.close()
 
     except (ConnectionRefusedError, OSError):
-        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-              "\nPlease enable and start it as root\n" % envs.SOCKET_PATH)
+        if _detect_init_system(init="systemd"):
+            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+                  "\nYou can enable and start it by running those commands as root :\n"
+                  "\nsystemctl enable optimus-manager.service\n"
+                  "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
+        elif _detect_init_system(init="openrc"):
+            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+                  "\nYou can enable and start it by running those commands as root :\n"
+                  "\nrc-update add optimus-manager default\n"
+                  "rc-service optimus-manager start\n" % envs.SOCKET_PATH)
+        elif _detect_init_system(init="runit"):
+            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+                  "\nYou can enable it by running this command as root :\n"
+                  "sv u optimus-manager\n" % envs.SOCKET_PATH)
         sys.exit(1)
 
 
 def _set_startup_and_exit(startup_arg):
-
     if startup_arg not in ["intel", "nvidia", "hybrid"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
@@ -426,8 +434,8 @@ def _set_startup_and_exit(startup_arg):
     _send_command(command)
     sys.exit(0)
 
-def _set_temp_config_and_exit(rel_path):
 
+def _set_temp_config_and_exit(rel_path):
     abs_path = os.path.join(os.getcwd(), rel_path)
 
     if not os.path.isfile(abs_path):
@@ -439,8 +447,8 @@ def _set_temp_config_and_exit(rel_path):
     _send_command(command)
     sys.exit(0)
 
-def _unset_temp_config_and_exit():
 
+def _unset_temp_config_and_exit():
     print("Unsetting temp config path")
     command = {"type": "temp_config", "args": {"path": ""}}
     _send_command(command)
@@ -448,7 +456,6 @@ def _unset_temp_config_and_exit():
 
 
 def _cleanup_xorg_and_exit():
-
     if os.geteuid() != 0:
         print("You need to execute the command as root for this action.")
         sys.exit(1)
