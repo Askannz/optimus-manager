@@ -188,22 +188,26 @@ def _is_service_active_dbus(system_bus, service_name):
 
 def _is_service_active_bash(service_name):
 
-    try:
-        exec_bash("systemctl is-active %s" % service_name)
-        return True
-    except BashError:
-        pass
+    if _detect_init_system(init="systemd"):
+        try:
+            exec_bash("systemctl is-active %s" % service_name)
+        except BashError:
+            return False
+        else:
+            return True
 
-    try:
-        exec_bash("rc-service %s status" % service_name)
-        return True
-    except BashError:
-        pass
+    if _detect_init_system(init="openrc"):
+        try:
+            exec_bash("rc-service %s status" % service_name)
+        except BashError:
+            return False
+        else:
+            return True
 
-    try:
-        exec_bash("sv s %s" % service_name)
-        return True
-    except BashError:
-        pass
-
-    return False
+    if _detect_init_system(init="runit"):
+        try:
+            exec_bash("sv s %s" % service_name)
+        except BashError:
+            return False
+        else:
+            return True
