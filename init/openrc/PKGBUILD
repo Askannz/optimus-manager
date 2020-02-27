@@ -1,5 +1,5 @@
 pkgname=optimus-manager-openrc
-pkgver=20200221
+pkgver=20200227
 pkgrel=1
 pkgdesc="OpenRC script for optimus-manager"
 arch=('any')

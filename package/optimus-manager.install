@@ -48,6 +48,7 @@ pre_install() {
     cleanup
 }
 
+
 post_install() {
 
     make_log_folder

@@ -128,6 +128,10 @@ def is_login_manager_active():
     return _is_service_active("display-manager")
 
 
+def is_elogind_active():
+    return _is_service_active("elogind")
+
+
 def is_daemon_active():
     return _is_service_active("optimus-manager")
 

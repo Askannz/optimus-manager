@@ -6,6 +6,7 @@ description="Optimus Manager Commands daemon"
 
 depend() {
     before xdm
+    after elogind
 }
 
 start_pre() {

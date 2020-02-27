@@ -77,6 +77,7 @@ def main():
     elif args.switch:
 
         _check_daemon_active()
+        _check_elogind_active()
 
         switch_mode = _get_switch_mode(args.switch)
 
@@ -199,6 +200,13 @@ def _print_status():
     _print_next_mode()
     _print_startup_mode()
     _print_temp_config_path()
+
+
+def _check_elogind_active():
+    if not checks.is_elogind_active():
+        if not _detect_init_system(init="systemd"):
+            print("The Elogind service was not detected but is required to use optimus-manager, please install, enable and start it.")
+        sys.exit(1)
 
 
 def _check_daemon_active():
