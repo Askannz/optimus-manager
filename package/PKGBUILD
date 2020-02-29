@@ -1,7 +1,7 @@
 # Maintainer: Robin Lange <robin dot langenc at gmail dot com>
 # Contributor: Robin Lange <robin dot langenc at gmail dot com>
 pkgname=optimus-manager-git
-pkgver=1.2.2.r37.g4b04ef8
+pkgver=1.2.2.r38.g404cc83
 pkgrel=1
 pkgdesc="Management utility to handle GPU switching for Optimus laptops (Git version)"
 arch=('any')

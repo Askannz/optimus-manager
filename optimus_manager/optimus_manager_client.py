@@ -427,7 +427,8 @@ def _send_command(command):
                   "rc-service optimus-manager start\n" % envs.SOCKET_PATH)
         elif _detect_init_system(init="runit"):
             print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                  "\nYou can enable it by running this command as root :\n"
+                  "\nYou can enable and start it by running this command as root :\n"
+                  "ln -s /etc/runit/sv/optimus-manager /var/run/runit/service\n"
                   "sv u optimus-manager\n" % envs.SOCKET_PATH)
         sys.exit(1)
 
