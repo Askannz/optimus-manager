@@ -1,7 +1,7 @@
 # Maintainer: Robin Lange <robin dot langenc at gmail dot com>
 # Contributor: Robin Lange <robin dot langenc at gmail dot com>
 pkgname=optimus-manager-git
-pkgver=1.2.2.r32.g623e5c0
+pkgver=1.2.2.r34.g3e1e553
 pkgrel=1
 pkgdesc="Management utility to handle GPU switching for Optimus laptops (Git version)"
 arch=('any')
@@ -26,7 +26,7 @@ backup=('etc/optimus-manager/xorg-intel.conf'
 
         'var/lib/optimus-manager/startup_mode'
         'var/lib/optimus-manager/requested_mode')
-source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=master")
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=runit")
 sha256sums=('SKIP')
 
 pkgver() {

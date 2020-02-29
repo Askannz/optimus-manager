@@ -212,7 +212,7 @@ def _is_service_active_bash(service_name):
 
     if _detect_init_system(init="runit"):
         try:
-            exec_bash("sv s %s" % service_name)
+            exec_bash("pstree | grep %s" % service_name)
         except BashError:
             return False
         else:
