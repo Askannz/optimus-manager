@@ -59,7 +59,7 @@ def _detect_init_system(init):
     except BashError:
         pass
     try:
-        exec_bash("sv")
+        exec_bash("pstree | grep runit")
         return init == "runit"
     except BashError:
         pass

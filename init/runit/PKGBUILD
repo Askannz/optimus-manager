@@ -7,7 +7,7 @@ url="https://github.com/Askannz/optimus-manager"
 license=('MIT')
 provides=('optimus-manager-runit')
 depends=('elogind')
-source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=runit_testing")
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=master")
 sha256sums=('SKIP')
 
 package(){
