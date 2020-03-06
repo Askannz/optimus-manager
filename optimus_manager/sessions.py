@@ -18,7 +18,7 @@ def logout_current_desktop_session():
         # KDE Plasma
         try:
             kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
-            kde.logout(0, 0, 0, dbus_interface="org.kde.KSMServerInterface")
+            kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
         except dbus.exceptions.DBusException:
             pass
 
