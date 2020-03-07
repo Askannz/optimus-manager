@@ -8,6 +8,15 @@ class CheckError(Exception):
     pass
 
 
+def is_ac_power_connected():
+
+    try:
+        with open("/sys/class/power_supply/AC/online", 'r') as f:
+            return f.read(1) == "1"
+    except IOError:
+        return False
+
+
 def is_pat_available():
     try:
         exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")

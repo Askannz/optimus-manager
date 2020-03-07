@@ -10,7 +10,7 @@ from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
-from optimus_manager.checks import is_daemon_active
+from optimus_manager.checks import is_daemon_active, is_ac_power_connected
 from optimus_manager.logging_utils import print_timestamp_separator
 
 
@@ -156,23 +156,9 @@ def _get_startup_mode():
         print("Startup mode is ac_auto, determining mode to set")
         # TODO: Get ac_auto_battery_option from config
         ac_auto_battery_option = "intel"
-        startup_mode = "nvidia" if _check_ac_power_connected() else ac_auto_battery_option
+        startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
-
-
-# TODO: Move to checks.py
-def _check_ac_power_connected():
-
-    try:
-        with open("/sys/class/power_supply/AC/online", 'r') as f:
-            is_ac_online = f.read(1) == "1"
-            print("AC power is%s connected" % ("" if is_ac_online else " not"))
-            return is_ac_online
-    except IOError:
-        print("Could not read AC power state")
-        # Default to normal startup mode
-        return False
 
 
 def _write_gpu_mode(mode):
