@@ -52,7 +52,7 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        startup_mode = _get_startup_mode()
+        startup_mode = _get_startup_mode(config)
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -133,7 +133,7 @@ def _get_config():
     return config
 
 
-def _get_startup_mode():
+def _get_startup_mode(config):
 
     kernel_parameters = get_kernel_parameters()
 
@@ -154,8 +154,7 @@ def _get_startup_mode():
 
     if startup_mode == "ac_auto":
         print("Startup mode is ac_auto, determining mode to set")
-        # TODO: Get ac_auto_battery_option from config
-        ac_auto_battery_option = "intel"
+        ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
         startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
