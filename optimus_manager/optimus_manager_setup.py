@@ -141,8 +141,9 @@ def _get_startup_mode(config):
 
         print("No kernel parameter set for startup, checking dynamic startup mode")
 
-        if config["optimus"]["dynamic_startup_mode"] == "yes" and _check_ac_power_connected():
-            startup_mode = "nvidia"
+        if config["optimus"]["dynamic_startup_mode"] == "yes":
+            # TODO: Remove dynamic_startup_mode
+            startup_mode = "ac_auto"
         else:
 
             print("Dynamic startup mode not available, reading from file")
@@ -158,9 +159,16 @@ def _get_startup_mode(config):
         print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
         startup_mode = kernel_parameters["startup_mode"]
 
+    if startup_mode == "ac_auto":
+        print("Startup mode is ac_auto, determining mode to set")
+        # TODO: Get ac_auto_battery_option from config
+        ac_auto_battery_option = "intel"
+        startup_mode = "nvidia" if _check_ac_power_connected() else ac_auto_battery_option
+
     return startup_mode
 
 
+# TODO: Move to checks.py
 def _check_ac_power_connected():
 
     try:
