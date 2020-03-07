@@ -52,7 +52,7 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        startup_mode = _get_startup_mode(config)
+        startup_mode = _get_startup_mode()
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -133,26 +133,19 @@ def _get_config():
     return config
 
 
-def _get_startup_mode(config):
+def _get_startup_mode():
 
     kernel_parameters = get_kernel_parameters()
 
     if kernel_parameters["startup_mode"] is None:
 
-        print("No kernel parameter set for startup, checking dynamic startup mode")
+        print("No kernel parameter set for startup, reading from file")
 
-        if config["optimus"]["dynamic_startup_mode"] == "yes":
-            # TODO: Remove dynamic_startup_mode
-            startup_mode = "ac_auto"
-        else:
-
-            print("Dynamic startup mode not available, reading from file")
-
-            try:
-                startup_mode = var.read_startup_mode()
-            except var.VarError as e:
-                print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
-                startup_mode = envs.DEFAULT_STARTUP_MODE
+        try:
+            startup_mode = var.read_startup_mode()
+        except var.VarError as e:
+            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+            startup_mode = envs.DEFAULT_STARTUP_MODE
 
     else:
 
