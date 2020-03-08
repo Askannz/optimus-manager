@@ -223,6 +223,10 @@ def _check_daemon_active():
             print("The optimus-manager service is not running. Please enable and start it with :\n\n"
                   "sudo systemctl enable optimus-manager\n"
                   "sudo systemctl start optimus-manager\n")
+        elif _detect_init_system(init="s6"):
+            print("The optimus-maanger service is not running. Please enable and start it with :\n\n"
+                  "sudo s6-rc-bundle-update add default optimus-manager\n"
+                  "sudo s6-rc -u change optimus-mnanager\n")
         else:
             print("ERROR: unsupported init system detected!")
         sys.exit(1)
@@ -430,6 +434,11 @@ def _send_command(command):
                   "\nYou can enable and start it by running this command as root :\n"
                   "ln -s /etc/runit/sv/optimus-manager /var/run/runit/service\n"
                   "sv u optimus-manager\n" % envs.SOCKET_PATH)
+        elif _detect_init_system(init="s6"):
+            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+                  "\nYou can enable and start it by running this command as root :\n"
+                  "s6-rc-bundle-update add default optimus-manager\n"
+                  "s6-rc -u change optimus-manager\n" % envs.SOCKET_PATH)
         sys.exit(1)
 
 

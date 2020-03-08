@@ -1,0 +1,25 @@
+pkgname=optimus-manager-s6
+pkgver=20200307
+pkgrel=1
+pkgdesc="s6 script for optimus-manager"
+arch=('any')
+url="https://github.com/Askannz/optimus-manager"
+license=('MIT')
+provides=('optimus-manager-s6')
+depends=('s6' 'elogind')
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=master")
+sha256sums=('SKIP')
+ 
+
+package(){
+	
+	install="s6.install"
+	install -Dm755 ${srcdir}/optimus-manager/s6/optimus-manager.run ${pkgbuild}/etc/s6/sv/optimus-manager.run
+	install -Dm755 ${srcdir}/optimus-manager/s6/optimus-manager.type ${pkgbuild}/etc/s6/sv/optimus-manager.type
+	install -Dm755 ${srcdir}/optimus-manager/s6/optimus-manager.install ${pkgbuild}/etc/s6/sv/optimus-manager.install
+
+
+
+
+}
+

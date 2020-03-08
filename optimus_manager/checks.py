@@ -59,8 +59,13 @@ def _detect_init_system(init):
     except BashError:
         pass
     try:
-        exec_bash("pstree | grep runit")
+        exec_bash("command -v sv")
         return init == "runit"
+    except BashError:
+        pass
+    try:
+        exec_bash("command -v s6-rc")
+        return init == "s6"
     except BashError:
         pass
     return False
@@ -222,6 +227,15 @@ def _is_service_active_bash(service_name):
             return False
         else:
             return True
+    
+    if _detect_init_system(init="s6"):
+        try:
+            exec_bash("pstree | grep %s" service_name)
+        except BashError:
+            return False
+        else:
+            return True
+
 
 
 

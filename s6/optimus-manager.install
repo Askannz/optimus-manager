@@ -1,0 +1,5 @@
+pre_remove() {
+	if [ -e "/run/service/optimus-manager" ]; then
+		s6-rc -d change optimus-manager
+	fi
+}
