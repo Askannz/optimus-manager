@@ -113,12 +113,14 @@ def _print_current_mode():
 
 def _print_next_mode():
 
-    try:
-        requested_mode = read_requested_mode()
-    except VarError as e:
-        print("Error reading requested GPU mode : %s" % str(e))
+    state = load_state()
 
-    print("GPU mode requested for next login : %s" % requested_mode)
+    if state is not None and state["type"] == "pending_pre_xorg_start":
+        res_str = state["requested_mode"]
+    else:
+        res_str = "no change"
+
+    print("GPU mode requested for next login : %s" % res_str)
 
 
 def _print_startup_mode():

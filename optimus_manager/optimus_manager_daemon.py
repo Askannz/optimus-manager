@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import sys
 import os
-import shutil
 import signal
 import select
 import socket
@@ -9,16 +8,12 @@ import json
 import optimus_manager.envs as envs
 from optimus_manager.config import load_config, ConfigError
 import optimus_manager.var as var
-from optimus_manager.xorg import cleanup_xorg_conf
-from optimus_manager.logging_utils import crop_logs
+from .state import write_state
 
 
 def main():
 
-    print("Optimus Manager (Daemon) version %s" % envs.VERSION)
-
-    print("Automatic log cropping")
-    crop_logs()
+    print("optimus-manager (Daemon) version %s" % envs.VERSION)
 
     print("Opening UNIX socket")
     server_socket = _open_server_socket()
@@ -88,8 +83,16 @@ def _process_command(msg):
 
     try:
         if command["type"] == "switch":
-            print("Writing requested GPU mode %s" % command["args"]["mode"])
-            var.write_requested_mode(command["args"]["mode"])
+
+            mode = command["args"]["mode"]
+
+            print("Writing requested GPU mode %s" % mode)
+
+            state = {
+                "type": "pending_pre_xorg_start",
+                "requested_mode": mode
+            }
+            write_state(state)
 
         elif command["type"] == "startup":
             print("Writing startup mode %s" % command["args"]["mode"])
@@ -131,9 +134,6 @@ class _SignalHandler:
         print("Closing and removing the socket...")
         self.server_socket.close()
         os.remove(envs.SOCKET_PATH)
-
-        print("Cleaning up Xorg conf...")
-        cleanup_xorg_conf()
 
         print("Goodbye !")
         sys.exit(0)
