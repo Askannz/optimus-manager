@@ -9,6 +9,7 @@ DPI_VAR_PATH = "/var/lib/optimus-manager/dpi"
 TEMP_CONFIG_PATH_VAR_PATH = "/var/lib/optimus-manager/temp_conf_path"
 ACPI_CALL_STRING_VAR_PATH = "/var/lib/optimus-manager/acpi_call_strings.json"
 LAST_ACPI_CALL_STATE_VAR = "/var/lib/optimus-manager/last_acpi_call_state"
+STATE_FILE_PATH = "/var/lib/optimus-manager/state.json"
 
 DEFAULT_STARTUP_MODE = "intel"
 

@@ -1,8 +1,10 @@
 import os
+import shutil
 import copy
 import json
 import configparser
-import optimus_manager.envs as envs
+from . import envs
+from . import var
 
 
 class ConfigError(Exception):
@@ -14,7 +16,7 @@ def load_config():
     base_config = configparser.ConfigParser()
     base_config.read(envs.DEFAULT_CONFIG_PATH)
     base_config = _parsed_config_to_dict(base_config)
-    validate_config(base_config)
+    _validate_config(base_config)
 
     if not os.path.isfile(envs.USER_CONFIG_COPY_PATH):
         return base_config
@@ -28,12 +30,31 @@ def load_config():
               % (envs.USER_CONFIG_COPY_PATH, envs.DEFAULT_CONFIG_PATH, str(e)))
         return base_config
 
-    corrected_config = validate_config(user_config, fallback_config=base_config)
+    corrected_config = _validate_config(user_config, fallback_config=base_config)
 
     return corrected_config
 
+def copy_user_config():
 
-def validate_config(config, fallback_config=None):
+    try:
+        temp_config_path = var.read_temp_conf_path_var()
+    except var.VarError:
+        config_path = envs.USER_CONFIG_PATH
+    else:
+        print("Using temporary configuration %s" % temp_config_path)
+        var.remove_temp_conf_path_var()
+        if os.path.isfile(temp_config_path):
+            config_path = temp_config_path
+        else:
+            print("Warning : temporary config file at %s not found."
+                  " Using normal config file %s instead." % (temp_config_path, envs.USER_CONFIG_PATH))
+            config_path = envs.USER_CONFIG_PATH
+
+    if os.path.isfile(config_path):
+        shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
+
+
+def _validate_config(config, fallback_config=None):
 
     folder_path = os.path.dirname(os.path.abspath(__file__))
     schema_path = os.path.join(folder_path, "config_schema.json")

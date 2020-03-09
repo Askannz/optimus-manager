@@ -61,12 +61,7 @@ def is_there_a_MHWD_file():
     return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
 
 
-def setup_PRIME():
-
-    try:
-        requested_mode = read_requested_mode()
-    except VarError as e:
-        raise XorgSetupError("Cannot setup PRIME : cannot read requested mode : %s" % str(e))
+def do_xsetup(requested_mode):
 
     if requested_mode == "nvidia":
 
