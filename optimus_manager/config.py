@@ -1,5 +1,6 @@
 import os
 import shutil
+from pathlib import Path
 import copy
 import json
 import configparser
@@ -51,7 +52,9 @@ def copy_user_config():
             config_path = envs.USER_CONFIG_PATH
 
     if os.path.isfile(config_path):
-        shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
+        copy_path = Path(envs.USER_CONFIG_COPY_PATH)
+        os.makedirs(copy_path.parent, exist_ok=True)
+        shutil.copy(config_path, copy_path)
 
 
 def _validate_config(config, fallback_config=None):

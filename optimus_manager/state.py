@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import json
 from .envs import STATE_FILE_PATH
 
@@ -9,7 +11,12 @@ def make_attempt_id():
 
 
 def write_state(state):
-    with open(STATE_FILE_PATH, "w") as f:
+
+    filepath = Path(STATE_FILE_PATH)
+
+    os.makedirs(filepath.parent, exist_ok=True)
+
+    with open(filepath, "w") as f:
         json.dump(state, f)
 
 def load_state():

@@ -4,16 +4,17 @@ import os
 import argparse
 import socket
 import json
-import optimus_manager.envs as envs
-import optimus_manager.checks as checks
-from optimus_manager.config import load_config, ConfigError
-from optimus_manager.kernel_parameters import get_kernel_parameters
-from optimus_manager.var import read_requested_mode, read_startup_mode, read_temp_conf_path_var, VarError
-from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
-import optimus_manager.sessions as sessions
+from .. import envs
+from .. import checks
+from ..config import load_config, ConfigError
+from ..kernel_parameters import get_kernel_parameters
+from ..var import read_startup_mode, read_temp_conf_path_var, VarError
+from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
+from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
-from .checks import run_switch_checks
+from .client_checks import run_switch_checks
+from ..state import load_state
 
 
 def main():

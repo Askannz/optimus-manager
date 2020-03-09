@@ -1,6 +1,6 @@
 import os
+from pathlib import Path
 from optimus_manager.bash import exec_bash, BashError
-from optimus_manager.var import read_requested_mode, VarError
 import optimus_manager.envs as envs
 from optimus_manager.pci import get_gpus_bus_ids
 from optimus_manager.config import load_extra_xorg_options
@@ -246,13 +246,15 @@ def _make_server_flags_section(config, bus_ids, xorg_extra):
 
 def _write_xorg_conf(xorg_conf_text):
 
+    filepath = Path(envs.XORG_CONF_PATH)
+
     try:
-        os.makedirs(envs.XORG_CONF_DIR, mode=0o755, exist_ok=True)
-        with open(envs.XORG_CONF_PATH, 'w') as f:
+        os.makedirs(filepath.parent, mode=0o755, exist_ok=True)
+        with open(filepath, 'w') as f:
             print("Writing to %s" % envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
     except IOError:
-        raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+        raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath))
 
 
 def _is_intel_module_available():
