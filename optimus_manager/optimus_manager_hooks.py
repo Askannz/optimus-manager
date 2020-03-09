@@ -4,46 +4,55 @@ from .var import remove_last_acpi_call_state
 from .xorg import configure_xorg, cleanup_xorg_conf, do_xsetup, set_DPI
 from .gdm import kill_gdm_server
 from .utils import get_startup_mode
-from .state import make_attempt_id, write_state, load_state
+from .state import make_attempt_id, make_startup_id, write_state, load_state
+from .logging_utils import logging
 
 
 def setup_pre_daemon_start():
 
-    try:
-        cleanup_xorg_conf()
-        copy_user_config()
-        remove_last_acpi_call_state()
-        startup_mode = get_startup_mode()
+    startup_id = make_startup_id()
 
-    except Exception:
+    with logging("startup", startup_id):
 
-        state = {
-            "type": "startup_failed",
-            "startup_mode": startup_mode
-        }
+        try:
+            cleanup_xorg_conf()
+            copy_user_config()
+            remove_last_acpi_call_state()
+            startup_mode = get_startup_mode()
 
-        write_state(state)
+        except Exception as e:
 
-    else:
+            print("Daemon startup error: %s" % str(e))
 
-        state = {
-            "type": "pending_pre_xorg_start",
-            "requested_mode": startup_mode
-        }
+            state = {
+                "type": "startup_failed",
+                "startup_mode": startup_mode,
+                "startup_id": startup_id
+            }
 
-        write_state(state)
-        setup_pre_xorg_start()
+        else:
+
+            state = {
+                "type": "pending_pre_xorg_start",
+                "requested_mode": startup_mode
+            }
+
+    write_state(state)
+    setup_pre_xorg_start()
 
 
 def setup_pre_xorg_start():
 
+    prev_state = load_state()
+
+    if prev_state is None or prev_state["type"] != "pending_pre_xorg_start":
+        return
+
     attempt_id = make_attempt_id()
 
-    try:
-        prev_state = load_state()
+    with logging("switch", attempt_id):
 
-        if prev_state["type"] == "pending_pre_xorg_start":
-
+        try:
             requested_mode = prev_state["requested_mode"]
             kill_gdm_server()
             config = load_config()
@@ -56,28 +65,33 @@ def setup_pre_xorg_start():
                 "requested_mode": requested_mode
             }
 
-    except Exception:
+        except Exception as e:
 
-        cleanup_xorg_conf()
+            print("Xorg pre-start setup error: %s" % str(e))
 
-        state = {
-            "type": "pre_xorg_start_failed",
-            "attempt_id": attempt_id,
-            "requested_mode": requested_mode
-        }
+            cleanup_xorg_conf()
 
-    finally:
-        write_state(state)
+            state = {
+                "type": "pre_xorg_start_failed",
+                "attempt_id": attempt_id,
+                "requested_mode": requested_mode
+            }
+
+    write_state(state)
 
 
 def setup_post_xorg_start():
 
-    try:
-        prev_state = load_state()
+    prev_state = load_state()
 
-        if prev_state["type"] == "pending_post_xorg_start":
+    if prev_state is None or prev_state["type"] != "pending_post_xorg_start":
+        return
 
-            attempt_id = prev_state["attempt_id"]
+    attempt_id = prev_state["attempt_id"]
+
+    with logging("switch", attempt_id):
+
+        try:
             requested_mode = prev_state["requested_mode"]
 
             do_xsetup(requested_mode)
@@ -88,15 +102,16 @@ def setup_post_xorg_start():
                 "type": "done",
                 "attempt_id": attempt_id,
                 "requested_mode": requested_mode
-            } 
+            }
 
-    except Exception:
+        except Exception as e:
 
-        state = {
-            "type": "post_xorg_start_failed",
-            "attempt_id": attempt_id,
-            "requested_mode": requested_mode
-        }
+            print("Xorg post-start setup error: %s" % str(e))
 
-    finally:
-        write_state(state)
+            state = {
+                "type": "post_xorg_start_failed",
+                "attempt_id": attempt_id,
+                "requested_mode": requested_mode
+            }
+
+    write_state(state)

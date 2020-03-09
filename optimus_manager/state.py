@@ -1,6 +1,8 @@
 import json
 from .envs import STATE_FILE_PATH
 
+def make_startup_id():
+    return 1337  # Placeholder
 
 def make_attempt_id():
     return 42  # Placeholder
