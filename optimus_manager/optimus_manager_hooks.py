@@ -1,24 +1,22 @@
 from .config import load_config, copy_user_config
 from .kernel import setup_kernel_state
-from .var import remove_last_acpi_call_state
+from . import var
 from .xorg import configure_xorg, cleanup_xorg_conf, do_xsetup, set_DPI
-from .gdm import kill_gdm_server
-from .utils import get_startup_mode
-from .state import make_attempt_id, make_startup_id, write_state, load_state
-from .logging_utils import logging
+from .hacks.gdm import kill_gdm_server
+from .logging import logging
 
 
 def setup_pre_daemon_start():
 
-    startup_id = make_startup_id()
+    startup_id = var.make_startup_id()
 
     with logging("startup", startup_id):
 
         try:
             cleanup_xorg_conf()
             copy_user_config()
-            remove_last_acpi_call_state()
-            startup_mode = get_startup_mode()
+            var.remove_last_acpi_call_state()
+            startup_mode = var.get_startup_mode()
 
         except Exception as e:
 
@@ -37,18 +35,18 @@ def setup_pre_daemon_start():
                 "requested_mode": startup_mode
             }
 
-    write_state(state)
+    var.write_state(state)
     setup_pre_xorg_start()
 
 
 def setup_pre_xorg_start():
 
-    prev_state = load_state()
+    prev_state = var.load_state()
 
     if prev_state is None or prev_state["type"] != "pending_pre_xorg_start":
         return
 
-    attempt_id = make_attempt_id()
+    attempt_id = var.make_attempt_id()
 
     with logging("switch", attempt_id):
 
@@ -77,12 +75,12 @@ def setup_pre_xorg_start():
                 "requested_mode": requested_mode
             }
 
-    write_state(state)
+    var.write_state(state)
 
 
 def setup_post_xorg_start():
 
-    prev_state = load_state()
+    prev_state = var.load_state()
 
     if prev_state is None or prev_state["type"] != "pending_post_xorg_start":
         return
@@ -114,4 +112,4 @@ def setup_post_xorg_start():
                 "requested_mode": requested_mode
             }
 
-    write_state(state)
+    var.write_state(state)

@@ -5,10 +5,9 @@ import signal
 import select
 import socket
 import json
-import optimus_manager.envs as envs
-from optimus_manager.config import load_config, ConfigError
-import optimus_manager.var as var
-from .state import write_state
+from . import envs
+from .config import load_config, ConfigError
+from . import var
 
 
 def main():
@@ -92,7 +91,7 @@ def _process_command(msg):
                 "type": "pending_pre_xorg_start",
                 "requested_mode": mode
             }
-            write_state(state)
+            var.write_state(state)
 
         elif command["type"] == "startup":
             print("Writing startup mode %s" % command["args"]["mode"])

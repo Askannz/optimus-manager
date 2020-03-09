@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
 import json
-import optimus_manager.envs as envs
+from . import envs
+from .kernel_parameters import get_kernel_parameters
 
 
 class VarError(Exception):
@@ -131,3 +132,44 @@ def remove_last_acpi_call_state():
         os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
     except FileNotFoundError:
         pass
+
+def get_startup_mode():
+
+    kernel_parameters = get_kernel_parameters()
+
+    if kernel_parameters["startup_mode"] is None:
+        try:
+            startup_mode = read_startup_mode()
+        except VarError as e:
+            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+            startup_mode = envs.DEFAULT_STARTUP_MODE
+
+    else:
+        print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
+        startup_mode = kernel_parameters["startup_mode"]
+
+    return startup_mode
+
+
+def make_startup_id():
+    return 1337  # Placeholder
+
+def make_attempt_id():
+    return 42  # Placeholder
+
+
+def write_state(state):
+
+    filepath = Path(envs.STATE_FILE_PATH)
+
+    os.makedirs(filepath.parent, exist_ok=True)
+
+    with open(filepath, "w") as f:
+        json.dump(state, f)
+
+def load_state():
+    try:
+        with open(envs.STATE_FILE_PATH, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return None

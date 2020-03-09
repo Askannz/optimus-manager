@@ -1,6 +1,6 @@
 import os
 import re
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"

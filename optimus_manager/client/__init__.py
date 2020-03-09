@@ -8,13 +8,12 @@ from .. import envs
 from .. import checks
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
-from ..var import read_startup_mode, read_temp_conf_path_var, VarError
+from ..var import read_startup_mode, read_temp_conf_path_var, load_state, VarError
 from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
 from .client_checks import run_switch_checks
-from ..state import load_state
 
 
 def main():

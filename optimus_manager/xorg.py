@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.envs as envs
-from optimus_manager.pci import get_gpus_bus_ids
-from optimus_manager.config import load_extra_xorg_options
-from optimus_manager import manjaro_hacks
+from .pci import get_gpus_bus_ids
+from .config import load_extra_xorg_options
+from .hacks.manjaro import remove_mhwd_conf
 
 
 class XorgSetupError(Exception):
@@ -23,7 +23,7 @@ def configure_xorg(config, requested_gpu_mode):
     elif requested_gpu_mode == "hybrid":
         xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
-    manjaro_hacks.remove_mhwd_conf()
+    remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
 
 

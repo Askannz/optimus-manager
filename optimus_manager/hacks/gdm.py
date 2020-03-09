@@ -1,4 +1,4 @@
-from . import processes
+from .. import processes
 
 
 def kill_gdm_server():

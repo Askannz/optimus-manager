@@ -1,9 +1,9 @@
-import optimus_manager.envs as envs
-import optimus_manager.var as var
-import optimus_manager.checks as checks
-import optimus_manager.pci as pci
-from optimus_manager.acpi_data import ACPI_STRINGS
-from optimus_manager.bash import exec_bash, BashError
+from . import envs
+from . import var
+from . import checks
+from . import pci
+from .acpi_data import ACPI_STRINGS
+from .bash import exec_bash, BashError
 
 class KernelSetupError(Exception):
     pass

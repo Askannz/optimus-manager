@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 import re
 import dbus
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
 
 
 class CheckError(Exception):
