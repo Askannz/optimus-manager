@@ -129,10 +129,9 @@ def _print_startup_mode():
 
     try:
         startup_mode = read_startup_mode()
+        print("GPU mode for next startup : %s" % startup_mode)
     except VarError as e:
         print("Error reading startup mode : %s" % str(e))
-
-    print("GPU mode for next startup : %s" % startup_mode)
 
     if kernel_parameters["startup_mode"] is not None:
         print("\nNote : the startup mode for the current boot was set to \"%s\" with"
