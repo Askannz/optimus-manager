@@ -71,7 +71,7 @@ def do_xsetup(requested_mode):
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
             exec_bash("xrandr --auto")
         except BashError as e:
-            raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
+            print("Cannot setup PRIME : %s" % str(e))
 
     for path in envs.XSETUP_SCRIPTS_PATHS.values():
 
