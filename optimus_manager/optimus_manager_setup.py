@@ -10,7 +10,7 @@ from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
-from optimus_manager.checks import is_daemon_active
+from optimus_manager.checks import is_daemon_active, is_ac_power_connected
 from optimus_manager.logging_utils import print_timestamp_separator
 
 
@@ -52,7 +52,7 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        startup_mode = _get_startup_mode()
+        startup_mode = _get_startup_mode(config)
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -89,15 +89,18 @@ def main():
         print("Requested mode :", requested_mode)
         _setup_gpu(config, requested_mode)
 
+
 def _abort_if_service_inactive():
     if not is_daemon_active():
         print("ERROR : the optimus-manager service is not running. Aborting.")
         sys.exit(0)
 
+
 def _remove_config_copy():
 
     if os.path.isfile(envs.USER_CONFIG_COPY_PATH):
         os.remove(envs.USER_CONFIG_COPY_PATH)
+
 
 def _copy_user_config():
 
@@ -118,6 +121,7 @@ def _copy_user_config():
     if os.path.isfile(config_path):
         shutil.copy(config_path, envs.USER_CONFIG_COPY_PATH)
 
+
 def _get_config():
 
     try:
@@ -129,7 +133,7 @@ def _get_config():
     return config
 
 
-def _get_startup_mode():
+def _get_startup_mode(config):
 
     kernel_parameters = get_kernel_parameters()
 
@@ -147,6 +151,11 @@ def _get_startup_mode():
 
         print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
         startup_mode = kernel_parameters["startup_mode"]
+
+    if startup_mode == "ac_auto":
+        print("Startup mode is ac_auto, determining mode to set")
+        ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
+        startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
 

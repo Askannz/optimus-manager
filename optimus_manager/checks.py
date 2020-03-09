@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import re
 import dbus
 from optimus_manager.bash import exec_bash, BashError
@@ -6,6 +7,26 @@ from optimus_manager.bash import exec_bash, BashError
 
 class CheckError(Exception):
     pass
+
+
+def is_ac_power_connected():
+
+    for power_source_path in Path("/sys/class/power_supply/").iterdir():
+
+        try:
+
+            with open(power_source_path / "type", 'r') as f:
+                if f.read().strip() != "Mains":
+                    continue
+
+            with open(power_source_path / "online", 'r') as f:
+                if f.read(1) == "1":
+                    return True
+
+        except IOError:
+            continue
+
+    return False
 
 
 def is_pat_available():
