@@ -209,19 +209,14 @@ def load_extra_xorg_options():
 
     xorg_extra = {}
 
-    try:
-        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_INTEL_PATH)
-        print("Loaded extra Intel Xorg options (%d lines)" % len(config_lines))
-        xorg_extra["intel"] = config_lines
-    except FileNotFoundError:
-        pass
+    for mode, path in envs.EXTRA_XORG_OPTIONS_PATHS.items():
 
-    try:
-        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_NVIDIA_PATH)
-        print("Loaded extra Nvidia Xorg options (%d lines)" % len(config_lines))
-        xorg_extra["nvidia"] = config_lines
-    except FileNotFoundError:
-        pass
+        try:
+            config_lines = _load_extra_xorg_file(path)
+            print("Loaded extra Intel Xorg options (%d lines)" % len(config_lines))
+            xorg_extra[mode] = config_lines
+        except FileNotFoundError:
+            pass
 
     return xorg_extra
 

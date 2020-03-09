@@ -18,12 +18,17 @@ XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
 USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
-EXTRA_XORG_OPTIONS_INTEL_PATH = "/etc/optimus-manager/xorg-intel.conf"
-EXTRA_XORG_OPTIONS_NVIDIA_PATH = "/etc/optimus-manager/xorg-nvidia.conf"
+EXTRA_XORG_OPTIONS_PATHS = {
+    "intel": "/etc/optimus-manager/xorg-intel.conf",
+    "nvidia": "/etc/optimus-manager/xorg-nvidia.conf",
+    "hybrid": "/etc/optimus-manager/xorg-hybrid.conf"
+}
 
-XSETUP_SCRIPT_INTEL = "/etc/optimus-manager/xsetup-intel.sh"
-XSETUP_SCRIPT_NVIDIA = "/etc/optimus-manager/xsetup-nvidia.sh"
-XSETUP_SCRIPT_HYBRID = "/etc/optimus-manager/xsetup-hybrid.sh"
+XSETUP_SCRIPTS_PATHS = {
+    "intel": "/etc/optimus-manager/xsetup-intel.sh",
+    "nvidia": "/etc/optimus-manager/xsetup-nvidia.sh",
+    "hybrid": "/etc/optimus-manager/xsetup-hybrid.sh"
+}
 
 NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"
 NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"

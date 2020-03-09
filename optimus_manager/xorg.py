@@ -73,27 +73,14 @@ def do_xsetup(requested_mode):
         except BashError as e:
             raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
 
-        print("Running %s" % envs.XSETUP_SCRIPT_NVIDIA)
+    for path in envs.XSETUP_SCRIPTS_PATHS.values():
+
+        print("Running %s" % path)
         try:
-            exec_bash(envs.XSETUP_SCRIPT_NVIDIA)
+            exec_bash(path)
         except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_NVIDIA, str(e)))
+            print("ERROR : cannot run %s : %s" % (path, str(e)))
 
-    elif requested_mode == "intel":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_INTEL)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_INTEL)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
-
-    elif requested_mode == "hybrid":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_HYBRID)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_HYBRID)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
 
 def set_DPI(config):
 
