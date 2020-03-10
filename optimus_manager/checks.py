@@ -37,15 +37,12 @@ def is_pat_available():
         return False
 
 
-def read_gpu_mode():
+def get_active_renderer():
 
     if _is_gl_provider_nvidia():
         return "nvidia"
     else:
-        if _is_offloading_available():
-            return "hybrid"
-        else:
-            return "intel"
+        return "intel"
 
 
 def is_module_available(module_name):
@@ -85,7 +82,7 @@ def using_patched_GDM():
 
     return os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2)
 
-def _is_offloading_available():
+def check_offloading_available():
 
     try:
         ret = exec_bash("xrandr --listproviders")
@@ -118,7 +115,7 @@ def is_bumblebeed_service_active():
 def _is_gl_provider_nvidia():
 
     try:
-        ret = exec_bash("glxinfo")
+        ret = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
     except BashError as e:
         raise CheckError("Cannot run glxinfo : %s" % str(e))
 

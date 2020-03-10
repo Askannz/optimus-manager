@@ -5,18 +5,18 @@ from .. import sessions
 from .utils import ask_confirmation
 
 
-def run_switch_checks(config, switch_mode):
+def run_switch_checks(config, requested_mode):
 
     _check_daemon_active()
     _check_power_switching(config)
     _check_bbswitch_module(config)
-    _check_nvidia_module(switch_mode)
+    _check_nvidia_module(requested_mode)
     _check_patched_GDM()
     _check_wayland()
     _check_bumblebeed()
     _check_xorg_conf()
     _check_MHWD_conf()
-    _check_intel_xorg_module(config, switch_mode)
+    _check_intel_xorg_module(config, requested_mode)
     _check_number_of_sessions()
 
 
@@ -46,9 +46,9 @@ def _check_bbswitch_module(config):
               "You can install bbswitch for the default kernel with \"sudo pacman -S bbswitch\" or"
               " for all kernels with \"sudo pacman -S bbswitch-dkms\".\n")
 
-def _check_nvidia_module(switch_mode):
+def _check_nvidia_module(requested_mode):
 
-    if switch_mode == "nvidia" and not checks.is_module_available("nvidia"):
+    if requested_mode == "nvidia" and not checks.is_module_available("nvidia"):
         print("WARNING : the nvidia module does not seem to be available for the current kernel."
               " It is likely the Nvidia driver was not properly installed. GPU switching will probably fail,\n"
               " continue anyway ? (y/N)")
@@ -135,9 +135,9 @@ def _check_MHWD_conf():
         if not confirmation:
             sys.exit(0)
 
-def _check_intel_xorg_module(config, switch_mode):
+def _check_intel_xorg_module(config, requested_mode):
 
-    if switch_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
+    if requested_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
         print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
               " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
               " the package \"xf86-video-intel.\"\n"

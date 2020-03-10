@@ -13,12 +13,18 @@ from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_ther
 from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
+from .error_reporting import report_errors
 from .client_checks import run_switch_checks
 
 
 def main():
 
     args = parse_args()
+    state = load_state()
+    fatal = report_errors(state)
+
+    if fatal:
+        sys.exit(1)
 
     config = _get_config()
     print("")
@@ -26,15 +32,15 @@ def main():
     if args.version:
         _print_version()
     elif args.print_mode:
-        _print_current_mode()
+        _print_current_mode(state)
     elif args.print_next_mode:
-        _print_next_mode()
+        _print_next_mode(state)
     elif args.print_startup:
         _print_startup_mode()
     elif args.status:
-        _print_status()
+        _print_status(state)
     elif args.switch:
-        _gpu_switch(config, args.switch, args.no_confirm)
+        _gpu_switch(config, state, args.switch, args.no_confirm)
     elif args.set_startup:
         _set_startup_and_exit(args.set_startup)
     elif args.temp_config:
@@ -50,12 +56,11 @@ def main():
     sys.exit(0)
 
 
-def _gpu_switch(config, switch_mode, no_confirm):
+def _gpu_switch(config, state, switch_mode, no_confirm):
 
+    requested_mode = _get_switch_mode(state, switch_mode)
 
-    switch_mode = _get_switch_mode(switch_mode)
-
-    run_switch_checks(config, switch_mode)
+    run_switch_checks(config, requested_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
 
@@ -69,17 +74,17 @@ def _gpu_switch(config, switch_mode, no_confirm):
             confirmation = ask_confirmation()
 
         if confirmation:
-            _send_switch_command(config, switch_mode)
+            _send_switch_command(config, requested_mode)
 
     else:
-        _send_switch_command(config, switch_mode)
+        _send_switch_command(config, requested_mode)
         print("Please logout all graphical sessions then log back in to apply the change.")
 
 
-def _send_switch_command(config, switch_mode):
+def _send_switch_command(config, requested_mode):
 
-    print("Switching to mode : %s" % switch_mode)
-    command = {"type": "switch", "args": {"mode": switch_mode}}
+    print("Switching to mode : %s" % requested_mode)
+    command = {"type": "switch", "args": {"mode": requested_mode}}
     _send_command(command)
 
     if config["optimus"]["auto_logout"] == "yes":
@@ -101,20 +106,12 @@ def _print_version():
     print("Optimus Manager (Client) version %s" % envs.VERSION)
 
 
-def _print_current_mode():
+def _print_current_mode(state):
+    print("Current GPU mode : %s" % state["current_mode"])
 
-    try:
-        mode = checks.read_gpu_mode()
-        print("Current GPU mode : %s" % mode)
-    except checks.CheckError as e:
-        print("Error reading current mode : %s" % str(e))
+def _print_next_mode(state):
 
-
-def _print_next_mode():
-
-    state = load_state()
-
-    if state is not None and state["type"] == "pending_pre_xorg_start":
+    if state["type"] == "pending_pre_xorg_start":
         res_str = state["requested_mode"]
     else:
         res_str = "no change"
@@ -145,12 +142,12 @@ def _print_temp_config_path():
     else:
         print("Temporary config path: %s" % path)
 
-def _print_status():
+def _print_status(state):
 
     _print_version()
     print("")
-    _print_current_mode()
-    _print_next_mode()
+    _print_current_mode(state)
+    _print_next_mode(state)
     _print_startup_mode()
     _print_temp_config_path()
 
@@ -163,32 +160,26 @@ def _check_daemon_active():
         sys.exit(1)
 
 
-def _get_switch_mode(switch_arg):
+def _get_switch_mode(state, switch_arg):
 
     if switch_arg not in ["auto", "intel", "nvidia", "hybrid", "ac_auto"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
     if switch_arg == "auto":
-        try:
-            gpu_mode = checks.read_gpu_mode()
-        except checks.CheckError as e:
-            print("Error reading current GPU mode: %s" % str(e))
-            sys.exit(1)
 
-        if gpu_mode == "nvidia":
-            switch_mode = "intel"
-        elif gpu_mode == "intel":
-            switch_mode = "nvidia"
-        elif gpu_mode == "hybrid":
-            switch_mode = "intel"
+        requested_mode = {
+            "nvidia": "intel",
+            "intel": "nvidia",
+            "hybrid": "intel"
+        }[state["current_mode"]]
 
-        print("Switching to : %s" % switch_mode)
+        print("Switching to : %s" % requested_mode)
 
     else:
-        switch_mode = switch_arg
+        requested_mode = switch_arg
 
-    return switch_mode
+    return requested_mode
 
 def _send_command(command):
 

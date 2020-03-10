@@ -1,3 +1,4 @@
+import sys
 from ..config import load_config, copy_user_config
 from ..kernel import setup_kernel_state
 from .. import var
@@ -18,6 +19,14 @@ def setup_pre_daemon_start():
             var.remove_last_acpi_call_state()
             startup_mode = var.get_startup_mode()
 
+            state = {
+                "type": "pending_pre_xorg_start",
+                "requested_mode": startup_mode,
+                "current_mode": None
+            }
+
+            var.write_state(state)
+
         except Exception as e:
 
             print("Daemon startup error: %s" % str(e))
@@ -28,15 +37,10 @@ def setup_pre_daemon_start():
                 "startup_id": startup_id
             }
 
-        else:
+            var.write_state(state)
 
-            state = {
-                "type": "pending_pre_xorg_start",
-                "requested_mode": startup_mode
-            }
 
-    var.write_state(state)
-    setup_pre_xorg_start()
+        setup_pre_xorg_start()
 
 
 def setup_pre_xorg_start():
@@ -60,8 +64,10 @@ def setup_pre_xorg_start():
             state = {
                 "type": "pending_post_xorg_start",
                 "attempt_id": attempt_id,
-                "requested_mode": requested_mode
+                "requested_mode": requested_mode,
             }
+
+            var.write_state(state)
 
         except Exception as e:
 
@@ -75,8 +81,7 @@ def setup_pre_xorg_start():
                 "requested_mode": requested_mode
             }
 
-    var.write_state(state)
-
+            var.write_state(state)
 
 def setup_post_xorg_start():
 
@@ -99,8 +104,10 @@ def setup_post_xorg_start():
             state = {
                 "type": "done",
                 "attempt_id": attempt_id,
-                "requested_mode": requested_mode
+                "current_mode": requested_mode
             }
+
+            var.write_state(state)
 
         except Exception as e:
 
@@ -112,4 +119,4 @@ def setup_post_xorg_start():
                 "requested_mode": requested_mode
             }
 
-    var.write_state(state)
+            var.write_state(state)

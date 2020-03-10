@@ -84,14 +84,16 @@ def _process_command(msg):
         if command["type"] == "switch":
 
             mode = command["args"]["mode"]
-
             print("Writing requested GPU mode %s" % mode)
 
-            state = {
+            state = var.load_state()
+
+            new_state = {
                 "type": "pending_pre_xorg_start",
-                "requested_mode": mode
+                "requested_mode": mode,
+                "current_mode": state["current_mode"]
             }
-            var.write_state(state)
+            var.write_state(new_state)
 
         elif command["type"] == "startup":
             print("Writing startup mode %s" % command["args"]["mode"])
