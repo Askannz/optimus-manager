@@ -5,9 +5,9 @@ import signal
 import select
 import socket
 import json
-from . import envs
-from .config import load_config, ConfigError
-from . import var
+from .. import envs
+from ..config import load_config, ConfigError
+from .. import var
 
 
 def main():

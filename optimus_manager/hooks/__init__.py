@@ -1,9 +1,9 @@
-from .config import load_config, copy_user_config
-from .kernel import setup_kernel_state
-from . import var
-from .xorg import configure_xorg, cleanup_xorg_conf, do_xsetup, set_DPI
-from .hacks.gdm import kill_gdm_server
-from .logging import logging
+from ..config import load_config, copy_user_config
+from ..kernel import setup_kernel_state
+from .. import var
+from ..xorg import configure_xorg, cleanup_xorg_conf, do_xsetup, set_DPI
+from ..hacks.gdm import kill_gdm_server
+from ..logging import logging
 
 
 def setup_pre_daemon_start():

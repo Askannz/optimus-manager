@@ -18,8 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'optimus-manager=optimus_manager.client:main',
-            'optimus-manager-setup=optimus_manager.optimus_manager_setup:main',
-            'optimus-manager-daemon=optimus_manager.optimus_manager_daemon:main'
+            'optimus-manager-daemon=optimus_manager.daemon:main'
         ],
     },
     package_data={'optimus_manager': ['config_schema.json', 'icon/intel.png', 'icon/nvidia.png']},
