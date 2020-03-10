@@ -38,6 +38,7 @@ def setup_pre_daemon_start():
             }
 
             var.write_state(state)
+            sys.exit(1)
 
 
         setup_pre_xorg_start()
@@ -82,6 +83,7 @@ def setup_pre_xorg_start():
             }
 
             var.write_state(state)
+            sys.exit(1)
 
 def setup_post_xorg_start():
 
@@ -120,3 +122,4 @@ def setup_post_xorg_start():
             }
 
             var.write_state(state)
+            sys.exit(1)
