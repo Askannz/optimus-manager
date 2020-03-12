@@ -31,10 +31,10 @@ def main():
 
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : intel, nvidia, hybrid, auto (auto-detects the mode you may want to switch to).")
+                             "Possible modes : intel, nvidia, hybrid, ac_auto, auto (auto-detects the mode you may want to switch to).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia, hybrid")
+                             "intel, nvidia, hybrid, ac_auto")
 
     parser.add_argument('--temp-config', metavar='PATH', action='store',
                         help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
@@ -233,7 +233,7 @@ def _check_daemon_active():
 
 
 def _get_switch_mode(switch_arg):
-    if switch_arg not in ["auto", "intel", "nvidia", "hybrid"]:
+    if switch_arg not in ["auto", "intel", "nvidia", "hybrid", "ac_auto"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
@@ -443,7 +443,7 @@ def _send_command(command):
 
 
 def _set_startup_and_exit(startup_arg):
-    if startup_arg not in ["intel", "nvidia", "hybrid"]:
+    if startup_arg not in ["intel", "nvidia", "hybrid", "ac_auto"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 

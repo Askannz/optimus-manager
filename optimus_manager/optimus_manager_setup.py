@@ -10,7 +10,7 @@ from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
-from optimus_manager.checks import is_daemon_active, is_elogind_active, _detect_init_system, _is_elogind_present
+from optimus_manager.checks import is_daemon_active, is_elogind_active, _detect_init_system, _is_elogind_present, is_ac_power_connected
 from optimus_manager.logging_utils import print_timestamp_separator
 
 
@@ -52,7 +52,7 @@ def main():
         config = _get_config()
 
         print("Reading startup mode")
-        startup_mode = _get_startup_mode()
+        startup_mode = _get_startup_mode(config)
         print("Startup mode is : %s" % startup_mode)
 
         print("Writing startup mode to requested GPU mode")
@@ -147,7 +147,7 @@ def _get_config():
     return config
 
 
-def _get_startup_mode():
+def _get_startup_mode(config):
 
     kernel_parameters = get_kernel_parameters()
 
@@ -165,6 +165,11 @@ def _get_startup_mode():
 
         print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
         startup_mode = kernel_parameters["startup_mode"]
+
+    if startup_mode == "ac_auto":
+        print("Startup mode is ac_auto, determining mode to set")
+        ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
+        startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
 
