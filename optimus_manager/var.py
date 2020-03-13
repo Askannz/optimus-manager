@@ -16,7 +16,7 @@ def read_requested_mode():
             if len(content) > 0 and content[-1] == "\n":
                 content = content[:-1]
 
-            if content in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]:
+            if content in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd", "ac_auto"]:
                 mode = content
             else:
                 raise VarError("Invalid mode request : %s" % content)
@@ -31,7 +31,7 @@ def read_requested_mode():
 
 def write_requested_mode(mode):
 
-    assert mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]
+    assert mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd", "ac_auto"]
 
     folder_path, _ = os.path.split(envs.REQUESTED_MODE_VAR_PATH)
 
@@ -62,7 +62,7 @@ def read_startup_mode():
             if len(content) > 0 and content[-1] == "\n":
                 content = content[:-1]
 
-            if content in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]:
+            if content in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd", "ac_auto"]:
                 mode = content
             else:
                 raise VarError("Invalid value : %s" % content)
@@ -74,7 +74,7 @@ def read_startup_mode():
 
 def write_startup_mode(mode):
 
-    assert mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]
+    assert mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd", "ac_auto"]
 
     folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 

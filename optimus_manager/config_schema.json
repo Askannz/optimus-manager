@@ -5,7 +5,8 @@
 		"pci_power_control": ["single_word", ["yes", "no"], false],
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
-		"auto_logout": ["single_word", ["yes", "no"], false]
+		"auto_logout": ["single_word", ["yes", "no"], false],
+		"ac_auto_battery_mode": ["single_word", ["amd", "intel", "hybrid-amd", "hybrid-intel"], false]
 	},
 
 	"intel":

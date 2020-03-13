@@ -85,6 +85,7 @@ Run
 * `optimus-manager --switch amd` to switch to the AMD GPU and power the Nvidia GPU off
 * `optimus-manager --switch hybrid-intel` to switch to the Intel GPU but leave the Nvidia GPU available for on-demand offloading, similar to how Optimus works on Windows. See [the Wiki](https://github.com/Askannz/optimus-manager/wiki/Nvidia-GPU-offloading-for-%22hybrid%22-mode) for more details.
 * `optimus-manager --switch hybrid-amd` to switch to the AMD GPU but leave the Nvidia GPU available on-demand offloading.
+* `optimus-manager --switch ac_auto` to switch to the Nvidia GPU when connected to AC and `ac_auto_battery_mode` from the config when disconnected
 * `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to `hybrid-amd` if you are in `nvidia` mode, and to `nvidia` otherwise)
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
@@ -97,7 +98,7 @@ You can also specify which GPU you want to be used by default when the system bo
 optimus-manager --set-startup MODE
 ```
 
-Where `MODE` can be `intel`, `nvidia`, `hybrid-intel`, `hybrid-amd`.
+Where `MODE` can be `intel`, `nvidia`, `hybrid-intel`, `hybrid-amd`, `ac_auto`.
 
 #### System Tray App
 
@@ -112,7 +113,7 @@ A Gnome Shell extension is also available here : [optimus-manager-argos](https:/
 
 As an alternative to the `--set-startup` command, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
 
-Simply add `optimus-manager.startup=intel` or `optimus-manager.startup=nvidia` to your kernel parameters list. Note that this parameter overrides whatever startup mode was set with `optimus-manager --set-startup`.
+Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where `MODE` can be any startup mode. Note that this parameter overrides whatever startup mode was set with `optimus-manager --set-startup`.
 
 Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
