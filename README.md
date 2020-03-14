@@ -81,11 +81,11 @@ Usage
 
 Run
 * `optimus-manager --switch nvidia` to switch to the Nvidia GPU
-* `optimus-manager --switch intel` to switch to the Intel GPU and power the Nvidia GPU off
 * `optimus-manager --switch amd` to switch to the AMD GPU and power the Nvidia GPU off
-* `optimus-manager --switch hybrid-intel` to switch to the Intel GPU but leave the Nvidia GPU available for on-demand offloading, similar to how Optimus works on Windows. See [the Wiki](https://github.com/Askannz/optimus-manager/wiki/Nvidia-GPU-offloading-for-%22hybrid%22-mode) for more details.
-* `optimus-manager --switch hybrid-amd` to switch to the AMD GPU but leave the Nvidia GPU available on-demand offloading.
-* `optimus-manager --switch ac_auto` to switch to the Nvidia GPU when connected to AC and `ac_auto_battery_mode` from the config when disconnected
+* `optimus-manager --switch intel` to switch to the Intel GPU and power the Nvidia GPU off
+* `optimus-manager --switch hybrid-amd` to switch to the AMD GPU but leave the Nvidia GPU available on-demand offloading
+* `optimus-manager --switch hybrid-intel` to switch to the Intel GPU but leave the Nvidia GPU available for on-demand offloading, similar to how Optimus works on Windows. See [the Wiki](https://github.com/Askannz/optimus-manager/wiki/Nvidia-GPU-offloading-for-%22hybrid%22-mode) for more details
+* `optimus-manager --switch ac_auto` to switch to `ac_auto_extpower_mode` from the config when connected to AC and `ac_auto_battery_mode` when disconnected
 * `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to `hybrid-amd` if you are in `nvidia` mode, and to `nvidia` otherwise)
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
@@ -98,7 +98,7 @@ You can also specify which GPU you want to be used by default when the system bo
 optimus-manager --set-startup MODE
 ```
 
-Where `MODE` can be `intel`, `nvidia`, `hybrid-intel`, `hybrid-amd`, `ac_auto`.
+Where `MODE` can be `nvidia`, `amd`, `intel`, `hybrid-amd`, `hybrid-intel`, `ac_auto`.
 
 #### System Tray App
 

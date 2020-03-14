@@ -11,7 +11,7 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, requested_gpu_mode):
 
-    assert requested_gpu_mode in ["nvidia", "intel", "amd", "hybrid-intel", "hybrid-amd"]
+    assert requested_gpu_mode in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel"]
 
     available_modules = _get_available_modules()
     print("Available kernel modules : %s" % str(available_modules))
