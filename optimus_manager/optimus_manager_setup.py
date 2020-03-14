@@ -154,8 +154,8 @@ def _get_startup_mode(config):
 
     if startup_mode == "ac_auto":
         print("Startup mode is ac_auto, determining mode to set")
-        ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
-        startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
+        ac_auto_battery_option, ac_auto_extpower_option = config["optimus"]["ac_auto_battery_mode"], config["optimus"]["ac_auto_extpower_mode"]
+        startup_mode = ac_auto_extpower_option if is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
 
