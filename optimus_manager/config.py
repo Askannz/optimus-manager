@@ -54,6 +54,7 @@ def copy_user_config():
     if os.path.isfile(config_path):
         copy_path = Path(envs.USER_CONFIG_COPY_PATH)
         os.makedirs(copy_path.parent, exist_ok=True)
+        print("Copying %s to %s" % (config_path, copy_path))
         shutil.copy(config_path, copy_path)
 
 

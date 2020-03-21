@@ -14,10 +14,14 @@ def setup_pre_daemon_start():
     with logging("startup", startup_id):
 
         try:
+            print("\n# Daemon pre-start hook")
+
             cleanup_xorg_conf()
             copy_user_config()
             var.remove_last_acpi_call_state()
             startup_mode = var.get_startup_mode()
+
+            print("Startup mode is: %s" % startup_mode)
 
             state = {
                 "type": "pending_pre_xorg_start",
@@ -56,6 +60,8 @@ def setup_pre_xorg_start():
     with logging("switch", attempt_id):
 
         try:
+            print("\n# Xorg pre-start hook")
+
             requested_mode = prev_state["requested_mode"]
             kill_gdm_server()
             config = load_config()
@@ -97,6 +103,8 @@ def setup_post_xorg_start():
     with logging("switch", attempt_id):
 
         try:
+            print("\n# Xorg post-start hook")
+
             requested_mode = prev_state["requested_mode"]
 
             do_xsetup(requested_mode)

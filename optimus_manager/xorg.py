@@ -29,9 +29,10 @@ def configure_xorg(config, requested_gpu_mode):
 
 def cleanup_xorg_conf():
 
+    print("Removing %s (if present)" % envs.XORG_CONF_PATH)
+
     try:
         os.remove(envs.XORG_CONF_PATH)
-        print("Removed %s" % envs.XORG_CONF_PATH)
     except FileNotFoundError:
         pass
 

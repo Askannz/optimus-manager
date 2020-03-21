@@ -128,6 +128,8 @@ def read_last_acpi_call_state():
 
 def remove_last_acpi_call_state():
 
+    print("Removing %s (if present)" % envs.LAST_ACPI_CALL_STATE_VAR)
+
     try:
         os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
     except FileNotFoundError:
