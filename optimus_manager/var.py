@@ -152,10 +152,31 @@ def get_startup_mode():
 
 
 def make_startup_id():
-    return 1337  # Placeholder
+
+    try:
+        with open(envs.STARTUP_ID_FILE_PATH, 'r') as f:
+            new_id = int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        new_id = 0
+
+    with open(envs.STARTUP_ID_FILE_PATH, 'w') as f:
+        f.write(str(new_id + 1))
+
+    return new_id
+
 
 def make_attempt_id():
-    return 42  # Placeholder
+
+    try:
+        with open(envs.ATTEMPT_ID_FILE_PATH, 'r') as f:
+            new_id = int(f.read().strip())
+    except (FileNotFoundError, ValueError):
+        new_id = 0
+
+    with open(envs.ATTEMPT_ID_FILE_PATH, 'w') as f:
+        f.write(str(new_id + 1))
+
+    return new_id
 
 
 def write_state(state):
