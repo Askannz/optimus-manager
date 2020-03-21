@@ -14,7 +14,7 @@ def setup_pre_daemon_start():
     with logging("startup", startup_id):
 
         try:
-            print("\n# Daemon pre-start hook")
+            print("# Daemon pre-start hook")
 
             cleanup_xorg_conf()
             copy_user_config()
@@ -44,6 +44,8 @@ def setup_pre_daemon_start():
             var.write_state(state)
             sys.exit(1)
 
+        else:
+            print("Daemon pre-start hook completed successfully. Calling Xorg pre-start hook.\n")
 
     setup_pre_xorg_start()
 
@@ -60,9 +62,12 @@ def setup_pre_xorg_start():
     with logging("switch", attempt_id):
 
         try:
-            print("\n# Xorg pre-start hook")
+            print("# Xorg pre-start hook")
 
             requested_mode = prev_state["requested_mode"]
+
+            print("Requested mode is: %s" % requested_mode)
+
             kill_gdm_server()
             config = load_config()
             setup_kernel_state(config, requested_mode)
@@ -91,6 +96,10 @@ def setup_pre_xorg_start():
             var.write_state(state)
             sys.exit(1)
 
+        else:
+            print("Xorg pre-start hook completed successfully.\n")
+
+
 def setup_post_xorg_start():
 
     prev_state = var.load_state()
@@ -103,7 +112,7 @@ def setup_post_xorg_start():
     with logging("switch", attempt_id):
 
         try:
-            print("\n# Xorg post-start hook")
+            print("# Xorg post-start hook")
 
             requested_mode = prev_state["requested_mode"]
 
@@ -131,3 +140,6 @@ def setup_post_xorg_start():
 
             var.write_state(state)
             sys.exit(1)
+
+        else:
+            print("Xorg post-start hook completed successfully.\n")
