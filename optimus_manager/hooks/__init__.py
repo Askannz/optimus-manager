@@ -45,7 +45,7 @@ def setup_pre_daemon_start():
             sys.exit(1)
 
 
-        setup_pre_xorg_start()
+    setup_pre_xorg_start()
 
 
 def setup_pre_xorg_start():
