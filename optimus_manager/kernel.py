@@ -9,53 +9,78 @@ class KernelSetupError(Exception):
     pass
 
 
-def setup_kernel_state(config, requested_gpu_mode):
+def setup_kernel_state(config, prev_state, requested_mode):
 
-    assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
+    assert requested_mode in ["intel", "nvidia", "hybrid"]
+    assert prev_state["type"] == "pending_pre_xorg_start"
+
+    current_mode = prev_state["current_mode"]
+
+    if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
+        _nvidia_up(config)
+
+    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
+        _nvidia_down(config)
+
+
+def _nvidia_up(config):
 
     available_modules = _get_available_modules()
-    print("Available kernel modules : %s" % str(available_modules))
+    print("Available modules: ", str(available_modules))
 
-    if requested_gpu_mode == "intel":
-        _setup_intel_mode(config, available_modules)
+    _unload_nouveau(available_modules)
 
-    elif requested_gpu_mode == "nvidia":
-        _setup_nvidia_mode(config, available_modules)
+    switching_mode = config["optimus"]["switching"]
+    if switching_mode == "bbswitch":
+        _try_load_bbswitch(available_modules)
+        _try_set_bbswitch_state("ON")
+    elif switching_mode == "acpi_call":
+        _try_load_acpi_call(available_modules)
+        _try_set_acpi_call_state("ON")
+    elif switching_mode == "none":
+        _try_custom_set_power_state("ON")
 
-    elif requested_gpu_mode == "hybrid":
-        _setup_hybrid_mode(config, available_modules)
+    if not pci.is_nvidia_visible():
+        print("Nvidia card not visible in PCI bus, rescanning")
+        _try_rescan_pci()
 
-def _setup_intel_mode(config, available_modules):
+    if config["optimus"]["pci_reset"] == "yes":
+        _try_pci_reset(config, available_modules)
 
-    # Resetting the system to its base state
-    _set_base_state(config, available_modules)
+    if config["optimus"]["pci_power_control"] == "yes":
+        _try_set_pci_power_state("on")
 
-    print("Setting up Intel state")
+    _load_nvidia_modules(config, available_modules)
 
-    # Power switching according to the switching backend
-    if config["optimus"]["switching"] == "nouveau":
+def _nvidia_down(config):
+
+    available_modules = _get_available_modules()
+    print("Available modules: ", str(available_modules))
+
+    _unload_nvidia_modules(available_modules)
+
+    switching_mode = config["optimus"]["switching"]
+    if switching_mode == "nouveau":
         _try_load_nouveau(config, available_modules)
-
-    elif config["optimus"]["switching"] == "bbswitch":
+    elif switching_mode == "bbswitch":
+        _try_load_bbswitch(available_modules)
         _set_bbswitch_state("OFF")
-
-    elif config["optimus"]["switching"] == "acpi_call":
+    elif switching_mode == "acpi_call":
+        _try_load_acpi_call(available_modules)
         _try_set_acpi_call_state("OFF")
-
-    elif config["optimus"]["switching"] == "none":
+    elif switching_mode == "none":
         _try_custom_set_power_state("OFF")
 
-    # PCI remove
+
     if config["optimus"]["pci_remove"] == "yes":
 
-        switching_mode = config["optimus"]["switching"]
         if switching_mode == "nouveau" or switching_mode == "bbswitch":
             print("%s is selected, pci_remove option ignored." % switching_mode)
         else:
             print("Removing Nvidia from PCI bus")
             _try_remove_pci()
 
-    # PCI power control
+
     if config["optimus"]["pci_power_control"] == "yes":
 
         switching_mode = config["optimus"]["switching"]
@@ -65,65 +90,6 @@ def _setup_intel_mode(config, available_modules):
             print("pci_remove is enabled, pci_power_control option ignored.")
         else:
             _try_set_pci_power_state("auto")
-
-def _setup_nvidia_mode(config, available_modules):
-
-    _set_base_state(config, available_modules)
-
-    print("Setting up Nvidia state")
-    _load_nvidia_modules(config, available_modules)
-
-def _setup_hybrid_mode(config, available_modules):
-
-    _set_base_state(config, available_modules)
-
-    print("Setting up Hybrid state")
-    _load_nvidia_modules(config, available_modules)
-
-def _set_base_state(config, available_modules):
-
-    print("Setting up base state")
-
-    _unload_nvidia_modules(available_modules)
-    _unload_nouveau(available_modules)
-
-    switching_mode = config["optimus"]["switching"]
-    if switching_mode == "bbswitch":
-        _try_load_bbswitch(available_modules)
-    elif switching_mode == "acpi_call":
-        _try_load_acpi_call(available_modules)
-
-    if checks.is_module_loaded("bbswitch"):
-        _try_set_bbswitch_state("ON")
-
-    if checks.is_module_loaded("acpi_call"):
-
-        try:
-            last_acpi_call_state = var.read_last_acpi_call_state()
-            should_send_acpi_call = (last_acpi_call_state == "OFF")
-        except var.VarError:
-            should_send_acpi_call = False
-
-        if should_send_acpi_call:
-            _try_set_acpi_call_state("ON")
-
-    if switching_mode == "none":
-        _try_custom_set_power_state("ON")
-
-    if not pci.is_nvidia_visible():
-        print("Nvidia card not visible in PCI bus, rescanning")
-        _try_rescan_pci()
-
-    if config["optimus"]["pci_reset"] != "no":
-        _try_pci_reset(config, available_modules)
-
-    if switching_mode == "bbswitch":
-        # Re-loading bbswitch in case it was unloaded before PCI reset
-        _try_load_bbswitch(available_modules)
-    else:
-        _try_unload_bbswitch(available_modules)
-
-    _try_set_pci_power_state("on")
 
 
 def _get_available_modules():
@@ -280,6 +246,8 @@ def _try_remove_pci():
 
 def _try_rescan_pci():
 
+    print("Rescanning PCI bus")
+
     try:
         pci.rescan()
         if not pci.is_nvidia_visible():
@@ -289,12 +257,16 @@ def _try_rescan_pci():
 
 def _try_set_pci_power_state(state):
 
+    print("Setting Nvidia PCI power state to %s" % state)
+
     try:
         pci.set_power_state(state)
     except pci.PCIError as e:
         print("ERROR : cannot set PCI power management state. Continuing. Error is : %s" % str(e))
 
 def _try_pci_reset(config, available_modules):
+
+    print("Resetting Nvidia PCI device")
 
     try:
         _pci_reset(config, available_modules)
@@ -339,7 +311,7 @@ def _try_custom_set_power_state(state):
     elif state == "OFF":
         script_path = envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH
 
-    print("Running %s" % script_path)
+    print("Running custom power switching script %s" % script_path)
 
     try:
         exec_bash(script_path)

@@ -70,7 +70,7 @@ def setup_pre_xorg_start():
 
             kill_gdm_server()
             config = load_config()
-            setup_kernel_state(config, requested_mode)
+            setup_kernel_state(config, prev_state, requested_mode)
             configure_xorg(config, requested_mode)
 
             state = {
