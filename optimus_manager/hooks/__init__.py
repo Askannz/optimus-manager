@@ -45,7 +45,7 @@ def setup_pre_daemon_start():
             sys.exit(1)
 
         else:
-            print("Daemon pre-start hook completed successfully. Calling Xorg pre-start hook.\n")
+            print("Daemon pre-start hook completed successfully. Calling Xorg pre-start hook.")
 
     setup_pre_xorg_start()
 
@@ -97,7 +97,7 @@ def setup_pre_xorg_start():
             sys.exit(1)
 
         else:
-            print("Xorg pre-start hook completed successfully.\n")
+            print("Xorg pre-start hook completed successfully.")
 
 
 def setup_post_xorg_start():
@@ -142,4 +142,4 @@ def setup_post_xorg_start():
             sys.exit(1)
 
         else:
-            print("Xorg post-start hook completed successfully.\n")
+            print("Xorg post-start hook completed successfully.")
