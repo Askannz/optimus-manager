@@ -74,13 +74,12 @@ def do_xsetup(requested_mode):
         except BashError as e:
             print("Cannot setup PRIME : %s" % str(e))
 
-    for path in envs.XSETUP_SCRIPTS_PATHS.values():
-
-        print("Running %s" % path)
-        try:
-            exec_bash(path)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (path, str(e)))
+    script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
+    print("Running %s" % script_path)
+    try:
+        exec_bash(script_path)
+    except BashError as e:
+        print("ERROR : cannot run %s : %s" % (script_path, str(e)))
 
 
 def set_DPI(config):
