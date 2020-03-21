@@ -1,4 +1,5 @@
 import sys
+import traceback
 from ..config import load_config, copy_user_config
 from ..kernel import setup_kernel_state
 from .. import var
@@ -33,7 +34,8 @@ def setup_pre_daemon_start():
 
         except Exception as e:
 
-            print("Daemon startup error: %s" % str(e))
+            print("Daemon startup error")
+            print(traceback.format_exc())
 
             state = {
                 "type": "startup_failed",
@@ -83,7 +85,8 @@ def setup_pre_xorg_start():
 
         except Exception as e:
 
-            print("Xorg pre-start setup error: %s" % str(e))
+            print("Xorg pre-start setup error")
+            print(traceback.format_exc())
 
             cleanup_xorg_conf()
 
@@ -130,7 +133,8 @@ def setup_post_xorg_start():
 
         except Exception as e:
 
-            print("Xorg post-start setup error: %s" % str(e))
+            print("Xorg post-start setup error")
+            print(traceback.format_exc())
 
             state = {
                 "type": "post_xorg_start_failed",
