@@ -182,7 +182,7 @@ def _is_gl_provider_nvidia():
 
 
 def _is_elogind_present():
-    return os.path.isfile("/usr/lib/libelogind.so")
+    return os.path.isfile("/usr/lib/libelogind.so.0")
 
 
 def _is_service_active(service_name):
