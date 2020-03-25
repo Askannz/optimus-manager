@@ -7,7 +7,7 @@ This Linux program provides a solution for GPU switching on Optimus laptops (i.e
 
 Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 
-**Only Archlinux and Archlinux-based distributions (such as Manjaro) are supported for now.**
+**Only VoidLinux, Archlinux and Archlinux-based distributions (such as Manjaro) are supported for now.**
 Only Xorg sessions are supported (no Wayland).
 
 Supported display managers are : SDDM, LightDM, GDM.
@@ -18,7 +18,7 @@ Introduction
 ----------
 GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between the Nvidia GPU and your screen.
 
-This is essentially a port to Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
+This is essentially a port to VoidLinux and Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
 To learn more about the current Optimus situation on Linux and how this solution works, read the [Home Wiki page](https://github.com/Askannz/optimus-manager/wiki).
 
@@ -47,7 +47,9 @@ Naturally, you must have the proprietary nvidia driver installed on your system.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
-For OpenRC or runit you will need to install the corresponding init script package in the init folder using `makepkg -si`
+For Artix OpenRC or runit you will need to install the corresponding init script package in the init folder using `makepkg -si`
+
+For VoidLinux, you will need to clone my [void-packages](https://github.com/Hyper-KVM/void-packages) repo for now and use xbps-src to install.
 
 After installation, the optimus-manager daemon should have been started automatically, but you can check its status with:
 
