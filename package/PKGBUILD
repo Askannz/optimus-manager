@@ -26,7 +26,7 @@ backup=('etc/optimus-manager/xorg-intel.conf'
 
         'var/lib/optimus-manager/startup_mode'
         'var/lib/optimus-manager/requested_mode')
-source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=runit")
+source=("git+https://github.com/Hyper-KVM/optimus-manager.git#branch=master")
 sha256sums=('SKIP')
 
 pkgver() {
