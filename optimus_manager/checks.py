@@ -238,12 +238,7 @@ def _is_service_active_bash(service_name):
 
     if _detect_init_system(init="runit"):
         try:
-            exec_bash("pstree | grep %s" % service_name)
-            return True
-        except BashError:
-            pass
-        try:
-            exec_bash("sv s %s" % service_name)
+            exec_bash("sudo cat /var/service/%s/supervise/stat | grep run" % service_name)
         except BashError:
             return False
         else:
