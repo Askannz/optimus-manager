@@ -1,3 +1,2 @@
 #!/bin/sh
-exec env python3 /usr/bin/optimus-manager-daemon 2>&1
-exec /usr/bin/prime-switch-boot
+exec env python3 /usr/bin/optimus-manager-daemon

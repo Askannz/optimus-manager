@@ -1,0 +1,3 @@
+#!/bin/sh
+sv o prime-switch-boot
+exec /usr/bin/prime-switch-boot
