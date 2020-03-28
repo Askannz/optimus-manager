@@ -10,7 +10,7 @@ from . import envs
 def logging(mode, log_id):
 
     log_dir_path = Path(envs.LOG_DIR_PATH)
-    log_filepath = log_dir_path / mode / (str(log_id) + ".log")
+    log_filepath = log_dir_path / mode / ("%s-%d.log" % (mode, log_id))
 
     os.makedirs(log_filepath.parent, exist_ok=True)
 

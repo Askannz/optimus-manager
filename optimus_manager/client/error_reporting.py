@@ -10,7 +10,7 @@ def report_errors(state):
 
     elif state["type"] == "startup_failed":
         print("ERROR: the optimus-manager service failed boot-time startup.")
-        print("Log at %s/daemon/%d.log" % (envs.LOG_DIR_PATH, state["daemon_run_id"]))
+        print("Log at %s/daemon/daemon-%d.log" % (envs.LOG_DIR_PATH, state["daemon_run_id"]))
         return True
 
     elif state["type"] == "pending_pre_xorg_start":
