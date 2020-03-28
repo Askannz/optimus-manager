@@ -59,9 +59,9 @@ def setup_pre_xorg_start():
     if prev_state is None or prev_state["type"] != "pending_pre_xorg_start":
         return
 
-    attempt_id = var.make_attempt_id()
+    switch_id = var.make_switch_id()
 
-    with logging("switch", attempt_id):
+    with logging("switch", switch_id):
 
         try:
             print("# Xorg pre-start hook")
@@ -77,7 +77,7 @@ def setup_pre_xorg_start():
 
             state = {
                 "type": "pending_post_xorg_start",
-                "attempt_id": attempt_id,
+                "switch_id": switch_id,
                 "requested_mode": requested_mode,
             }
 
@@ -92,7 +92,7 @@ def setup_pre_xorg_start():
 
             state = {
                 "type": "pre_xorg_start_failed",
-                "attempt_id": attempt_id,
+                "switch_id": switch_id,
                 "requested_mode": requested_mode
             }
 
@@ -110,9 +110,9 @@ def setup_post_xorg_start():
     if prev_state is None or prev_state["type"] != "pending_post_xorg_start":
         return
 
-    attempt_id = prev_state["attempt_id"]
+    switch_id = prev_state["switch_id"]
 
-    with logging("switch", attempt_id):
+    with logging("switch", switch_id):
 
         try:
             print("# Xorg post-start hook")
@@ -125,7 +125,7 @@ def setup_post_xorg_start():
 
             state = {
                 "type": "done",
-                "attempt_id": attempt_id,
+                "switch_id": switch_id,
                 "current_mode": requested_mode
             }
 
@@ -138,7 +138,7 @@ def setup_post_xorg_start():
 
             state = {
                 "type": "post_xorg_start_failed",
-                "attempt_id": attempt_id,
+                "switch_id": switch_id,
                 "requested_mode": requested_mode
             }
 
