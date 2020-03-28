@@ -11,6 +11,7 @@ from ..logging import logging
 def setup_pre_daemon_start():
 
     daemon_run_id = var.make_daemon_run_id()
+    var.write_daemon_run_id(daemon_run_id)
 
     with logging("daemon", daemon_run_id):
 

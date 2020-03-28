@@ -181,6 +181,21 @@ def make_switch_id():
     return new_id
 
 
+def write_daemon_run_id(daemon_run_id):
+
+    filepath = Path(envs.CURRENT_DAEMON_RUN_ID)
+
+    os.makedirs(filepath.parent, exist_ok=True)
+
+    with open(filepath, "w") as f:
+        f.write(str(daemon_run_id))
+
+
+def load_daemon_run_id():
+    with open(envs.CURRENT_DAEMON_RUN_ID, "r") as f:
+        return int(f.read().strip())
+
+
 def write_state(state):
 
     filepath = Path(envs.STATE_FILE_PATH)

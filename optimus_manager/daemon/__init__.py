@@ -8,25 +8,30 @@ import json
 from .. import envs
 from ..config import load_config, ConfigError
 from .. import var
+from ..logging import logging
 
 
 def main():
 
-    print("optimus-manager (Daemon) version %s" % envs.VERSION)
+    daemon_run_id = var.load_daemon_run_id()
 
-    print("Opening UNIX socket")
-    server_socket = _open_server_socket()
+    with logging("daemon", daemon_run_id):
 
-    _setup_signal_handler(server_socket)
+        print("# Commands daemon")
 
-    print("Awaiting commands")
+        print("Opening UNIX socket")
+        server_socket = _open_server_socket()
 
-    while True:
+        _setup_signal_handler(server_socket)
 
-        msg = _wait_for_command(server_socket)
-        print("Received command : %s" % msg)
+        print("Awaiting commands")
 
-        _process_command(msg)
+        while True:
+
+            msg = _wait_for_command(server_socket)
+            print("Received command : %s" % msg)
+
+            _process_command(msg)
 
 
 def _get_config():
