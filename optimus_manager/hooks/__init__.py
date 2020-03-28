@@ -10,9 +10,9 @@ from ..logging import logging
 
 def setup_pre_daemon_start():
 
-    startup_id = var.make_startup_id()
+    daemon_run_id = var.make_daemon_run_id()
 
-    with logging("startup", startup_id):
+    with logging("daemon", daemon_run_id):
 
         try:
             print("# Daemon pre-start hook")
@@ -40,7 +40,7 @@ def setup_pre_daemon_start():
             state = {
                 "type": "startup_failed",
                 "startup_mode": startup_mode,
-                "startup_id": startup_id
+                "daemon_run_id": daemon_run_id
             }
 
             var.write_state(state)
