@@ -36,6 +36,7 @@ def main():
 
             _process_command(logger, msg)
 
+    # pylint: disable=W0703
     except Exception:
         logger.exception("Daemon crashed")
 

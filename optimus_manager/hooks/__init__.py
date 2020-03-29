@@ -34,6 +34,7 @@ def setup_pre_daemon_start():
 
         var.write_state(state)
 
+    # pylint: disable=W0703
     except Exception:
 
         logger.exception("Daemon startup error")
@@ -86,6 +87,7 @@ def setup_pre_xorg_start():
 
         var.write_state(state)
 
+    # pylint: disable=W0703
     except Exception:
 
         logger.exception("Xorg pre-start setup error")
@@ -134,6 +136,7 @@ def setup_post_xorg_start():
 
         var.write_state(state)
 
+    # pylint: disable=W0703
     except Exception:
 
         logger.exception("Xorg post-start setup error")

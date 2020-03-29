@@ -121,7 +121,7 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
             )
 
         pci_class = items[1][:-1]
-        vendor_id, product_id = items[2].split(":")
+        vendor_id, _ = items[2].split(":")
 
         if re.fullmatch(match_pci_class, pci_class) and re.fullmatch(match_vendor_id, vendor_id):
             bus_ids_list.append(bus_id)
