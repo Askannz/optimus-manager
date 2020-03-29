@@ -16,6 +16,8 @@ def setup_pre_daemon_start():
     set_logger_config("daemon", daemon_run_id)
     logger = get_logger()
 
+    startup_mode = None
+
     try:
         logger.info("# Daemon pre-start hook")
 
@@ -66,6 +68,8 @@ def setup_pre_xorg_start():
 
     set_logger_config("switch", switch_id)
     logger = get_logger()
+
+    requested_mode = None
 
     try:
         logger.info("# Xorg pre-start hook")
@@ -118,6 +122,8 @@ def setup_post_xorg_start():
 
     set_logger_config("switch", switch_id)
     logger = get_logger()
+
+    requested_mode = None
 
     try:
         logger.info("# Xorg post-start hook")
