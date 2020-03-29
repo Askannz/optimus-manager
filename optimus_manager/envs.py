@@ -36,4 +36,4 @@ XSETUP_SCRIPTS_PATHS = {
 NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"
 NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"
 
-LOG_DIR_PATH = "/var/log/optimus-manager/"
+LOG_DIR_PATH = "/var/log/optimus-manager"
