@@ -62,3 +62,6 @@ def report_errors(state):
             print("Log at %s/switch/switch-%d.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
 
         return False
+
+    else:
+        assert False

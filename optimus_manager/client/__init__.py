@@ -151,14 +151,6 @@ def _print_status(state):
     _print_startup_mode()
     _print_temp_config_path()
 
-def _check_daemon_active():
-
-    if not checks.is_daemon_active():
-        print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-              "sudo systemctl enable optimus-manager\n"
-              "sudo systemctl start optimus-manager\n")
-        sys.exit(1)
-
 
 def _get_switch_mode(state, switch_arg):
 

@@ -248,7 +248,6 @@ def _load_extra_xorg_file(path):
             if len(line_nospaces) == 0 or line_nospaces[0] == "#":
                 continue
 
-            else:
-                config_lines.append(line)
+            config_lines.append(line)
 
         return config_lines
