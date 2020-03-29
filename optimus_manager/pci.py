@@ -100,13 +100,13 @@ def get_gpus_bus_ids(notation_fix=True):
 def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     try:
-        lspci_output = exec_bash("lspci -n").stdout.decode('utf-8')
+        out = exec_bash("lspci -n")
     except BashError as e:
         raise PCIError("cannot run lspci -n : %s" % str(e))
 
     bus_ids_list = []
 
-    for line in lspci_output.splitlines():
+    for line in out.splitlines():
 
         items = line.split(" ")
 

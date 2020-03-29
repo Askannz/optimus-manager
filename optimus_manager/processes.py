@@ -15,7 +15,7 @@ def get_PIDs_from_process_names(processes_names_list):
     for p_name in processes_names_list:
 
         try:
-            process_PIDs_str = exec_bash("pidof %s" % p_name).stdout.decode('utf-8')[:-1]
+            process_PIDs_str = exec_bash("pidof %s" % p_name)
         except BashError:
             continue
 
@@ -33,7 +33,7 @@ def get_PIDs_from_process_names(processes_names_list):
 def get_PID_user(PID_value):
 
     try:
-        user = exec_bash("ps -o uname= -p %d" % PID_value).stdout.decode('utf-8')[:-1]
+        user = exec_bash("ps -o uname= -p %d" % PID_value)
     except BashError:
         raise ProcessesError("PID %d does not exist" % PID_value)
 

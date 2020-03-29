@@ -86,13 +86,11 @@ def using_patched_GDM():
 def check_offloading_available():
 
     try:
-        ret = exec_bash("xrandr --listproviders")
+        out = exec_bash("xrandr --listproviders")
     except BashError as e:
         raise CheckError("Cannot list xrand providers : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
             return True
     return False
@@ -116,13 +114,11 @@ def is_bumblebeed_service_active():
 def _is_gl_provider_nvidia():
 
     try:
-        ret = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
+        out = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
     except BashError as e:
         raise CheckError("Cannot run glxinfo : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
     return False
