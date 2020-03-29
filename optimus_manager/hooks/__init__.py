@@ -54,8 +54,6 @@ def setup_pre_daemon_start():
         logger.info("Daemon pre-start hook completed successfully.")
         logger.info("Calling Xorg pre-start hook.")
 
-    setup_pre_xorg_start()
-
 
 def setup_pre_xorg_start():
 
