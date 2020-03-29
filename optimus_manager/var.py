@@ -208,6 +208,10 @@ def load_daemon_run_id():
 
 def write_state(state):
 
+    logger = get_logger()
+
+    logger.info("Writing state %s", str(state))
+
     filepath = Path(envs.STATE_FILE_PATH)
 
     os.makedirs(filepath.parent, exist_ok=True)
