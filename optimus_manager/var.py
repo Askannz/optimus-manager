@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 from . import envs
 from .kernel_parameters import get_kernel_parameters
+from .log_utils import get_logger
 
 
 class VarError(Exception):
@@ -128,7 +129,9 @@ def read_last_acpi_call_state():
 
 def remove_last_acpi_call_state():
 
-    print("Removing %s (if present)" % envs.LAST_ACPI_CALL_STATE_VAR)
+    logger = get_logger()
+
+    logger.info("Removing %s (if present)", envs.LAST_ACPI_CALL_STATE_VAR)
 
     try:
         os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
@@ -137,17 +140,24 @@ def remove_last_acpi_call_state():
 
 def get_startup_mode():
 
+    logger = get_logger()
+
     kernel_parameters = get_kernel_parameters()
 
     if kernel_parameters["startup_mode"] is None:
         try:
             startup_mode = read_startup_mode()
         except VarError as e:
-            print("Cannot read startup mode : %s.\nUsing default startup mode %s instead." % (str(e), envs.DEFAULT_STARTUP_MODE))
+            logger.warning(
+                "Cannot read startup mode : %s.\n"
+                "Using default startup mode %s instead.",
+                str(e), envs.DEFAULT_STARTUP_MODE)
             startup_mode = envs.DEFAULT_STARTUP_MODE
 
     else:
-        print("Startup kernel parameter found : %s" % kernel_parameters["startup_mode"])
+        logger.info(
+            "Startup kernel parameter found : %s",
+            kernel_parameters["startup_mode"])
         startup_mode = kernel_parameters["startup_mode"]
 
     return startup_mode

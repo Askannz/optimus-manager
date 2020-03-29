@@ -5,6 +5,7 @@ import optimus_manager.envs as envs
 from .pci import get_gpus_bus_ids
 from .config import load_extra_xorg_options
 from .hacks.manjaro import remove_mhwd_conf
+from .log_utils import get_logger
 
 
 class XorgSetupError(Exception):
@@ -29,7 +30,9 @@ def configure_xorg(config, requested_gpu_mode):
 
 def cleanup_xorg_conf():
 
-    print("Removing %s (if present)" % envs.XORG_CONF_PATH)
+    logger = get_logger()
+
+    logger.info("Removing %s (if present)", envs.XORG_CONF_PATH)
 
     try:
         os.remove(envs.XORG_CONF_PATH)
@@ -64,22 +67,24 @@ def is_there_a_MHWD_file():
 
 def do_xsetup(requested_mode):
 
+    logger = get_logger()
+
     if requested_mode == "nvidia":
 
-        print("Running xrandr commands")
+        logger.info("Running xrandr commands")
 
         try:
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
             exec_bash("xrandr --auto")
         except BashError as e:
-            print("Cannot setup PRIME : %s" % str(e))
+            logger.error("Cannot setup PRIME : %s", str(e))
 
     script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
-    print("Running %s" % script_path)
+    logger.info("Running %s", script_path)
     try:
         exec_bash(script_path)
     except BashError as e:
-        print("ERROR : cannot run %s : %s" % (script_path, str(e)))
+        logger.error("ERROR : cannot run %s : %s", script_path, str(e))
 
 
 def set_DPI(config):
@@ -197,8 +202,10 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
 def _make_intel_device_section(config, bus_ids, xorg_extra):
 
+    logger = get_logger()
+
     if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
-        print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
+        logger.warning("The Xorg intel module is not available. Defaulting to modesetting.")
         driver = "modesetting"
     else:
         driver = config["intel"]["driver"]
@@ -233,12 +240,14 @@ def _make_server_flags_section(config, bus_ids, xorg_extra):
 
 def _write_xorg_conf(xorg_conf_text):
 
+    logger = get_logger()
+
     filepath = Path(envs.XORG_CONF_PATH)
 
     try:
         os.makedirs(filepath.parent, mode=0o755, exist_ok=True)
         with open(filepath, 'w') as f:
-            print("Writing to %s" % envs.XORG_CONF_PATH)
+            logger.info("Writing to %s", envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
     except IOError:
         raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath))

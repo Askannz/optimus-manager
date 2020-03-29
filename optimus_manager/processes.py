@@ -1,4 +1,5 @@
 from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 
 class ProcessesError(Exception):
@@ -6,6 +7,8 @@ class ProcessesError(Exception):
 
 
 def get_PIDs_from_process_names(processes_names_list):
+
+    logger = get_logger()
 
     PIDs_list = []
 
@@ -19,7 +22,7 @@ def get_PIDs_from_process_names(processes_names_list):
         try:
             process_PIDs_list = [int(pid_str) for pid_str in process_PIDs_str.split(" ")]
         except ValueError:
-            print("Warning : cannot parse pidof output for process %s : invalid value : %s" % (p_name, process_PIDs_str))
+            logger.warning("Cannot parse pidof output for process %s : invalid value : %s", p_name, process_PIDs_str)
             continue
 
         PIDs_list += process_PIDs_list

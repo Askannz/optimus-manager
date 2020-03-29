@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import dbus
 from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 
 class CheckError(Exception):
@@ -129,11 +130,14 @@ def _is_gl_provider_nvidia():
 
 def _is_service_active(service_name):
 
+    logger = get_logger()
+
     try:
         system_bus = dbus.SystemBus()
     except dbus.exceptions.DBusException:
-        print("WARNING : Cannot communicate with the DBus system bus to check status of %s."
-              " Is DBus running ? Falling back to bash commands" % service_name)
+        logger.warning(
+            "Cannot communicate with the DBus system bus to check status of %s."
+            " Is DBus running ? Falling back to bash commands", service_name)
         return _is_service_active_bash(service_name)
     else:
         return _is_service_active_dbus(system_bus, service_name)
