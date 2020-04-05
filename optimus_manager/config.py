@@ -226,7 +226,7 @@ def load_extra_xorg_options():
 
         try:
             config_lines = _load_extra_xorg_file(path)
-            logger.info("Loaded extra Intel Xorg options (%d lines)", len(config_lines))
+            logger.info("Loaded extra %s Xorg options (%d lines)", mode, len(config_lines))
             xorg_extra[mode] = config_lines
         except FileNotFoundError:
             pass

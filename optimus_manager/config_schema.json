@@ -6,7 +6,7 @@
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
 		"auto_logout": ["single_word", ["yes", "no"], false],
-		"ac_auto_battery_mode": ["single_word", ["intel", "hybrid"], false]
+		"ac_auto_battery_mode": ["single_word", ["intel", "integrated", "hybrid"], false]
 	},
 
 	"intel":
@@ -16,6 +16,11 @@
 		"tearfree": ["single_word", ["yes", "no"], true],
 		"dri": ["single_word", ["2", "3"], false],
 		"modeset": ["single_word", ["yes", "no"], false]
+	},
+
+	"amd":
+	{
+
 	},
 
 	"nvidia":

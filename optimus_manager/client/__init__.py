@@ -56,9 +56,9 @@ def main():
     sys.exit(0)
 
 
-def _gpu_switch(config, state, switch_mode, no_confirm):
+def _gpu_switch(config, state, switch_arg, no_confirm):
 
-    requested_mode = _get_switch_mode(state, switch_mode)
+    requested_mode = _get_switch_mode(state, switch_arg)
 
     run_switch_checks(config, requested_mode)
 
@@ -154,16 +154,19 @@ def _print_status(state):
 
 def _get_switch_mode(state, switch_arg):
 
-    if switch_arg not in ["auto", "intel", "nvidia", "hybrid", "ac_auto"]:
+    if switch_arg not in ["auto", "intel", "integrated", "nvidia", "hybrid", "ac_auto"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
+
+    if switch_arg == "intel":
+        switch_arg = "integrated"
 
     if switch_arg == "auto":
 
         requested_mode = {
-            "nvidia": "intel",
-            "intel": "nvidia",
-            "hybrid": "intel"
+            "nvidia": "integrated",
+            "integrated": "nvidia",
+            "hybrid": "integrated"
         }[state["current_mode"]]
 
         print("Switching to : %s" % requested_mode)
@@ -193,9 +196,12 @@ def _send_command(command):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia", "hybrid", "ac_auto"]:
+    if startup_arg not in ["intel", "integrated", "nvidia", "hybrid", "ac_auto"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
+
+    if startup_arg == "intel":
+        startup_arg = "integrated"
 
     print("Setting startup mode to : %s" % startup_arg)
     command = {"type": "startup", "args": {"mode": startup_arg}}

@@ -18,10 +18,10 @@ def parse_args():
 
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : intel, nvidia, hybrid, ac_auto, auto (auto-detects the mode you may want to switch to).")
+                             "Possible modes : integrated, nvidia, hybrid, ac_auto, auto (auto-detects the mode you may want to switch to).")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Set the startup mode to STARTUP_MODE. Possible modes : "
-                             "intel, nvidia, hybrid, ac_auto")
+                             "integrated, nvidia, hybrid, ac_auto")
 
     parser.add_argument('--temp-config', metavar='PATH', action='store',
                         help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"

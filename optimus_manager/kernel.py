@@ -12,15 +12,15 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, prev_state, requested_mode):
 
-    assert requested_mode in ["intel", "nvidia", "hybrid"]
+    assert requested_mode in ["integrated", "nvidia", "hybrid"]
     assert prev_state["type"] == "pending_pre_xorg_start"
 
     current_mode = prev_state["current_mode"]
 
-    if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
+    if current_mode in ["integrated", None] and requested_mode in ["nvidia", "hybrid"]:
         _nvidia_up(config)
 
-    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
+    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "integrated":
         _nvidia_down(config)
 
 
@@ -110,6 +110,7 @@ def _load_nvidia_modules(config, available_modules):
     _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
 
 def _load_nouveau(config, available_modules):
+    # TODO: move that option to [optimus]
     modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 

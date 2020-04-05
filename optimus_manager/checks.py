@@ -43,7 +43,7 @@ def get_active_renderer():
     if _is_gl_provider_nvidia():
         return "nvidia"
     else:
-        return "intel"
+        return "integrated"
 
 
 def is_module_available(module_name):

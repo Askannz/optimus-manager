@@ -12,7 +12,7 @@ STATE_FILE_PATH = "/var/lib/optimus-manager/tmp/state.json"
 USER_CONFIG_COPY_PATH = "/var/lib/optimus-manager/tmp/config_copy.conf"
 CURRENT_DAEMON_RUN_ID = "/var/lib/optimus-manager/tmp/daemon_run_id"
 
-DEFAULT_STARTUP_MODE = "intel"
+DEFAULT_STARTUP_MODE = "integrated"
 
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 
@@ -21,12 +21,14 @@ USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
 EXTRA_XORG_OPTIONS_PATHS = {
     "intel": "/etc/optimus-manager/xorg-intel.conf",
+    "amd": "/etc/optimus-manager/xorg-amd.conf",
     "nvidia": "/etc/optimus-manager/xorg-nvidia.conf",
     "hybrid": "/etc/optimus-manager/xorg-hybrid.conf"
 }
 
 XSETUP_SCRIPTS_PATHS = {
     "intel": "/etc/optimus-manager/xsetup-intel.sh",
+    "amd": "/etc/optimus-manager/xsetup-amd.sh",
     "nvidia": "/etc/optimus-manager/xsetup-nvidia.sh",
     "hybrid": "/etc/optimus-manager/xsetup-hybrid.sh"
 }

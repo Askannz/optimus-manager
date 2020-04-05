@@ -19,8 +19,10 @@ def configure_xorg(config, requested_gpu_mode):
 
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "intel":
+    elif requested_gpu_mode == "integrated" and "intel" in bus_ids:
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "integrated" and "amd" in bus_ids:
+        xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "hybrid":
         xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
@@ -79,7 +81,17 @@ def do_xsetup(requested_mode):
         except BashError as e:
             logger.error("Cannot setup PRIME : %s", str(e))
 
-    script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
+
+    if requested_mode == "integrated":
+        bus_ids = get_gpus_bus_ids()
+        if "intel" in bus_ids:
+            script_name = "intel"
+        else:
+            script_name = "amd"
+    else:
+        script_name = requested_mode
+
+    script_path = envs.XSETUP_SCRIPTS_PATHS[script_name]
     logger.info("Running %s", script_path)
     try:
         exec_bash(script_path)
@@ -149,6 +161,9 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 def _generate_intel(config, bus_ids, xorg_extra):
     text = _make_intel_device_section(config, bus_ids, xorg_extra)
     return text
+
+def _generate_amd(config, bus_ids, xorg_extra):
+    raise NotImplementedError
 
 def _generate_hybrid(config, bus_ids, xorg_extra):
 

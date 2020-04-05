@@ -3,6 +3,7 @@ from .. import checks
 from ..xorg import is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from .. import sessions
 from .utils import ask_confirmation
+from ..pci import get_gpus_bus_ids
 
 
 def run_switch_checks(config, requested_mode):
@@ -137,7 +138,12 @@ def _check_MHWD_conf():
 
 def _check_intel_xorg_module(config, requested_mode):
 
-    if requested_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
+    bus_ids = get_gpus_bus_ids()
+
+    if "intel" not in bus_ids:
+        return
+
+    if requested_mode == "integrated" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
         print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
               " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
               " the package \"xf86-video-intel.\"\n"
