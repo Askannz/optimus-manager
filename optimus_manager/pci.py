@@ -109,6 +109,10 @@ def get_gpus_bus_ids(notation_fix=True):
     if len(amd_ids_list) > 0:
         bus_ids["amd"] = amd_ids_list[0]
 
+    if "intel" in bus_ids and "amd" in bus_ids:
+        logger.warning("Found both an Intel and an AMD GPU. Defaulting to Intel.")
+        del bus_ids["amd"]
+
     return bus_ids
 
 def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
