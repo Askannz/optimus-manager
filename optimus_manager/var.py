@@ -183,7 +183,7 @@ def write_daemon_run_id(daemon_run_id):
 
 def load_daemon_run_id():
     with open(envs.CURRENT_DAEMON_RUN_ID, "r") as f:
-        return int(f.read().strip())
+        return f.read().strip()
 
 
 def write_state(state):
