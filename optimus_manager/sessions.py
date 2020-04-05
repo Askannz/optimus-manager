@@ -67,6 +67,12 @@ def logout_current_desktop_session():
     except BashError:
         pass
 
+    # dwm
+    try:
+        exec_bash("killall dwm")
+    except BasshError:
+        pass
+
 
 def is_there_a_wayland_session():
 
