@@ -23,8 +23,10 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "integrated" and "amd" in bus_ids:
         xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid":
-        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid" and "intel" in bus_ids:
+        xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid" and "amd" in bus_ids:
+        xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -163,9 +165,10 @@ def _generate_intel(config, bus_ids, xorg_extra):
     return text
 
 def _generate_amd(config, bus_ids, xorg_extra):
-    raise NotImplementedError
+    text = _make_amd_device_section(config, bus_ids, xorg_extra)
+    return text
 
-def _generate_hybrid(config, bus_ids, xorg_extra):
+def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
     text = "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
@@ -193,6 +196,28 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
            "EndSection\n\n"
 
     text += _make_server_flags_section(config)
+
+    return text
+
+def _generate_hybrid_amd(config, bus_ids, xorg_extra):
+
+    text = "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"amd\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+           "EndSection\n\n"
+
+    text += _make_amd_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+            "\tIdentifier \"amd\"\n" \
+            "\tDevice \"amd\"\n" \
+            "EndSection\n\n"
+
+    text += "Section \"Device\"\n" \
+            "\tIdentifier \"nvidia\"\n" \
+            "\tDriver \"nvidia\"\n" \
+            "EndSection\n\n"
 
     return text
 
@@ -243,6 +268,28 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
+
+
+def _make_amd_device_section(config, bus_ids, xorg_extra):
+
+    driver = config["amd"]["driver"]
+    dri = int(config["amd"]["DRI"])
+
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"amd\"\n"
+    text += "\tDriver \"%s\"\n" % driver
+    text += "\tBusID \"%s\"\n" % bus_ids["amd"]
+    if config["amd"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    if "amd" in xorg_extra.keys():
+        for line in xorg_extra["amd"]:
+            text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
+
+    return text
+
 
 def _make_server_flags_section(config):
     if config["nvidia"]["ignore_abi"] == "yes":
