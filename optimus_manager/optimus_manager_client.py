@@ -10,7 +10,6 @@ from optimus_manager.config import load_config, ConfigError
 from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.var import read_requested_mode, read_startup_mode, read_temp_conf_path_var, VarError
 from optimus_manager.xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
-from optimus_manager.checks import _detect_init_system
 import optimus_manager.sessions as sessions
 
 
@@ -211,19 +210,26 @@ def _check_elogind_active():
 
 def _check_daemon_active():
     if not checks.is_daemon_active():
-        if _detect_init_system(init="openrc"):
+        if checks._detect_init_system(init="openrc"):
             print("The optimus-manager service is not running. Please enable and start it with :\n\n"
                   "sudo rc-service enable optimus-manager\n"
                   "sudo rc-service start optimus-manager\n")
-        elif _detect_init_system(init="runit"):
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                  "sudo ln -s /etc/runit/run/sv/optimus-manager /var/run/runit\n"
-                  "sudo sv u optimus-manager\n")
-        elif _detect_init_system(init="systemd"):
+        elif checks._detect_init_system(init="runit"):
+            if not checks.detect_os():
+                print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                    "sudo ln -s /etc/sv/optimus-manager /var/service\n"
+                    "sudo ln -s /etc/sv/prime-switch-boot /var/service\n"
+                    "sudo sv u optimus-manager\n")
+            elif checks.detect_os():
+                print("The optimus-manager service is not running. Please enable and start it with :\n\n"
+                    "sudo ln -s /etc/runit/sv/optimus-manager /run/runit/service\n"
+                    "sudo ln -s /etc/runit/sv/prime-switch-boot /var/run/runit/service\n"
+                    "sudo sv u optimus-manager\n")
+        elif checks._detect_init_system(init="systemd"):
             print("The optimus-manager service is not running. Please enable and start it with :\n\n"
                   "sudo systemctl enable optimus-manager\n"
                   "sudo systemctl start optimus-manager\n")
-        elif _detect_init_system(init="s6"):
+        elif checks._detect_init_system(init="s6"):
             print("The optimus-maanger service is not running. Please enable and start it with :\n\n"
                   "sudo s6-rc-bundle-update add default optimus-manager\n"
                   "sudo s6-rc -u change optimus-mnanager\n")
