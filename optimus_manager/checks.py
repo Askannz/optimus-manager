@@ -92,6 +92,10 @@ def _detect_init_system(init):
     return False
 
 
+def detect_os():
+    return os.path.isdir("/run/runit/service")
+
+
 def get_current_display_manager():
 
     if not _detect_init_system(init="systemd"):
