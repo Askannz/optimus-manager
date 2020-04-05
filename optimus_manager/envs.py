@@ -6,8 +6,6 @@ SOCKET_TIMEOUT = 1.0
 STARTUP_MODE_VAR_PATH = "/var/lib/optimus-manager/persistent/startup_mode"
 ACPI_CALL_STRING_VAR_PATH = "/var/lib/optimus-manager/persistent/acpi_call_strings.json"
 TEMP_CONFIG_PATH_VAR_PATH = "/var/lib/optimus-manager/persistent/temp_conf_path"
-DAEMON_RUN_ID_GENERATOR_FILE_PATH = "/var/lib/optimus-manager/persistent/next_daemon_run_id"
-SWITCH_ID_GENERATOR_FILE_PATH = "/var/lib/optimus-manager/persistent/next_switch_id"
 
 LAST_ACPI_CALL_STATE_VAR = "/var/lib/optimus-manager/tmp/last_acpi_call_state"
 STATE_FILE_PATH = "/var/lib/optimus-manager/tmp/state.json"

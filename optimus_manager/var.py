@@ -1,3 +1,4 @@
+import time
 import os
 from pathlib import Path
 import json
@@ -164,31 +165,10 @@ def get_startup_mode():
 
 
 def make_daemon_run_id():
-
-    try:
-        with open(envs.DAEMON_RUN_ID_GENERATOR_FILE_PATH, 'r') as f:
-            new_id = int(f.read().strip())
-    except (FileNotFoundError, ValueError):
-        new_id = 0
-
-    with open(envs.DAEMON_RUN_ID_GENERATOR_FILE_PATH, 'w') as f:
-        f.write(str(new_id + 1))
-
-    return new_id
-
+    return time.strftime("%Y%m%dT%H%M%S")
 
 def make_switch_id():
-
-    try:
-        with open(envs.SWITCH_ID_GENERATOR_FILE_PATH, 'r') as f:
-            new_id = int(f.read().strip())
-    except (FileNotFoundError, ValueError):
-        new_id = 0
-
-    with open(envs.SWITCH_ID_GENERATOR_FILE_PATH, 'w') as f:
-        f.write(str(new_id + 1))
-
-    return new_id
+    return time.strftime("%Y%m%dT%H%M%S")
 
 
 def write_daemon_run_id(daemon_run_id):
