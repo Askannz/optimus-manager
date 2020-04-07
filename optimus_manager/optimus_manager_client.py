@@ -77,6 +77,7 @@ def main():
 
         _check_daemon_active()
         _check_elogind_active()
+        _check_lxdm_active()
 
         switch_mode = _get_switch_mode(args.switch)
 
@@ -205,6 +206,13 @@ def _check_elogind_active():
     if not checks.is_elogind_active():
         if not _detect_init_system(init="systemd"):
             print("The Elogind service was not detected but is required to use optimus-manager, please install, enable and start it.")
+        sys.exit(1)
+
+
+def _check_lxdm_active():
+    if checks.is_lxdm_active():
+        print("ERROR: The Display Manager LXDM is not supported, supported Display Managers are listed in the README.\n"
+                "https://github.com/Hyper-KVM/optimus-manager\n")
         sys.exit(1)
 
 
