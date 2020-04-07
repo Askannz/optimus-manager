@@ -4,13 +4,13 @@ import os
 import shutil
 import argparse
 import optimus_manager.envs as envs
+import optimus_manager.checks as checks
 from optimus_manager.config import load_config, ConfigError
 import optimus_manager.var as var
 from optimus_manager.kernel_parameters import get_kernel_parameters
 from optimus_manager.kernel import setup_kernel_state, KernelSetupError
 from optimus_manager.xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running, setup_PRIME, set_DPI, XorgSetupError
 import optimus_manager.processes as processes
-from optimus_manager.checks import is_daemon_active, is_elogind_active, _detect_init_system, _is_elogind_present, is_ac_power_connected
 from optimus_manager.logging_utils import print_timestamp_separator
 
 
@@ -64,9 +64,9 @@ def main():
     elif args.setup_prime:
         print("Setting up PRIME")
 
-        if not _detect_init_system(init="systemd"):
+        if not checks._detect_init_system(init="systemd"):
             print("Checking status of optimus-manager")
-        elif _detect_init_system(init="systemd"):
+        elif checks._detect_init_system(init="systemd"):
             print("Checking the status of optimus-manager.service")
         _abort_if_service_inactive()
         _abort_if_elogind_inactive()
@@ -80,9 +80,9 @@ def main():
     elif args.setup_gpu:
         print("Setting up the GPU")
 
-        if not _detect_init_system(init="systemd"):
+        if not checks._detect_init_system(init="systemd"):
             print("Checking status of optimus-manager")
-        elif _detect_init_system(init="systemd"):
+        elif checks._detect_init_system(init="systemd"):
             print("Checking status of optimus-manager.service")
         _abort_if_service_inactive()
         _abort_if_elogind_inactive()
@@ -98,14 +98,14 @@ def main():
 
 
 def _abort_if_elogind_inactive():
-    if not _detect_init_system(init="systemd"):
-        if not is_elogind_active():
+    if not checks._detect_init_system(init="systemd"):
+        if not checks.is_elogind_active():
             print("ERROR : Elogind is either not installed or not running. Aborting.")
             sys.exit(0)
 
 
 def _abort_if_service_inactive():
-    if not is_daemon_active():
+    if not checks.is_daemon_active():
         print("ERROR : the optimus-manager service is not running. Aborting.")
         sys.exit(0)
 
@@ -169,7 +169,7 @@ def _get_startup_mode(config):
     if startup_mode == "ac_auto":
         print("Startup mode is ac_auto, determining mode to set")
         ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
-        startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
+        startup_mode = "nvidia" if checks.is_ac_power_connected() else ac_auto_battery_option
 
     return startup_mode
 
