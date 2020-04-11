@@ -3,6 +3,7 @@ post_install() {
     echo "optimus-manager : enabling optimus-manager"
     mkdir -p /etc/runit/sv/optimus-manager/
     ln -sf /etc/runit/sv/optimus-manager /run/runit/service/
+    ln -sf /etc/runit/sv/pre_start /run/runit/service/
 
     bold=$(tput bold)
     red=$(tput setaf 1)
@@ -15,8 +16,9 @@ post_remove() {
     echo "optimus-manager : disabling optimus-manager.service"
 
     service_file_link=/run/runit/service/optimus-manager
+    service_file_link_pre_start=/run/runit/service/pre_start
     if [ -L "$service_file_link" ]; then
-        rm $service_file_link
+        rm $service_file_link $service_file_link_pre_start
     fi
 
 }
