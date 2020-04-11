@@ -27,7 +27,6 @@ def setup_pre_daemon_start():
         cleanup_xorg_conf()
         copy_user_config()
         config = load_config()
-        var.remove_last_acpi_call_state()
         startup_mode = var.get_startup_mode()
 
         logger.info("Startup mode is: %s", startup_mode)

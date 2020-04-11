@@ -129,17 +129,6 @@ def read_last_acpi_call_state():
     except IOError:
         raise VarError("Cannot open or read %s" % str(filepath))
 
-def remove_last_acpi_call_state():
-
-    logger = get_logger()
-
-    logger.info("Removing %s (if present)", envs.LAST_ACPI_CALL_STATE_VAR)
-
-    try:
-        os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
-    except FileNotFoundError:
-        pass
-
 def get_startup_mode():
 
     logger = get_logger()
