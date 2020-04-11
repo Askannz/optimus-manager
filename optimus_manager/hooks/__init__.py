@@ -10,6 +10,8 @@ from ..log_utils import set_logger_config, get_logger
 
 def setup_pre_daemon_start():
 
+    var.cleanup_tmp_vars()
+
     daemon_run_id = var.make_daemon_run_id()
     var.write_daemon_run_id(daemon_run_id)
 
@@ -156,3 +158,7 @@ def setup_post_xorg_start():
 
     else:
         logger.info("Xorg post-start hook completed successfully.")
+
+
+def cleanup_post_daemon_stop():
+    var.cleanup_tmp_vars()

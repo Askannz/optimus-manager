@@ -1,5 +1,6 @@
 import time
 import os
+import shutil
 from pathlib import Path
 import json
 from . import envs
@@ -205,3 +206,7 @@ def load_state():
             return json.load(f)
     except FileNotFoundError:
         return None
+
+
+def cleanup_tmp_vars():
+    shutil.rmtree(envs.TMP_VARS_FOLDER_PATH, ignore_errors=True)

@@ -3,14 +3,16 @@ VERSION = "1.2.2"
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
 
-STARTUP_MODE_VAR_PATH = "/var/lib/optimus-manager/persistent/startup_mode"
-ACPI_CALL_STRING_VAR_PATH = "/var/lib/optimus-manager/persistent/acpi_call_strings.json"
-TEMP_CONFIG_PATH_VAR_PATH = "/var/lib/optimus-manager/persistent/temp_conf_path"
+PERSISTENT_VARS_FOLDER_PATH = "/var/lib/optimus-manager/persistent"
+STARTUP_MODE_VAR_PATH = "%s/startup_mode" % PERSISTENT_VARS_FOLDER_PATH
+ACPI_CALL_STRING_VAR_PATH = "%s/acpi_call_strings.json" % PERSISTENT_VARS_FOLDER_PATH
+TEMP_CONFIG_PATH_VAR_PATH = "%s/temp_conf_path" % PERSISTENT_VARS_FOLDER_PATH
 
-LAST_ACPI_CALL_STATE_VAR = "/var/lib/optimus-manager/tmp/last_acpi_call_state"
-STATE_FILE_PATH = "/var/lib/optimus-manager/tmp/state.json"
-USER_CONFIG_COPY_PATH = "/var/lib/optimus-manager/tmp/config_copy.conf"
-CURRENT_DAEMON_RUN_ID = "/var/lib/optimus-manager/tmp/daemon_run_id"
+TMP_VARS_FOLDER_PATH = "/var/lib/optimus-manager/tmp"
+LAST_ACPI_CALL_STATE_VAR = "%s/last_acpi_call_state" % TMP_VARS_FOLDER_PATH
+STATE_FILE_PATH = "%s/state.json" % TMP_VARS_FOLDER_PATH
+USER_CONFIG_COPY_PATH = "%s/config_copy.conf" % TMP_VARS_FOLDER_PATH
+CURRENT_DAEMON_RUN_ID = "%s/daemon_run_id" % TMP_VARS_FOLDER_PATH
 
 DEFAULT_STARTUP_MODE = "intel"
 
