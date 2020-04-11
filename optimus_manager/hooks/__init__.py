@@ -5,6 +5,7 @@ from ..kernel import setup_kernel_state
 from .. import var
 from ..xorg import configure_xorg, cleanup_xorg_conf, do_xsetup, set_DPI
 from ..hacks.gdm import kill_gdm_server
+from ..checks import is_ac_power_connected
 from ..log_utils import set_logger_config, get_logger
 
 
@@ -25,10 +26,16 @@ def setup_pre_daemon_start():
 
         cleanup_xorg_conf()
         copy_user_config()
+        config = load_config()
         var.remove_last_acpi_call_state()
         startup_mode = var.get_startup_mode()
 
         logger.info("Startup mode is: %s", startup_mode)
+
+        if startup_mode == "ac_auto":
+            ac_auto_battery_option = config["optimus"]["ac_auto_battery_mode"]
+            startup_mode = "nvidia" if is_ac_power_connected() else ac_auto_battery_option
+            logger.info("Effective mode is: %s", startup_mode)
 
         state = {
             "type": "pending_pre_xorg_start",
