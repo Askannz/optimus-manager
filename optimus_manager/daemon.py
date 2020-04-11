@@ -5,11 +5,9 @@ import signal
 import select
 import socket
 import json
-import logging
-from .. import envs
-from ..config import load_config, ConfigError
-from .. import var
-from ..log_utils import set_logger_config, get_logger
+from . import envs
+from . import var
+from .log_utils import set_logger_config, get_logger
 
 
 def main():

@@ -58,11 +58,6 @@ package() {
   install -Dm644 var/startup_mode "$pkgdir/var/lib/optimus-manager/startup_mode"
   install -Dm644 var/requested_mode "$pkgdir/var/lib/optimus-manager/requested_mode"
   
-  install -Dm755 scripts/prime-switch-boot "$pkgdir/usr/bin/prime-switch-boot"
-  install -Dm755 scripts/prime-switch "$pkgdir/usr/bin/prime-switch"
-  install -Dm755 scripts/prime-offload "$pkgdir/usr/bin/prime-offload"
-  install -Dm755 scripts/prime-cleanup "$pkgdir/usr/bin/prime-cleanup"
-  
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"
   
