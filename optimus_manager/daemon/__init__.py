@@ -16,11 +16,22 @@ def main():
 
     daemon_run_id = var.load_daemon_run_id()
 
+    no_id = False
+    if daemon_run_id is None:
+        no_id = True
+        daemon_run_id = var.make_daemon_run_id()
+        var.write_daemon_run_id(daemon_run_id)
+
     set_logger_config("daemon", daemon_run_id)
     logger = get_logger()
 
     try:
         logger.info("# Commands daemon")
+
+        if no_id:
+            logger.warning(
+                "No daemon ID found, created a new one."
+                " Did the daemon pre-start hook fail ?")
 
         logger.info("Opening UNIX socket")
         server_socket = _open_server_socket(logger)
@@ -89,6 +100,10 @@ def _process_command(logger, msg):
             logger.info("Writing requested GPU mode %s" % mode)
 
             state = var.load_state()
+
+            if state is None:
+                logger.error("Cannot execute switch because the state file was not found.")
+                return
 
             new_state = {
                 "type": "pending_pre_xorg_start",
