@@ -23,24 +23,13 @@ def main():
     state = load_state()
     fatal = report_errors(state)
 
-    if fatal:
-        sys.exit(1)
-
     config = _get_config()
     print("")
 
     if args.version:
         _print_version()
-    elif args.print_mode:
-        _print_current_mode(state)
-    elif args.print_next_mode:
-        _print_next_mode(state)
     elif args.print_startup:
         _print_startup_mode()
-    elif args.status:
-        _print_status(state)
-    elif args.switch:
-        _gpu_switch(config, state, args.switch, args.no_confirm)
     elif args.set_startup:
         _set_startup_and_exit(args.set_startup)
     elif args.temp_config:
@@ -49,9 +38,24 @@ def main():
         _unset_temp_config_and_exit()
     elif args.cleanup:
         _cleanup_xorg_and_exit()
+
     else:
-        print("Invalid arguments.")
-        sys.exit(1)
+
+        if fatal:
+            print("Cannot execute command because of previous errors.")
+            sys.exit(1)
+
+        if args.print_mode:
+            _print_current_mode(state)
+        elif args.print_next_mode:
+            _print_next_mode(state)
+        elif args.status:
+            _print_status(state)
+        elif args.switch:
+            _gpu_switch(config, state, args.switch, args.no_confirm)
+        else:
+            print("Invalid arguments.")
+            sys.exit(1)
 
     sys.exit(0)
 

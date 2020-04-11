@@ -1,5 +1,6 @@
 import time
 import os
+import shutil
 from pathlib import Path
 import json
 from . import envs
@@ -128,17 +129,6 @@ def read_last_acpi_call_state():
     except IOError:
         raise VarError("Cannot open or read %s" % str(filepath))
 
-def remove_last_acpi_call_state():
-
-    logger = get_logger()
-
-    logger.info("Removing %s (if present)", envs.LAST_ACPI_CALL_STATE_VAR)
-
-    try:
-        os.remove(envs.LAST_ACPI_CALL_STATE_VAR)
-    except FileNotFoundError:
-        pass
-
 def get_startup_mode():
 
     logger = get_logger()
@@ -182,8 +172,11 @@ def write_daemon_run_id(daemon_run_id):
 
 
 def load_daemon_run_id():
-    with open(envs.CURRENT_DAEMON_RUN_ID, "r") as f:
-        return f.read().strip()
+    try:
+        with open(envs.CURRENT_DAEMON_RUN_ID, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return None
 
 
 def write_state(state):
@@ -205,3 +198,7 @@ def load_state():
             return json.load(f)
     except FileNotFoundError:
         return None
+
+
+def cleanup_tmp_vars():
+    shutil.rmtree(envs.TMP_VARS_FOLDER_PATH, ignore_errors=True)

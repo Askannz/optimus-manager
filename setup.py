@@ -18,7 +18,8 @@ setup(
     entry_points={
         'console_scripts': [
             'optimus-manager=optimus_manager.client:main',
-            'optimus-manager-daemon=optimus_manager.daemon:main'
+            'prime-switch=optimus_manager.hooks.pre_xorg_start:main',
+            'prime-offload=optimus_manager.hooks.post_xorg_start:main'
         ],
     },
     package_data={'optimus_manager': ['config_schema.json', 'icon/intel.png', 'icon/nvidia.png']},
