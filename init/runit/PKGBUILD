@@ -1,5 +1,5 @@
 pkgname=optimus-manager-runit
-pkgver=20200221
+pkgver=20200425
 pkgrel=1
 pkgdesc="runit script for optimus-manager"
 arch=('any')
@@ -15,4 +15,5 @@ package(){
     install="runit.install"
 
     install -Dm755 ${srcdir}/optimus-manager/runit/optimus-manager/run ${pkgdir}/etc/runit/sv/optimus-manager/run
+    install -Dm755 ${srcdir}/optimus-manager/runit/prime-switch-boot/run ${pkgdir}/etc/runit/sv/prime-switch-boot/run
 }
