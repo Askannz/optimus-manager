@@ -68,6 +68,10 @@ def is_module_loaded(module_name):
         return True
 
 
+def detect_os():
+    return os.path.isdir("/run/runit/service")
+
+
 def _detect_init_system(init):
     try:
         exec_bash("systemctl")
@@ -81,7 +85,10 @@ def _detect_init_system(init):
         pass
     try:
         exec_bash("command -v sv")
-        return init == "runit"
+        if detect_os():
+            return init == "runit-artix"
+        elif not detect_os():
+            return init == "runit-void"
     except BashError:
         pass
     try:
@@ -90,10 +97,6 @@ def _detect_init_system(init):
     except BashError:
         pass
     return False
-
-
-def detect_os():
-    return os.path.isdir("/run/runit/service")
 
 
 def get_current_display_manager():
@@ -245,6 +248,22 @@ def _is_service_active_bash(service_name):
     if _detect_init_system(init="runit"):
         try:
             exec_bash("sudo cat /var/service/%s/supervise/stat | grep run" % service_name)
+        except BashError:
+            return False
+        else:
+            return True
+
+    if _detect_init_system(init="runit-void"):
+        try:
+            exec_bash("sudo cat /var/service/%s/supervise/stat | grep run" % service_name)
+        except BashError:
+            return False
+        else:
+            return True
+            
+    if _detect_init_system(init="runit-artix"):
+        try:
+            exec_bash("sudo cat /run/runit/service/%s/supervise/stat | grep run" % service_name)
         except BashError:
             return False
         else:
