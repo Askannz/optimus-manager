@@ -12,6 +12,7 @@ depend() {
 start_pre() {
     /usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start || return $?
     /usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start || return $?
+    /usr/bin/python3 -u -m optimus_manager.hooks.post_xorg_start || return $?
 }
 
 start() {
