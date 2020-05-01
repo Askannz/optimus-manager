@@ -6,13 +6,26 @@
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
 		"auto_logout": ["single_word", ["yes", "no"], false],
+<<<<<<< HEAD
 		"ac_auto_battery_mode": ["single_word", ["intel", "hybrid"], false]
+=======
+		"ac_auto_battery_mode": ["single_word", ["amd", "intel", "hybrid-amd", "hybrid-intel"], false],
+		"ac_auto_extpower_mode": ["single_word", ["hybrid-amd", "hybrid-intel", "nvidia"], false]
+>>>>>>> 1bbdd19faeb1dcd961c39523bc518ae47df4bde8
 	},
 
 	"intel":
 	{
 		"driver": ["single_word", ["modesetting", "intel"], false],
 		"accel": ["single_word", ["sna", "xna", "uxa"], true],
+		"tearfree": ["single_word", ["yes", "no"], true],
+		"dri": ["single_word", ["2", "3"], false],
+		"modeset": ["single_word", ["yes", "no"], false]
+	},
+
+	"amd":
+	{
+		"driver": ["single_word", ["modesetting", "amdgpu"], false],
 		"tearfree": ["single_word", ["yes", "no"], true],
 		"dri": ["single_word", ["2", "3"], false],
 		"modeset": ["single_word", ["yes", "no"], false]

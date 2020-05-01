@@ -1,4 +1,5 @@
 __pycache__/
 build/
 optimus_manager.egg-info/
-
+.idea/
+.venv/

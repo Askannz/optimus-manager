@@ -5,6 +5,8 @@ from .log_utils import get_logger
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"
+AMD_VENDOR_ID = "1002"
+
 
 GPU_PCI_CLASS_PATTERN = "03[0-9a-f]{2}"
 PCI_BRIDGE_PCI_CLASS_PATTERN = "0604"
@@ -83,17 +85,27 @@ def get_gpus_bus_ids(notation_fix=True):
                                   match_vendor_id=INTEL_VENDOR_ID,
                                   notation_fix=notation_fix)
 
+    amd_ids_list = _get_bus_ids(match_pci_class=GPU_PCI_CLASS_PATTERN,
+                                  match_vendor_id=AMD_VENDOR_ID,
+                                  notation_fix=notation_fix)
+
     if len(nvidia_ids_list) > 1:
         logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
 
     if len(intel_ids_list) > 1:
         logger.warning("Multiple Intel GPUs found ! Picking the first one.")
 
+    if len(amd_ids_list) > 1:
+        print("WARNING : Multiple AMD GPUs found ! Picking the first one.")
+
     bus_ids = {}
     if len(nvidia_ids_list) > 0:
         bus_ids["nvidia"] = nvidia_ids_list[0]
     if len(intel_ids_list) > 0:
         bus_ids["intel"] = intel_ids_list[0]
+    if len(amd_ids_list) > 0:
+        bus_ids["amd"] = amd_ids_list[0]
+
 
     return bus_ids
 
@@ -128,6 +140,34 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     return bus_ids_list
 
+
+def get_available_igpu(notation_fix=True):
+    try:
+        lspci_output = exec_bash("lspci -n").stdout.decode('utf-8')
+    except BashError as e:
+        raise PCIError("cannot run lspci -n : %s" % str(e))
+
+    detected_igpu = "intel"
+
+    for line in lspci_output.splitlines():
+        items = line.split(" ")
+        bus_id = items[0]
+
+        if notation_fix:
+            # Xorg expects bus IDs separated by colons in decimal instead of
+            # hexadecimal format without any leading zeroes and prefixed with
+            # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            bus_id = "PCI:" + ":".join(
+                str(int(field, 16)) for field in re.split("[.:]", bus_id)
+            )
+
+        pci_class = items[1][:-1]
+        vendor_id, product_id = items[2].split(":")
+
+        if re.fullmatch(GPU_PCI_CLASS_PATTERN, pci_class) and re.fullmatch(AMD_VENDOR_ID, vendor_id):
+            detected_igpu = "amd"
+
+    return detected_igpu
 
 
 def _write_to_nvidia_path(relative_path, string):

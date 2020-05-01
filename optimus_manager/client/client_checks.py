@@ -18,6 +18,7 @@ def run_switch_checks(config, requested_mode):
     _check_xorg_conf()
     _check_MHWD_conf()
     _check_intel_xorg_module(config, requested_mode)
+    _check_amd_xorg_module(config, switch_mode)
     _check_number_of_sessions()
 
 
@@ -174,6 +175,19 @@ def _check_intel_xorg_module(config, requested_mode):
               "Continue ? (y/N)")
 
         confirmation = ask_confirmation()
+
+        if not confirmation:
+            sys.exit(0)
+
+def _check_amd_xorg_module(config, switch_mode):
+
+    if switch_mode == "amd" and config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amd_module_available():
+        print("WARNING : The Xorg driver \"amdgpu\" is selected in the configuration file but this driver is not installed."
+              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"amdgpu\" driver from"
+              " the package \"xf86-video-amdgpu\".\n"
+              "Continue ? (y/N)")
+
+        confirmation = _ask_confirmation()
 
         if not confirmation:
             sys.exit(0)

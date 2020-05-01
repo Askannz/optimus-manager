@@ -22,7 +22,7 @@ setup(
             'prime-offload=optimus_manager.hooks.post_xorg_start:main'
         ],
     },
-    package_data={'optimus_manager': ['config_schema.json', 'icon/intel.png', 'icon/nvidia.png']},
+    package_data={'optimus_manager': ['config_schema.json', 'icon/intel.png', 'icon/amd.png', 'icon/nvidia.png']},
     keywords=['optimus', 'nvidia', 'bbswitch', 'prime', 'gpu'],
     classifiers=[
         'License :: OSI Approved :: MIT License',

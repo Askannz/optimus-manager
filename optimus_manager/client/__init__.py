@@ -158,7 +158,7 @@ def _print_status(state):
 
 def _get_switch_mode(state, switch_arg):
 
-    if switch_arg not in ["auto", "intel", "nvidia", "hybrid", "ac_auto"]:
+    if switch_arg not in ["auto", "intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd", "ac_auto"]:
         print("Invalid mode : %s" % switch_arg)
         sys.exit(1)
 
@@ -167,7 +167,9 @@ def _get_switch_mode(state, switch_arg):
         requested_mode = {
             "nvidia": "intel",
             "intel": "nvidia",
-            "hybrid": "intel"
+            "hybrid-intel": "intel",
+            "hybrid-amd": "amd"
+            "amd": "amd"
         }[state["current_mode"]]
 
         print("Switching to : %s" % requested_mode)
@@ -218,7 +220,7 @@ def _send_command(command):
 
 def _set_startup_and_exit(startup_arg):
 
-    if startup_arg not in ["intel", "nvidia", "hybrid", "ac_auto"]:
+    if startup_arg not in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd", "ac_auto"]:
         print("Invalid startup mode : %s" % startup_arg)
         sys.exit(1)
 
