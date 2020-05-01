@@ -24,8 +24,7 @@ backup=('etc/optimus-manager/xorg-intel.conf'
         'etc/optimus-manager/nvidia-enable.sh'
         'etc/optimus-manager/nvidia-disable.sh'
 
-        'var/lib/optimus-manager/startup_mode'
-        'var/lib/optimus-manager/requested_mode')
+        'var/lib/optimus-manager/persistent/startup_mode')
 source=("git+https://github.com/Askannz/optimus-manager.git#branch=master")
 sha256sums=('SKIP')
 
@@ -54,9 +53,6 @@ package() {
   install -Dm644 optimus-manager.conf "$pkgdir/usr/share/optimus-manager.conf"
   
   install -Dm644 systemd/logind/10-optimus-manager.conf "$pkgdir/usr/lib/systemd/logind.conf.d/10-optimus-manager.conf"
-  
-  install -Dm644 var/startup_mode "$pkgdir/var/lib/optimus-manager/startup_mode"
-  install -Dm644 var/requested_mode "$pkgdir/var/lib/optimus-manager/requested_mode"
   
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"
