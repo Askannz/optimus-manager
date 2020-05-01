@@ -1,3 +1,8 @@
 #!/bin/sh
-sv o pre_start
-exec /usr/bin/python3 -u -m optimus_manager.daemon
+/usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start
+/usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start
+/usr/bin/python3 -u -m optimus_manager.hooks.post_xorg_start
+sv u post_stop_optimus-manager
+exec /usr/bin/python3 -u -m optimus_manager.daemon 
+
+
