@@ -45,8 +45,10 @@ def report_errors(state):
 
         expected_renderer = {
             "intel": "intel",
-            "hybrid": "intel",
-            "nvidia": "nvidia"
+            "hybrid-intel": "hybrid-intel",
+            "hybrid-amd": "hybrid-amd",
+            "nvidia": "nvidia",
+            "amd": "amd"
         }[state["current_mode"]]
 
         active_renderer = get_active_renderer()

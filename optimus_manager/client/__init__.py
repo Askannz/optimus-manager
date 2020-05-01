@@ -168,8 +168,8 @@ def _get_switch_mode(state, switch_arg):
             "nvidia": "intel",
             "intel": "nvidia",
             "hybrid-intel": "intel",
-            "hybrid-amd": "amd"
-            "amd": "amd"
+            "hybrid-amd": "amd",
+            "amd": "nvidia"
         }[state["current_mode"]]
 
         print("Switching to : %s" % requested_mode)

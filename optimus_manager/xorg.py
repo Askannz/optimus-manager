@@ -83,37 +83,6 @@ def do_xsetup(requested_mode):
         except BashError as e:
             logger.error("Cannot setup PRIME : %s", str(e))
 
-        print("Running %s" % envs.XSETUP_SCRIPT_NVIDIA)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_NVIDIA)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_NVIDIA, str(e)))
-
-    elif requested_mode == "intel":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_INTEL)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_INTEL)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
-
-    elif requested_mode == "amd":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_AMD)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_AMD)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_AMD, str(e)))
-
-    elif requested_mode in ("hybrid-amd", "hybrid_intel"):
-
-        print("Running %s" % envs.XSETUP_SCRIPT_HYBRID)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_HYBRID)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
-
-
     script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
     logger.info("Running %s", script_path)
     try:
@@ -312,7 +281,7 @@ def _make_amd_device_section(config, bus_ids, xorg_extra):
 
     return text
 
-def _make_server_flags_section(config, bus_ids, xorg_extra):
+def _make_server_flags_section(config):
     if config["nvidia"]["ignore_abi"] == "yes":
         return (
             "Section \"ServerFlags\"\n"

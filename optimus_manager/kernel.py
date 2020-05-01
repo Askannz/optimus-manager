@@ -12,53 +12,21 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, prev_state, requested_mode):
 
-<<<<<<< HEAD
-    assert requested_mode in ["intel", "nvidia", "hybrid"]
+    assert requested_mode in ["intel", "nvidia", "hybrid-intel", "amd", "hybrid-amd"]
     assert prev_state["type"] == "pending_pre_xorg_start"
 
     current_mode = prev_state["current_mode"]
 
-    if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
+    if current_mode in ["intel", "amd", None] and requested_mode in ["nvidia", "hybrid-intel", "hybrid-amd"]:
         _nvidia_up(config)
 
-    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
+    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode == "intel":
         _nvidia_down(config)
-=======
-    assert requested_gpu_mode in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel"]
-
-    available_modules = _get_available_modules()
-    print("Available kernel modules : %s" % str(available_modules))
-
-    if requested_gpu_mode == "nvidia":
-        _setup_nvidia_mode(config, available_modules)
-
-    elif requested_gpu_mode == "intel":
-        _setup_igpu_mode(config, available_modules, "intel")
-
-    elif requested_gpu_mode == "amd":
-        _setup_igpu_mode(config, available_modules, "amd")
-
-    elif requested_gpu_mode == "hybrid-intel":
-        _setup_hybrid_mode(config, available_modules)
-
-    elif requested_gpu_mode == "hybrid-amd":
-        _setup_hybrid_mode(config, available_modules)
-
-def _setup_igpu_mode(config, available_modules, igpu="intel"):
->>>>>>> 1bbdd19faeb1dcd961c39523bc518ae47df4bde8
 
 
-<<<<<<< HEAD
 def _nvidia_up(config):
 
     logger = get_logger()
-=======
-    print("Setting up %s-GPU state" % ("AMD" if igpu == "amd" else "Intel"))
-
-    # Power switching according to the switching backend
-    if config["optimus"]["switching"] == "nouveau":
-        _try_load_nouveau(config, available_modules, igpu)
->>>>>>> 1bbdd19faeb1dcd961c39523bc518ae47df4bde8
 
     available_modules = _get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
@@ -145,14 +113,10 @@ def _load_nouveau(config, available_modules, igpu):
     modeset_value = 1 if config[igpu]["modeset"] == "yes" else 0
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
-<<<<<<< HEAD
 def _try_load_nouveau(config, available_modules):
 
     logger = get_logger()
 
-=======
-def _try_load_nouveau(config, available_modules, igpu):
->>>>>>> 1bbdd19faeb1dcd961c39523bc518ae47df4bde8
     try:
         _load_nouveau(config, available_modules, igpu)
     except KernelSetupError as e:
