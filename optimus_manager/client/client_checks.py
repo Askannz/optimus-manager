@@ -40,12 +40,12 @@ def _check_daemon_active():
             if not checks.detect_os():
                 print("The optimus-manager service is not running. Please enable and start it with :\n\n"
                     "sudo ln -s /etc/sv/optimus-manager /var/service\n"
-                    "sudo ln -s /etc/sv/prime-switch-boot /var/service\n"
+                    "sudo ln -s /etc/sv/post_stop_optimus-manager /var/service\n"
                     "sudo sv u optimus-manager\n")
             elif checks.detect_os():
                 print("The optimus-manager service is not running. Please enable and start it with :\n\n"
                     "sudo ln -s /etc/runit/sv/optimus-manager /run/runit/service\n"
-                    "sudo ln -s /etc/runit/sv/prime-switch-boot /var/run/runit/service\n"
+                    "sudo ln -s /etc/runit/sv/post_stop_optimus-manager /var/run/runit/service\n"
                     "sudo sv u optimus-manager\n")
         elif checks._detect_init_system(init="systemd"):
             print("The optimus-manager service is not running. Please enable and start it with :\n\n"
