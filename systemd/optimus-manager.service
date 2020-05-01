@@ -3,10 +3,10 @@ Description=Optimus Manager Commands Daemon
 Before=display-manager.service
 
 [Service]
-ExecStartPre=/usr/bin/prime-switch-boot
-ExecStart=/usr/bin/python3 -u /usr/bin/optimus-manager-daemon
+ExecStartPre=-/usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start
+ExecStartPre=-/usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start
+ExecStart=/usr/bin/python3 -u -m optimus_manager.daemon
+ExecStopPost=/usr/bin/python3 -u -m optimus_manager.hooks.post_daemon_stop
 
 [Install]
 WantedBy=graphical.target
-
- 

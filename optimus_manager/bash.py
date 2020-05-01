@@ -6,9 +6,17 @@ class BashError(Exception):
 
 
 def exec_bash(command):
-    ret = subprocess.run(["bash", "-c", command], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-    if ret.returncode != 0:
-        raise BashError("Failed to execute '%s' : %s" % (command, ret.stderr.decode('utf-8')[:-1]))
+    try:
+        out = subprocess.check_output(
+            ["bash", "-c", command],
+            stderr=subprocess.STDOUT
+        ).decode("utf8").strip()
 
-    return ret
+    except subprocess.CalledProcessError as e:
+        out = e.stdout.decode("utf8")
+        raise BashError(
+            "Failed to execute '%s' :\n%s" % (
+                command, out))
+
+    return out

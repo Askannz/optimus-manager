@@ -19,4 +19,7 @@ Please include :
 - The version of optimus-manager you are using : latest stable release (optimus-manager), or the latest Git version (optimus-manager-git)
 
 **Logs**
-If you are able to, please attach all the logs you can find in `/var/log/optimus-manager/`. *Do not directly copy paste the logs into the GitHub issue.* Join them as text files or save them to pastebins (https://pastebin.com/) and post the links here.
+
+* **If you are using the latest stable release (1.2.2): attach all the logs you can find in `/var/log/optimus-manager/`. Join them as text files or share them with a pastebin (like https://pastebin.com/). *Do not directly copy paste the logs into the GitHub issue.*
+
+* **If you are using the Git version:** run `optimus-manager --status` in a console, and if an error message appears, post it here. The message should also point you to a log path, attach it here as well. If there is no error message but you are still experiencing issues, grab the most recent files in `/var/log/optimus-manager/switch/` and `/var/log/optimus-manager/daemon/`.
