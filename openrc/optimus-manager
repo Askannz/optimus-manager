@@ -1,6 +1,6 @@
 #!/usr/bin/openrc-run
 
-command="env python3 /usr/bin/optimus-manager-daemon"
+command="/usr/bin/python3 -u -m optimus_manager.daemon"
 pidfile=${pidfile-/var/run/optimus-manager.pid}
 description="Optimus Manager Commands daemon"
 
@@ -10,7 +10,8 @@ depend() {
 }
 
 start_pre() {
-    /usr/bin/prime-switch-boot || return $?
+    /usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start || return $?
+    /usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start || return $?
 }
 
 start() {
@@ -24,4 +25,8 @@ stop() {
     ebegin "Stopping Optimus Manager daemon"
     start-stop-daemon --quiet --stop --pidfile $pidfile --signal QUIT
     eend $? "Failed to stop Optimus Manager daemon"
+}
+
+stop_post() {
+	/usr/bin/python3 -u -m optimus_manager.hook.post_daemon_stop || return $?
 }

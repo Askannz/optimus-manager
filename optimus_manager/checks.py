@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 import re
 import dbus
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 
 class CheckError(Exception):
@@ -37,15 +38,12 @@ def is_pat_available():
         return False
 
 
-def read_gpu_mode():
+def get_active_renderer():
 
     if _is_gl_provider_nvidia():
         return "nvidia"
     else:
-        if _is_offloading_available():
-            return "hybrid"
-        else:
-            return "intel"
+        return "intel"
 
 
 def is_module_available(module_name):
@@ -67,6 +65,8 @@ def is_module_loaded(module_name):
     else:
         return True
 
+def detect_os():
+    return os.path.isdir("/run/runit/service")
 
 def detect_os():
     return os.path.isdir("/run/runit/service")
@@ -97,6 +97,10 @@ def _detect_init_system(init):
     except BashError:
         pass
     return False
+
+
+def detect_os():
+    return os.path.isdir("/run/runit/service")
 
 
 def get_current_display_manager():
@@ -137,17 +141,14 @@ def using_patched_GDM():
 
     return os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2)
 
-
-def _is_offloading_available():
+def check_offloading_available():
 
     try:
-        ret = exec_bash("xrandr --listproviders")
+        out = exec_bash("xrandr --listproviders")
     except BashError as e:
         raise CheckError("Cannot list xrand providers : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
             return True
     return False
@@ -178,13 +179,11 @@ def is_bumblebeed_service_active():
 def _is_gl_provider_nvidia():
 
     try:
-        ret = exec_bash("glxinfo")
+        out = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
     except BashError as e:
         raise CheckError("Cannot run glxinfo : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
     return False
@@ -201,11 +200,14 @@ def _is_service_active(service_name):
     else:
         pass
 
+    logger = get_logger()
+
     try:
         system_bus = dbus.SystemBus()
     except dbus.exceptions.DBusException:
-        print("WARNING : Cannot communicate with the DBus system bus to check status of %s."
-              " Is DBus running ? Falling back to bash commands" % service_name)
+        logger.warning(
+            "Cannot communicate with the DBus system bus to check status of %s."
+            " Is DBus running ? Falling back to bash commands", service_name)
         return _is_service_active_bash(service_name)
     else:
         return _is_service_active_dbus(system_bus, service_name)

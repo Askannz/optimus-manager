@@ -1,0 +1,5 @@
+#!/bin/sh
+if [ $(sv s optimus-manager | awk '{print $1}') = "down:" ]; then
+	sv o post_stop_optimus-manager
+	/usr/bin/python3 -u -m optimus-manager.hooks.post_daemon_stop
+fi
