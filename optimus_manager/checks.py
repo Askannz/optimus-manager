@@ -23,6 +23,8 @@ def read_gpu_mode():
     else:
         if _is_offloading_available():
             return "hybrid"
+        if check_offloading_available():
+            return "hybrid-" + get_integrated_gpu()
         else:
             return "intel"
 
@@ -107,6 +109,15 @@ def _is_gl_provider_nvidia():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
     return False
+
+
+def get_integrated_gpu():
+
+    try:
+        exec_bash("glxinfo | awk '/Vendor:/{print $2}'| grep 'X.Org'")
+        return "amd"
+    except BashError:
+        return "intel"
 
 
 def _is_service_active(service_name):

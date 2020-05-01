@@ -71,6 +71,7 @@ def setup_PRIME():
     if requested_mode == "nvidia":
 
         print("Running xrandr commands")
+        logger.info("Running xrandr commands")
 
         try:
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
@@ -241,6 +242,32 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     return text
 
 def _make_server_flags_section(config, bus_ids, xorg_extra):
+def _make_amd_device_section(config, bus_ids, xorg_extra):
+
+    if config["amd"]["driver"] == "amdgpu" and not _is_amd_module_available():
+        print("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
+        driver = "modesetting"
+    else:
+        driver = config["amd"]["driver"]
+
+    dri = int(config["amd"]["dri"])
+
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"amd\"\n"
+    text += "\tDriver \"%s\"\n" % driver
+    text += "\tBusID \"%s\"\n" % bus_ids["amd"]
+    if config["amd"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    if "amd" in xorg_extra.keys():
+        for line in xorg_extra["amd"]:
+            text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
+
+    return text
+
+def _make_server_flags_section(config):
     if config["nvidia"]["ignore_abi"] == "yes":
         return (
             "Section \"ServerFlags\"\n"

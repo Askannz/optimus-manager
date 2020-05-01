@@ -26,11 +26,28 @@ def setup_kernel_state(config, requested_gpu_mode):
         _setup_hybrid_mode(config, available_modules)
 
 def _setup_intel_mode(config, available_modules):
+    assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
+    assert requested_mode in ["intel", "nvidia", "hybrid-intel", "amd", "hybrid-amd"]
+    assert prev_state["type"] == "pending_pre_xorg_start"
+
+    current_mode = prev_state["current_mode"]
+
+    if current_mode in ["intel", "amd", None] and requested_mode in ["nvidia", "hybrid-intel", "hybrid-amd"]:
+        _nvidia_up(config)
+
+    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode in ["intel", "amd"]:
+    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode == "intel":
+        _nvidia_down(config)
+
+
+    elif requested_gpu_mode == "hybrid-amd":
+        _setup_hybrid_mode(config, available_modules)
 
     # Resetting the system to its base state
     _set_base_state(config, available_modules)
 
     print("Setting up Intel state")
+def _nvidia_up(config):
 
     # Power switching according to the switching backend
     if config["optimus"]["switching"] == "nouveau":
@@ -143,6 +160,10 @@ def _load_nouveau(config, available_modules):
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
 def _try_load_nouveau(config, available_modules):
+
+    logger = get_logger()
+
+def _try_load_nouveau(config, available_modules, igpu):
     try:
         _load_nouveau(config, available_modules)
     except KernelSetupError as e:
