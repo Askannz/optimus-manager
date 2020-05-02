@@ -17,6 +17,7 @@ Please include :
 - You display manager (SDDM, GDM, LightDM...), if you have one. If you do not know, you are probably using the one coming with your desktop manager.
 - Your laptop model, if you think it could be related to the problem
 - The version of optimus-manager you are using : latest stable release (optimus-manager), or the latest Git version (optimus-manager-git)
+- Your custom optimus-manager configuration file at `/etc/optimus-manager/optimus-manager.conf`, if you made one
 
 **Logs**
 
