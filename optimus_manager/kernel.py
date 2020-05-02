@@ -28,6 +28,7 @@ def setup_kernel_state(config, requested_gpu_mode):
 def _setup_intel_mode(config, available_modules):
     assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
     assert requested_mode in ["intel", "nvidia", "hybrid-intel", "amd", "hybrid-amd"]
+    assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
     assert prev_state["type"] == "pending_pre_xorg_start"
 
     current_mode = prev_state["current_mode"]

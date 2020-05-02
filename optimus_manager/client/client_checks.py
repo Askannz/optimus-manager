@@ -165,23 +165,13 @@ def _check_amd_xorg_module(config, requested_mode):
 
 def _check_igpu(requested_mode):
 
-    if requested_mode == "amd" and checks.get_integrated_gpu() == "intel":
+    if requested_mode in ["amd", "hybrid-amd"] and checks.get_integrated_gpu() == "intel":
         print("ERROR: No AMD iGPU found!\n"
               "Cannot continue!")
         sys.exit(0)
 
-    elif requested_mode == "hybrid-amd" and checks.get_integrated_gpu() == "intel":
-        print("ERROR: No AMD iGPU found!\n"
-              "Cannot continue!")
-        sys.exit(0)
-
-    elif requested_mode == "intel" and checks.get_integrated_gpu() == "amd":
+    elif requested_mode in ["intel", "hybrid-intel"] and checks.get_integrated_gpu() == "amd":
         print("ERROR: No Intel GPU found!\n"
-              "Cannot continue!")
-        sys.exit(0)
-
-    elif requested_mode == "hybrid-intel" and checks.get_integrated_gpu() == "amd":
-        print("ERROR: No Intel iGPU found!\n"
               "Cannot continue!")
         sys.exit(0)
 
