@@ -13,6 +13,7 @@ def run_switch_checks(config, requested_mode):
     _check_bbswitch_module(config)
     _check_nvidia_module(requested_mode)
     _check_patched_GDM()
+    _check_igpu(requested_mode)
     _check_wayland()
     _check_bumblebeed()
     _check_xorg_conf()
@@ -191,6 +192,28 @@ def _check_amd_xorg_module(config, requested_mode):
 
         if not confirmation:
             sys.exit(0)
+
+def _check_igpu(requested_mode):
+
+    if requested_mode == "amd" and checks.get_integrated_gpu() == "intel":
+        print("ERROR: No AMD iGPU found!\n"
+              "Cannot continue!")
+        sys.exit(0)
+
+    elif requested_mode == "hybrid-amd" and checks.get_integrated_gpu() == "intel":
+        print("ERROR: No AMD iGPU found!\n"
+              "Cannot continue!")
+        sys.exit(0)
+
+    elif requested_mode == "intel" and checks.get_integrated_gpu() == "amd":
+        print("ERROR: No Intel GPU found!\n"
+              "Cannot continue!")
+        sys.exit(0)
+
+    elif requested_mode == "hybrid-intel" and checks.get_integrated_gpu() == "amd":
+        print("ERROR: No Intel iGPU found!\n"
+              "Cannot continue!")
+        sys.exit(0)
 
 def _check_number_of_sessions():
 
