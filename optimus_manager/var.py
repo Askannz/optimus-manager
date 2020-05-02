@@ -136,22 +136,12 @@ def get_startup_mode():
     kernel_parameters = get_kernel_parameters()
 
     if kernel_parameters["startup_mode"] is None:
-        try:
-            startup_mode = read_startup_mode()
-        except VarError as e:
-            logger.warning(
-                "Cannot read startup mode : %s.\n"
-                "Using default startup mode %s instead.",
-                str(e), envs.DEFAULT_STARTUP_MODE)
-            startup_mode = envs.DEFAULT_STARTUP_MODE
-
+        return read_startup_mode()
     else:
         logger.info(
             "Startup kernel parameter found : %s",
             kernel_parameters["startup_mode"])
-        startup_mode = kernel_parameters["startup_mode"]
-
-    return startup_mode
+        return kernel_parameters["startup_mode"]
 
 
 def make_daemon_run_id():

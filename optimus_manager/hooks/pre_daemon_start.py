@@ -1,5 +1,6 @@
 import sys
 from ..config import load_config, copy_user_config
+from .. import envs
 from .. import var
 from ..xorg import cleanup_xorg_conf
 from ..checks import is_ac_power_connected
@@ -24,7 +25,16 @@ def main():
         cleanup_xorg_conf()
         copy_user_config()
         config = load_config()
-        startup_mode = var.get_startup_mode()
+
+        try:
+            startup_mode = var.get_startup_mode()
+        except var.VarError as e:
+            logger.warning(
+                "Cannot read startup mode : %s.\n"
+                "Using default startup mode %s instead.",
+                str(e), envs.DEFAULT_STARTUP_MODE)
+            startup_mode = envs.DEFAULT_STARTUP_MODE
+            var.write_startup_mode(startup_mode)
 
         logger.info("Startup mode is: %s", startup_mode)
 
