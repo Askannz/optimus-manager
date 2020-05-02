@@ -36,7 +36,7 @@ def _check_power_switching(config):
               "Follow instructions at https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options"
               " to enable power management.\n"
               "If you have already enabled the new Runtime D3 power management inside the Nvidia driver (for Turing+ GPU + Coffee Lake+ CPU),"
-              " you can safely ignore this warning.")
+              " you can safely ignore this warning.\n")
 
 def _check_bbswitch_module(config):
 
