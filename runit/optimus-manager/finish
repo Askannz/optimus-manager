@@ -1,0 +1,3 @@
+#!/bin/sh
+exec /usr/bin/python3 -u -m optimus_maanger.hooks.post_daemon_stop
+

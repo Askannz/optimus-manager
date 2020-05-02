@@ -15,5 +15,4 @@ package(){
     install="runit.install"
 
     install -Dm755 ${srcdir}/optimus-manager/runit/optimus-manager/run ${pkgdir}/etc/runit/sv/optimus-manager/run
-    install -Dm755 ${srcdir}/optimus-manager/runit/post_stop_optimus-manager/run ${pkgdir}/etc/runit/sv/post_stop_optimus-manager/run
 }
