@@ -182,6 +182,11 @@ def write_state(state):
     with open(filepath, "w") as f:
         json.dump(state, f)
 
+    try:
+        os.chmod(filepath, mode=0o666)
+    except PermissionError:
+        pass
+
 def load_state():
     try:
         with open(envs.STATE_FILE_PATH, "r") as f:

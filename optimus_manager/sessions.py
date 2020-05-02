@@ -76,6 +76,12 @@ def logout_current_desktop_session():
     except BashError:
         pass
 
+    # lxde
+    try:
+        exec_bash("pkill -SIGTERM -f lxsession")
+    except BashError:
+        pass
+
 
 def is_there_a_wayland_session():
 
