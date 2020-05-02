@@ -6,7 +6,7 @@ from .pci import get_gpus_bus_ids
 from .config import load_extra_xorg_options
 from .hacks.manjaro import remove_mhwd_conf
 from .log_utils import get_logger
-
+from .checks import is_display_manager_active
 
 class XorgSetupError(Exception):
     pass
@@ -74,14 +74,15 @@ def do_xsetup(requested_mode):
     logger = get_logger()
 
     if requested_mode == "nvidia":
+        if is_display_manager_active():
 
-        logger.info("Running xrandr commands")
+            logger.info("Running xrandr commands")
 
-        try:
-            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
-            exec_bash("xrandr --auto")
-        except BashError as e:
-            logger.error("Cannot setup PRIME : %s", str(e))
+            try:
+                exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+                exec_bash("xrandr --auto")
+            except BashError as e:
+                logger.error("Cannot setup PRIME : %s", str(e))
 
     script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
     logger.info("Running %s", script_path)
@@ -91,18 +92,19 @@ def do_xsetup(requested_mode):
         logger.error("ERROR : cannot run %s : %s", script_path, str(e))
 
 
+def set_DPI(requested_mode, config):
 
-def set_DPI(config):
+    if requested_mode == "nvidia":
+        if is_display_manager_active():
+            dpi_str = config["nvidia"]["dpi"]
 
-    dpi_str = config["nvidia"]["dpi"]
+            if dpi_str == "":
+                return
 
-    if dpi_str == "":
-        return
-
-    try:
-        exec_bash("xrandr --dpi %s" % dpi_str)
-    except BashError as e:
-        raise XorgSetupError("Cannot set DPI : %s" % str(e))
+            try:
+                exec_bash("xrandr --dpi %s" % dpi_str)
+            except BashError as e:
+                raise XorgSetupError("Cannot set DPI : %s" % str(e))
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):

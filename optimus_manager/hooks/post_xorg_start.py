@@ -26,7 +26,7 @@ def main():
 
         do_xsetup(requested_mode)
         config = load_config()
-        set_DPI(config)
+        set_DPI(requested_mode, config)
 
         state = {
             "type": "done",
