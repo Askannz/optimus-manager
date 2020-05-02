@@ -91,6 +91,20 @@ def do_xsetup(requested_mode):
         logger.error("ERROR : cannot run %s : %s", script_path, str(e))
 
 
+
+def set_DPI(config):
+
+    dpi_str = config["nvidia"]["dpi"]
+
+    if dpi_str == "":
+        return
+
+    try:
+        exec_bash("xrandr --dpi %s" % dpi_str)
+    except BashError as e:
+        raise XorgSetupError("Cannot set DPI : %s" % str(e))
+
+
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
     text = "Section \"Files\"\n" \

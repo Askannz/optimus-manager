@@ -1,7 +1,7 @@
 import sys
 from ..config import load_config
 from .. import var
-from ..xorg import do_xsetup
+from ..xorg import do_xsetup, set_DPI
 from ..log_utils import set_logger_config, get_logger
 
 
@@ -26,6 +26,7 @@ def main():
 
         do_xsetup(requested_mode)
         config = load_config()
+        set_DPI(config)
 
         state = {
             "type": "done",
