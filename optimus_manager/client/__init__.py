@@ -9,7 +9,7 @@ from .. import checks
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
 from ..var import read_startup_mode, read_temp_conf_path_var, load_state, VarError
-from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
+from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file, set_DPI
 from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
@@ -71,10 +71,16 @@ def _gpu_switch(config, state, switch_mode, no_confirm):
         if no_confirm:
             confirmation = True
         else:
+            if not checks.is_display_manager_active():
+                print("No Display manager detected, please make sure you have these commands in your .xinitrc if you use one!\n"
+                      "xrandr --setprovideroutputsource modesetting NVIDIA-0\n"
+                      "xrandr --auto\n"
+                      "xrandr --dpi %s" % config["nvidia"]["dpi"])
             print("You are about to switch GPUs. This will forcibly close all graphical sessions"
                   " and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
+            
             confirmation = ask_confirmation()
 
         if confirmation:
