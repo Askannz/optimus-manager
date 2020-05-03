@@ -40,7 +40,7 @@ def _nvidia_up(config):
     elif switching_mode == "acpi_call":
         _try_load_acpi_call(available_modules)
         _try_set_acpi_call_state("ON")
-    elif switching_mode == "none":
+    elif switching_mode == "custom":
         _try_custom_set_power_state("ON")
 
     if not pci.is_nvidia_visible():
@@ -73,7 +73,7 @@ def _nvidia_down(config):
     elif switching_mode == "acpi_call":
         _try_load_acpi_call(available_modules)
         _try_set_acpi_call_state("OFF")
-    elif switching_mode == "none":
+    elif switching_mode == "custom":
         _try_custom_set_power_state("OFF")
 
 
