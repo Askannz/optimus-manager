@@ -5,7 +5,7 @@ from ..checks import get_active_renderer, check_offloading_available
 def report_errors(state):
 
     if state is None:
-        print("ERROR: no state file found. Is optimus-manager.service running ?")
+        print("ERROR: no state file found.")
         return True
 
     elif state["type"] == "startup_failed":

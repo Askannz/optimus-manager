@@ -14,7 +14,7 @@ from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
 from .error_reporting import report_errors
-from .client_checks import run_switch_checks
+from .client_checks import run_switch_checks, _check_daemon_active
 
 
 def main():
@@ -42,8 +42,8 @@ def main():
     else:
 
         if fatal:
-            print("Cannot execute command because of previous errors.")
-            sys.exit(1)
+            print("Cannot execute command because of previous errors.\n")
+            return _check_daemon_active()
 
         if args.print_mode:
             _print_current_mode(state)
@@ -127,7 +127,7 @@ def _print_next_mode(state):
 
 def _print_startup_deperecation_and_exit():
     print(
-        "The argument --set-startup is deprecated. Set startup_mode through the"
+        "The argument --set-startup is deprecated. Set startup_mode through the\n"
         "configuration file at %s instead" % envs.USER_CONFIG_PATH)
     sys.exit(1)
 
@@ -137,6 +137,8 @@ def _print_startup_mode(config):
     startup_mode = config["optimus"]["startup_mode"]
     kernel_parameters = get_kernel_parameters()
 
+    print("The argument --set-startup is deprecated. Set startup_mode through the\n"
+          "configuration file at %s instead." % envs.USER_CONFIG_PATH)
     print("GPU at startup : %s" % startup_mode)
 
     if kernel_parameters["startup_mode"] is not None:
