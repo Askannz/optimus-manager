@@ -1,7 +1,6 @@
 #!/bin/sh
 /usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start
 /usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start
-/usr/bin/python3 -u -m optimus_manager.hooks.post_xorg_start
 exec /usr/bin/python3 -u -m optimus_manager.daemon 
 
 

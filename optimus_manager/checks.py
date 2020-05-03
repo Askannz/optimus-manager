@@ -159,7 +159,6 @@ def is_xorg_amd_module_available():
 def is_login_manager_active():
     return _is_service_active("display-manager")
 
-
 def is_elogind_active():
     return _is_service_active("elogind")
 
@@ -168,9 +167,6 @@ def is_lxdm_active():
 
 def is_daemon_active():
     return _is_service_active("optimus-manager")
-
-def is_display_manager_active():
-    return _is_service_active in ["sddm", "lightdm", "gdm"]
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
