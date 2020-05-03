@@ -63,6 +63,7 @@ def read_startup_mode():
                 content = content[:-1]
 
             if content in ["intel", "nvidia", "hybrid", "ac_auto"]:
+            if content in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel", "auto"]:
                 mode = content
             else:
                 raise VarError("Invalid value : %s" % content)
@@ -75,6 +76,7 @@ def read_startup_mode():
 def write_startup_mode(mode):
 
     assert mode in ["intel", "nvidia", "hybrid", "ac_auto"]
+    assert mode in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel", "auto"]
 
     folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 

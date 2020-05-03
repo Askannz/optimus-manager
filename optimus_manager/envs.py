@@ -30,7 +30,8 @@ XSETUP_SCRIPT_HYBRID = "/etc/optimus-manager/xsetup-hybrid.sh"
 EXTRA_XORG_OPTIONS_PATHS = {
     "intel": "/etc/optimus-manager/xorg-intel.conf",
     "nvidia": "/etc/optimus-manager/xorg-nvidia.conf",
-    "hybrid": "/etc/optimus-manager/xorg-hybrid.conf",
+    "hybrid-intel": "/etc/optimus-manager/xorg-hybrid.conf",
+    "hybrid-amd": "/etc/optimus-manager/xorg-hybrid.conf",
     "amd": "/etc/optimus-manager/xorg-amd.conf"
 }
 

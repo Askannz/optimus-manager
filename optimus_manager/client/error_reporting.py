@@ -59,7 +59,7 @@ def report_errors(state):
             print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
             return True
 
-        if state["current_mode"] == "hybrid" and not check_offloading_available():
+        if state["current_mode"] in ["hybrid-intel", "hybrid-amd"] and not check_offloading_available():
             print("WARNING: hybrid mode is set but Nvidia card does not seem to be available for offloading.")
             print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
 
