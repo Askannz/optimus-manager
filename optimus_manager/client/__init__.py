@@ -71,11 +71,6 @@ def _gpu_switch(config, state, switch_mode, no_confirm):
         if no_confirm:
             confirmation = True
         else:
-            if not checks.is_display_manager_active():
-                print("No Display manager detected, please make sure you have these commands in your .xinitrc if you use one!\n"
-                      "xrandr --setprovideroutputsource modesetting NVIDIA-0\n"
-                      "xrandr --auto\n"
-                      "xrandr --dpi %s" % config["nvidia"]["dpi"])
             print("You are about to switch GPUs. This will forcibly close all graphical sessions"
                   " and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"

@@ -69,20 +69,24 @@ def is_there_a_MHWD_file():
     return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
 
 
-def do_xsetup(requested_mode):
+def do_xsetup(requested_mode, config):
 
     logger = get_logger()
 
-    if requested_mode == "nvidia":
-        if is_display_manager_active():
+    if requested_mode == "nvidia" and is_display_manager_active():
 
-            logger.info("Running xrandr commands")
+        logger.info("Running xrandr commands")
 
-            try:
-                exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
-                exec_bash("xrandr --auto")
-            except BashError as e:
-                logger.error("Cannot setup PRIME : %s", str(e))
+        try:
+            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+            exec_bash("xrandr --auto")
+        except BashError as e:
+            logger.error("Cannot setup PRIME : %s", str(e))
+    elif requested_mode == "nvidia" and not is_display_manager_active():
+        logger.warning("No Display Manager is active, please make sure these commands are in your .xinitrc file, or enable your Display Manager.\n"
+                "xrandr --setprovideroutputsource modesetting NVIDIA-0\n"
+                "xrandr --auto\n"
+                "xrandr --dpi %s" % config["nvidia"]["dpi"])
 
     script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
     logger.info("Running %s", script_path)
@@ -94,17 +98,16 @@ def do_xsetup(requested_mode):
 
 def set_DPI(requested_mode, config):
 
-    if requested_mode == "nvidia":
-        if is_display_manager_active():
-            dpi_str = config["nvidia"]["dpi"]
+    if requested_mode == "nvidia" and is_display_manager_active():
+        dpi_str = config["nvidia"]["dpi"]
 
-            if dpi_str == "":
-                return
+        if dpi_str == "":
+            return
 
-            try:
-                exec_bash("xrandr --dpi %s" % dpi_str)
-            except BashError as e:
-                raise XorgSetupError("Cannot set DPI : %s" % str(e))
+        try:
+            exec_bash("xrandr --dpi %s" % dpi_str)
+        except BashError as e:
+            raise XorgSetupError("Cannot set DPI : %s" % str(e))
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
