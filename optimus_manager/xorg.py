@@ -215,7 +215,7 @@ def _generate_hybrid_amd(config, bus_ids, xorg_extra):
             "\tDevice \"nvidia\"\n" \
             "EndSection\n\n"
 
-    text += _make_server_flags_section(config, bus_ids, xorg_extra)
+    text += _make_server_flags_section(config)
 
     return text
 
