@@ -62,7 +62,7 @@ def main():
 
 def _gpu_switch(config, switch_mode, no_confirm):
 
-    if switch_mode not in ["intel", "nvidia", "hybrid"]:
+    if switch_mode not in ["intel", "nvidia", "hybrid-intel", "hybrid-amd", "amd"]:
         print("Invalid mode : %s" % switch_mode)
         sys.exit(1)
 
