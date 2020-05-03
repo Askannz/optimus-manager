@@ -5,7 +5,6 @@ SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
 
 PERSISTENT_VARS_FOLDER_PATH = "/var/lib/optimus-manager/persistent"
-STARTUP_MODE_VAR_PATH = "%s/startup_mode" % PERSISTENT_VARS_FOLDER_PATH
 ACPI_CALL_STRING_VAR_PATH = "%s/acpi_call_strings.json" % PERSISTENT_VARS_FOLDER_PATH
 TEMP_CONFIG_PATH_VAR_PATH = "%s/temp_conf_path" % PERSISTENT_VARS_FOLDER_PATH
 

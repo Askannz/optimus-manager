@@ -102,6 +102,8 @@ Run
 * `optimus-manager --switch ac_auto` to switch to `ac_auto_extpower_mode` from the config when connected to AC and `ac_auto_battery_mode` when disconnected
 * `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to `hybrid-amd` if you are in `nvidia` mode, and to `nvidia` otherwise)
 
+(Note: `auto` and `ac_auto` are deprecated and removed from the -git version)
+
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
 Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, Openbox, AwesomeWM, and bspwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
@@ -113,6 +115,8 @@ optimus-manager --set-startup MODE
 ```
 
 Where `MODE` can be `nvidia`, `amd`, `intel`, `hybrid-amd`, `hybrid-intel`, `ac_auto`.
+
+(Note: this options is deprecated and removed from the -git version. Set `startup_mode` in the config file instead)
 
 #### System Tray App
 

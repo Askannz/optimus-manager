@@ -1,13 +1,14 @@
 {
 	"optimus":
 	{
-		"switching": ["single_word", ["nouveau", "bbswitch", "acpi_call", "none"], false],
+		"switching": ["single_word", ["nouveau", "bbswitch", "acpi_call", "custom", "none"], false],
 		"pci_power_control": ["single_word", ["yes", "no"], false],
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
 		"auto_logout": ["single_word", ["yes", "no"], false],
-		"ac_auto_battery_mode": ["single_word", ["amd", "intel", "hybrid-amd", "hybrid-intel"], false],
-		"ac_auto_extpower_mode": ["single_word", ["hybrid-amd", "hybrid-intel", "nvidia"], false]
+		"startup_mode": ["single_word", ["intel", "hybrid-intel", "hybrid-amd", "amd", "nvidia", "auto"], false],
+		"startup_auto_battery_mode": ["single_word", ["intel", "hybrid-intel", "hybrid-amd", "amd", "nvidia"], false],
+		"startup_auto_extpower_mode": ["single_word", ["intel", "hybrid-intel", "hybrid-amd", "amd", "nvidia"], false]
 	},
 
 	"intel":

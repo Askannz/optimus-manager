@@ -4,7 +4,6 @@ import shutil
 from pathlib import Path
 import json
 from . import envs
-from .kernel_parameters import get_kernel_parameters
 from .log_utils import get_logger
 
 
@@ -128,20 +127,6 @@ def read_last_acpi_call_state():
         raise VarError("File %s not found." % str(filepath))
     except IOError:
         raise VarError("Cannot open or read %s" % str(filepath))
-
-def get_startup_mode():
-
-    logger = get_logger()
-
-    kernel_parameters = get_kernel_parameters()
-
-    if kernel_parameters["startup_mode"] is None:
-        return read_startup_mode()
-    else:
-        logger.info(
-            "Startup kernel parameter found : %s",
-            kernel_parameters["startup_mode"])
-        return kernel_parameters["startup_mode"]
 
 
 def make_daemon_run_id():
