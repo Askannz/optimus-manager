@@ -4,7 +4,6 @@ SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
 
 PERSISTENT_VARS_FOLDER_PATH = "/var/lib/optimus-manager/persistent"
-STARTUP_MODE_VAR_PATH = "%s/startup_mode" % PERSISTENT_VARS_FOLDER_PATH
 ACPI_CALL_STRING_VAR_PATH = "%s/acpi_call_strings.json" % PERSISTENT_VARS_FOLDER_PATH
 TEMP_CONFIG_PATH_VAR_PATH = "%s/temp_conf_path" % PERSISTENT_VARS_FOLDER_PATH
 
@@ -14,7 +13,6 @@ STATE_FILE_PATH = "%s/state.json" % TMP_VARS_FOLDER_PATH
 USER_CONFIG_COPY_PATH = "%s/config_copy.conf" % TMP_VARS_FOLDER_PATH
 CURRENT_DAEMON_RUN_ID = "%s/daemon_run_id" % TMP_VARS_FOLDER_PATH
 
-DEFAULT_STARTUP_MODE = "intel"
 
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 

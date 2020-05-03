@@ -98,6 +98,8 @@ optimus-manager --set-startup MODE
 
 Where `MODE` can be `intel`, `nvidia`, `hybrid`, `ac_auto`.
 
+(Note: this options is deprecated and removed from the -git version. Set `startup_mode` in the config file instead)
+
 #### System Tray App
 
 ![optimus-manager systray screenshot](systray.png "optimus-manager systray")

@@ -110,10 +110,6 @@ def _process_command(logger, msg):
             }
             var.write_state(new_state)
 
-        elif command["type"] == "startup":
-            logger.info("Writing startup mode %s" % command["args"]["mode"])
-            var.write_startup_mode(command["args"]["mode"])
-
         elif command["type"] == "temp_config":
             if command["args"]["path"] == "":
                 logger.info("Removing temporary config file path")
