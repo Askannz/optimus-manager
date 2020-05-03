@@ -18,7 +18,7 @@ def parse_args():
 
     parser.add_argument('--switch', metavar='MODE', action='store',
                         help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : intel, nvidia, hybrid, ac_auto, auto (auto-detects the mode you may want to switch to).")
+                             "Possible modes : intel, nvidia, hybrid")
     parser.add_argument('--set-startup', metavar='STARTUP_MODE', action='store',
                         help="Deprecated argument. Set the startup mode through the configuration file instead.")
 

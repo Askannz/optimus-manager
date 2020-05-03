@@ -86,6 +86,8 @@ Run
 * `optimus-manager --switch ac_auto` to switch to the Nvidia GPU when connected to AC and `ac_auto_battery_mode` from the config when disconnected
 * `optimus-manager --switch auto` to automatically detect which mode you are currently running and auto-switch to another (will switch to `intel` if you are in `nvidia` or `hybrid` mode, and to `nvidia` otherwise)
 
+(Note: `auto` and `ac_auto` are deprecated and removed from the -git version)
+
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
 Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, Openbox, AwesomeWM, and bspwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.

@@ -52,7 +52,7 @@ def main():
         elif args.status:
             _print_status(config, state)
         elif args.switch:
-            _gpu_switch(config, state, args.switch, args.no_confirm)
+            _gpu_switch(config, args.switch, args.no_confirm)
         else:
             print("Invalid arguments.")
             sys.exit(1)
@@ -60,11 +60,13 @@ def main():
     sys.exit(0)
 
 
-def _gpu_switch(config, state, switch_mode, no_confirm):
+def _gpu_switch(config, switch_mode, no_confirm):
 
-    requested_mode = _get_switch_mode(state, switch_mode)
+    if switch_mode not in ["intel", "nvidia", "hybrid"]:
+        print("Invalid mode : %s" % switch_mode)
+        sys.exit(1)
 
-    run_switch_checks(config, requested_mode)
+    run_switch_checks(config, switch_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
 
@@ -78,10 +80,10 @@ def _gpu_switch(config, state, switch_mode, no_confirm):
             confirmation = ask_confirmation()
 
         if confirmation:
-            _send_switch_command(config, requested_mode)
+            _send_switch_command(config, switch_mode)
 
     else:
-        _send_switch_command(config, requested_mode)
+        _send_switch_command(config, switch_mode)
         print("Please logout all graphical sessions then log back in to apply the change.")
 
 
@@ -160,28 +162,6 @@ def _print_status(config, state):
     _print_next_mode(state)
     _print_startup_mode(config)
     _print_temp_config_path()
-
-
-def _get_switch_mode(state, switch_arg):
-
-    if switch_arg not in ["auto", "intel", "nvidia", "hybrid", "ac_auto"]:
-        print("Invalid mode : %s" % switch_arg)
-        sys.exit(1)
-
-    if switch_arg == "auto":
-
-        requested_mode = {
-            "nvidia": "intel",
-            "intel": "nvidia",
-            "hybrid": "intel"
-        }[state["current_mode"]]
-
-        print("Switching to : %s" % requested_mode)
-
-    else:
-        requested_mode = switch_arg
-
-    return requested_mode
 
 def _send_command(command):
 
