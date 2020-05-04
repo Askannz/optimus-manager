@@ -44,6 +44,16 @@ make_log_folder() {
     chmod 777 "$LOGDIR"
 }
 
+make_state_folders() {
+    TEMPDIR=/var/lib/optimus-manager/tmp
+    mkdir -p "$STATEDIR"
+    chmod 777 "$STATEDIR"
+    
+    PERSISTDIR=/var/lib/optimus-manager/persistent
+    mkdir -p "$PERSISTDIR"
+    chmod 777 "$PERSISTDIR"
+}
+
 pre_install() {
     cleanup
 }
@@ -52,6 +62,7 @@ pre_install() {
 post_install() {
 
     make_log_folder
+    make_state_folders
     
     bold=$(tput bold)
     red=$(tput setaf 1)
@@ -68,6 +79,7 @@ pre_upgrade() {
 post_upgrade() {
 
     make_log_folder
+    make_state_folders
     
     bold=$(tput bold)
     red=$(tput setaf 1)

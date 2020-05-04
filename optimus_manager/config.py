@@ -7,6 +7,7 @@ import configparser
 from . import envs
 from . import var
 from .log_utils import get_logger
+from .checks import get_active_renderer
 
 
 class ConfigError(Exception):
@@ -226,7 +227,7 @@ def load_extra_xorg_options():
 
         try:
             config_lines = _load_extra_xorg_file(path)
-            logger.info("Loaded extra Intel Xorg options (%d lines)", len(config_lines))
+            logger.info("Loaded extra Xorg options (%d lines)", len(config_lines))
             xorg_extra[mode] = config_lines
         except FileNotFoundError:
             pass
