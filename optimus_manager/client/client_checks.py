@@ -3,6 +3,7 @@ from .. import checks
 from ..xorg import is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from .. import sessions
 from .utils import ask_confirmation
+from ..pci import get_available_igpu
 
 
 def run_switch_checks(config, requested_mode):
@@ -194,12 +195,14 @@ def _check_amd_xorg_module(config, requested_mode):
 
 def _check_igpu(requested_mode):
 
-    if requested_mode in ["amd", "hybrid-amd"] and checks.get_integrated_gpu() == "intel":
+    detected_igpu = get_available_igpu()
+
+    if requested_mode in ["amd", "hybrid-amd"] and detected_igpu == "intel":
         print("ERROR: No AMD iGPU found!\n"
               "Cannot continue!")
         sys.exit(0)
 
-    elif requested_mode in ["intel", "hybrid-intel"] and checks.get_integrated_gpu() == "amd":
+    elif requested_mode in ["intel", "hybrid-intel"] and detected_igpu == "amd":
         print("ERROR: No Intel GPU found!\n"
               "Cannot continue!")
         sys.exit(0)
