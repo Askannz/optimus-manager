@@ -162,6 +162,9 @@ def is_login_manager_active():
 def is_elogind_active():
     return _is_service_active("elogind")
 
+def is_sddm_active():
+    return _is_service_active("sddm")
+
 def is_lxdm_active():
     return _is_service_active("lxdm")
 

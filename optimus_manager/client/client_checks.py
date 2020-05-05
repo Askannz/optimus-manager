@@ -26,7 +26,7 @@ def run_switch_checks(config, requested_mode):
 
 def _check_elogind_active():
 
-    if not checks.is_elogind_active() and not checks._detect_init_system(init="systemd"):
+    if not checks.is_elogind_active() and not checks._detect_init_system(init="systemd") and not checks.is_sddm_active():
         print("The Elogind service was not detected but is required to use optimus-manager, please install, enable and start it.")
         sys.exit(1)
 
