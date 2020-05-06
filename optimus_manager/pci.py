@@ -9,6 +9,7 @@ AMD_VENDOR_ID = "1002"
 
 
 GPU_PCI_CLASS_PATTERN = "03[0-9a-f]{2}"
+AUDIO_PCI_CLASS_PATTERN = "04[0-9a-f]{2}"
 PCI_BRIDGE_PCI_CLASS_PATTERN = "0604"
 
 
@@ -59,6 +60,9 @@ def hot_reset_nvidia():
     if not is_nvidia_visible():
         raise PCIError("failed to bring Nvidia card back")
 
+def remove_nvidia_audio():
+    _write_to_nvidia_audio_path("remove", "1")
+
 def remove_nvidia():
     _write_to_nvidia_path("remove", "1")
 
@@ -72,6 +76,20 @@ def is_nvidia_visible():
 def rescan():
     _write_to_pci_path("/sys/bus/pci/rescan", "1")
 
+
+def get_audio_bus_ids(notation_fix=True):
+
+    logger = get_logger()
+
+    nvidia_audio_ids_list = _get_audio_bus_ids(match_audio_pci_class=AUDIO_PCI_CLASS_PATTERN,
+                                        match_vendor_id=NVIDIA_VENDOR_ID,
+                                        notation_fix=notation_fix)
+
+    audio_bus_ids = {}
+    if len(nvidia_audio_ids_list) > 0:
+        audio_bus_ids["nvidia_audio"] = nvidia_audio_ids_list[0]
+
+    return audio_bus_ids
 
 def get_gpus_bus_ids(notation_fix=True):
 
@@ -106,8 +124,40 @@ def get_gpus_bus_ids(notation_fix=True):
     if len(amd_ids_list) > 0:
         bus_ids["amd"] = amd_ids_list[0]
 
-
     return bus_ids
+
+
+def _get_audio_bus_ids( match_audio_pci_class, match_vendor_id, notation_fix=True):
+
+    try:
+        out = exec_bash("lspci -n")
+    except BashError as e:
+        raise PCIError("cannot run lspci -n : %s" % str(e))
+
+    audio_bus_ids_list = []
+
+    for line in out.splitlines():
+
+        items = line.split(" ")
+
+        audio_bus_id = items[0]
+
+        if notation_fix:
+            # Xorg expects bus IDs separated by colons in decimal instead of
+            # hexadecimal format without any leading zeroes and prefixed with
+            # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            audio_bus_id = "PCI:" + ":".join(
+                str(int(field, 16)) for field in re.split("[.:]", audio_bus_id)
+            )
+
+        vendor_id, _ = items[2].split(":")
+        audio_pci_class = items[1][:-1]
+
+        if re.fullmatch(match_vendor_id, vendor_id) and re.fullmatch(match_audio_pci_class, audio_pci_class):
+            audio_bus_ids_list.append(audio_bus_id)
+
+    return audio_bus_ids_list
+
 
 def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
@@ -169,6 +219,26 @@ def get_available_igpu(notation_fix=True):
 
     return detected_igpu
 
+
+def _write_to_nvidia_audio_path(relative_path, string):
+
+    audio_bus_ids = get_audio_bus_ids(notation_fix=False)
+
+    if "nvidia_audio" not in audio_bus_ids.keys():
+        raise PCIError("Nvidia Audio not in PCI bus")
+
+    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (audio_bus_ids["nvidia_audio"], relative_path)
+    _write_to_pci_path(absolute_path, string)
+
+def _read_from_nvidia_audio_path(relative_path):
+
+    audio_bus_ids = get_audio_bus_ids(notation_fix=False)
+
+    if "nvidia_audio" not in audio_bus_ids.keys():
+        raise PCIError("Nvidia Audio not in PCI bus")
+
+    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (audio_bus_ids["nvidia_audio"], relative_path)
+    return _read_pci_path(absolute_path)
 
 def _write_to_nvidia_path(relative_path, string):
 

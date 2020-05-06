@@ -84,6 +84,8 @@ def _nvidia_down(config):
         else:
             logger.info("Removing Nvidia from PCI bus")
             _try_remove_pci()
+            logger.info("Removing Nvidia Audio from PCI bus")
+            _try_remove_audio_pci()
 
 
     if config["optimus"]["pci_power_control"] == "yes":
@@ -269,6 +271,18 @@ def _set_acpi_call_state(state):
 
     var.write_last_acpi_call_state(state)
     var.write_acpi_call_strings(working_strings)
+
+def _try_remove_audio_pci():
+
+    logger = get_logger()
+
+    try:
+        pci.remove_nvidia_audio()
+    except pci.PCIError as e:
+        logger.error(
+            "Cannot remove Nvidia Audio from PCI bus. Continuing anyways. Error is: %s", str(e))
+
+
 
 def _try_remove_pci():
 
