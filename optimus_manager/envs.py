@@ -1,4 +1,4 @@
-VERSION = "1.3.1"
+VERSION = "1.3.2"
 from optimus_manager.pci import get_available_igpu
 
 SOCKET_PATH = "/tmp/optimus-manager"
@@ -13,8 +13,6 @@ LAST_ACPI_CALL_STATE_VAR = "%s/last_acpi_call_state" % TMP_VARS_FOLDER_PATH
 STATE_FILE_PATH = "%s/state.json" % TMP_VARS_FOLDER_PATH
 USER_CONFIG_COPY_PATH = "%s/config_copy.conf" % TMP_VARS_FOLDER_PATH
 CURRENT_DAEMON_RUN_ID = "%s/daemon_run_id" % TMP_VARS_FOLDER_PATH
-
-DEFAULT_STARTUP_MODE = get_available_igpu()
 
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 

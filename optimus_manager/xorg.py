@@ -169,8 +169,8 @@ def _generate_hybrid_intel(config, bus_ids, xorg_extra):
     text += _make_intel_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
-            "\tIdentifier \"intel\"\n" \
-            "\tDevice \"intel\"\n"
+           "\tIdentifier \"intel\"\n" \
+           "\tDevice \"intel\"\n"
 
     if config["nvidia"]["allow_external_gpus"] == "yes":
         text += "\tOption \"AllowExternalGpus\"\n"

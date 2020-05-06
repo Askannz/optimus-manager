@@ -8,7 +8,7 @@ from .. import envs
 from .. import checks
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
-from ..var import read_startup_mode, read_temp_conf_path_var, load_state, VarError
+from ..var import read_temp_conf_path_var, load_state, VarError
 from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file, set_DPI
 from .. import sessions
 from .args import parse_args
@@ -77,7 +77,7 @@ def _gpu_switch(config, switch_mode, no_confirm):
                   " and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
-            
+
             confirmation = ask_confirmation()
 
         if confirmation:
@@ -166,29 +166,6 @@ def _print_status(config, state):
     _print_startup_mode(config)
     _print_temp_config_path()
 
-
-def _get_switch_mode(state, switch_arg):
-
-    if switch_arg not in ["auto", "intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]:
-        print("Invalid mode : %s" % switch_arg)
-        sys.exit(1)
-
-    if switch_arg == "auto":
-
-        requested_mode = {
-            "nvidia": "intel",
-            "intel": "nvidia",
-            "hybrid-intel": "intel",
-            "hybrid-amd": "amd",
-            "amd": "nvidia"
-        }[state["current_mode"]]
-
-        print("Switching to : %s" % requested_mode)
-
-    else:
-        requested_mode = switch_arg
-
-    return requested_mode
 
 def _send_command(command):
 
