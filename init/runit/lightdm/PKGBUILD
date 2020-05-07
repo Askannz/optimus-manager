@@ -1,7 +1,7 @@
-pkgname=optimus-manager-runit-xinit
+pkgname=optimus-manager-runit-lightdm
 pkgver=20200507
 pkgrel=1
-pkgdesc="runit script for optimus-manager - xinit script"
+pkgdesc="runit script for optimus-manager - lightdm script"
 arch=('any')
 url="https://github.com/Askannz/optimus-manager"
 license=('MIT')
@@ -14,6 +14,7 @@ package(){
 
     install="runit.install"
 
-    install -Dm755 ${srcdir}/optimus-manager/runit/optimus-manager/run ${pkgdir}/etc/runit/sv/optimus-manager/run
+    install -Dm755 ${srcdir}/optimus-manager/runit/displaymanager/lightdm/optimus-manager/run ${pkgdir}/etc/runit/sv/optimus-manager/run
     install -Dm755 ${srcdir}/optimus-manager/runit/optimus-manager/finish ${pkgdir}/etc/runit/sv/optimus-manager/finish
+    install -Dm755 ${srcdir}/optimus-manager/runit/displaymanager/lightdm/run ${pkgdir}/etc/sv/runit/lightdm/run
 }

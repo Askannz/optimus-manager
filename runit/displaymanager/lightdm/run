@@ -1,0 +1,6 @@
+#!/bin/sh
+sv check dbus >/dev/null || exit 1
+install -d -m0711 -olightdm -glightdm /run/lightdm
+/usr/bin/python3 -u -m optimus_manager.hooks.pre_xorg_start
+exec lightdm
+

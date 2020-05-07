@@ -1,0 +1,5 @@
+#!/bin/sh
+/usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start
+exec /usr/bin/python3 -u -m optimus_manager.daemon 
+
+

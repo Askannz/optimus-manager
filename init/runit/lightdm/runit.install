@@ -2,7 +2,9 @@ post_install() {
 
     echo "optimus-manager : enabling optimus-manager"
     mkdir -p /etc/runit/sv/optimus-manager/
+    mkdir -p /etc/runit/sv/lightdm
     ln -sf /etc/runit/sv/optimus-manager /run/runit/service/
+    ln -sf /etc/runit/sv/lightdm /run/runit/service/
 
     bold=$(tput bold)
     red=$(tput setaf 1)
@@ -16,8 +18,7 @@ post_remove() {
 
     service_file_link=/run/runit/service/optimus-manager
     if [ -L "$service_file_link" ]; then
-        rm $service_file_link     
+        rm $service_file_link 
     fi
-
 
 }
