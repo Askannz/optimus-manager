@@ -1,7 +1,7 @@
 optimus-manager
 ==================
 
-**IMPORTANT :** this README is for version v1.2. If you are still using the previous version (v1.1), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.1-README
+**IMPORTANT :** this README is for version v1.3. If you are still using the previous version (v1.2), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.2-README
 
 This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU configuration).
 
@@ -117,6 +117,9 @@ optimus-manager --set-startup MODE
 Where `MODE` can be `nvidia`, `amd`, `intel`, `hybrid-amd`, `hybrid-intel`.
 
 (Note: this option is deprecated and removed from the -git version. Set `startup_mode` in the config file instead)
+=======
+You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
+
 
 #### System Tray App
 
@@ -129,16 +132,16 @@ A Gnome Shell extension is also available here : [optimus-manager-argos](https:/
 
 #### Kernel parameter
 
-As an alternative to the `--set-startup` command, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
+As an alternative to `startup_mode`, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
 
-Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where `MODE` can be any startup mode. Note that this parameter overrides whatever startup mode was set with `optimus-manager --set-startup`.
+Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where `MODE` can be any startup mode. Note that this parameter overrides whatever startup mode was set in the config file.
 
 Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
 Power management
 ----------
 
-Since version v1.2, power management is disabled by default, so the Nvidia GPU will stay powered on (eating battery life) until manual configuration is done. This choice was made because there is no catch-all configuration that works for all laptop models, and incorrect configurations often break the boot process.
+Since version v1.2, power management is disabled by default, so the Nvidia GPU will stay powered on (consuming energy) until manual configuration is done. This choice was made because there is no catch-all configuration that works for all laptop models, and incorrect configurations often break the boot process.
 
 Please refer to [the guide on power management](https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options) in the Wiki.
 
@@ -153,9 +156,9 @@ Please refer to the comments in the [default config file](https://github.com/Ask
 
 No config changes will be effective until you computer is rebooted or the optimus-manager service is restarted.
 
-You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf` and `/etc/optimus-manager/xorg-nvidia.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
+You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf`, `/etc/optimus-manager/xorg-nvidia.conf` and `/etc/optimus-manager/xorg-hybrid.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
 
-If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh` (for Intel mode) and `/etc/optimus-manager/xsetup-nvidia.sh` (for Nvidia mode).
+If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh`, `/etc/optimus-manager/xsetup-nvidia.sh` and `/etc/optimus-manager/xsetup-hybrid.sh`.
 
 Finally, if you need to run some specific code prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if bbswitch is not supported), you can write the commands to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
