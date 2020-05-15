@@ -127,7 +127,7 @@ def get_gpus_bus_ids(notation_fix=True):
     return bus_ids
 
 
-def _get_audio_bus_ids( match_audio_pci_class, match_vendor_id, notation_fix=True):
+def _get_audio_bus_ids(match_audio_pci_class, match_vendor_id, notation_fix=True):
 
     try:
         out = exec_bash("lspci -n")
@@ -192,6 +192,7 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
 
 def get_available_igpu(notation_fix=True):
+    
     try:
         lspci_output = exec_bash("lspci -n")
     except BashError as e:
@@ -212,7 +213,7 @@ def get_available_igpu(notation_fix=True):
             )
 
         pci_class = items[1][:-1]
-        vendor_id, product_id = items[2].split(":")
+        vendor_id, _ = items[2].split(":")
 
         if re.fullmatch(GPU_PCI_CLASS_PATTERN, pci_class) and re.fullmatch(AMD_VENDOR_ID, vendor_id):
             detected_igpu = "amd"

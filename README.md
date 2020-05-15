@@ -51,6 +51,14 @@ For Artix OpenRC or runit you will need to install the corresponding init script
 
 For VoidLinux, you will need to clone my [void-packages](https://github.com/Hyper-KVM/void-packages) repo for now and use xbps-src to install.
 
+**NOTE FOR RUNIT:**
+
+To use optimus-manager on Void linux OR Artix-runit, you'll also need to install the corresponding DM package script for the DM you use, which is currently
+
+Void: optimus-manager-lightdm and optimus-manager-sddm. Without a Display Manager, install optimus-manager-xinit.
+
+Artix: optimus-manager-runit-lightdm and optimus-manager-sddm. Without a Display Manager, install optimus-manager-runit-xinit.
+
 After installation, the optimus-manager daemon should have been started automatically, but you can check its status with:
 
 systemd:`systemctl status optimus-manager.service` 
