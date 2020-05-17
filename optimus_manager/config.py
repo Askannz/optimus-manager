@@ -7,8 +7,6 @@ import configparser
 from . import envs
 from . import var
 from .log_utils import get_logger
-from .checks import get_active_renderer
-
 
 class ConfigError(Exception):
     pass

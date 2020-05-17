@@ -34,27 +34,19 @@ def _check_elogind_active():
 def _check_daemon_active():
 
     if not checks.is_daemon_active():
+        print("The optimus-manager service is not running. Please enable and start it with :\n")
         if checks._detect_init_system(init="openrc"):
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                  "sudo rc-service enable optimus-manager\n"
+            print("sudo rc-service enable optimus-manager\n"
                   "sudo rc-service start optimus-manager\n")
         elif checks._detect_init_system(init="runit-void"):
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                    "sudo ln -s /etc/sv/optimus-manager /var/service\n"
-                    "sudo ln -s /etc/sv/post_stop_optimus-manager /var/service\n"
-                    "sudo sv u optimus-manager\n")
+            print("sudo ln -s /etc/sv/optimus-manager /var/service\n")
         elif checks._detect_init_system(init="runit-artix"):    
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                    "sudo ln -s /etc/runit/sv/optimus-manager /run/runit/service\n"
-                    "sudo ln -s /etc/runit/sv/post_stop_optimus-manager /var/run/runit/service\n"
-                    "sudo sv u optimus-manager\n")
+            print("sudo ln -s /etc/runit/sv/optimus-manager /run/runit/service\n")
         elif checks._detect_init_system(init="systemd"):
-            print("The optimus-manager service is not running. Please enable and start it with :\n\n"
-                  "sudo systemctl enable optimus-manager\n"
+            print("sudo systemctl enable optimus-manager\n"
                   "sudo systemctl start optimus-manager\n")
         elif checks._detect_init_system(init="s6"):
-            print("The optimus-maanger service is not running. Please enable and start it with :\n\n"
-                  "sudo s6-rc-bundle-update add default optimus-manager\n"
+            print("sudo s6-rc-bundle-update add default optimus-manager\n"
                   "sudo s6-rc -u change optimus-mnanager\n")
         else:
             print("ERROR: unsupported init system detected!")

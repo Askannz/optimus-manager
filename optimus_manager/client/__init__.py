@@ -9,7 +9,7 @@ from .. import checks
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
 from ..var import read_temp_conf_path_var, load_state, VarError
-from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file, set_DPI
+from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from .. import sessions
 from .args import parse_args
 from .utils import ask_confirmation
@@ -77,7 +77,6 @@ def _gpu_switch(config, switch_mode, no_confirm):
                   " and all your applications WILL CLOSE.\n"
                   "(you can pass the --no-confirm option to disable this warning)\n"
                   "Continue ? (y/N)")
-
             confirmation = ask_confirmation()
 
         if confirmation:
@@ -137,8 +136,6 @@ def _print_startup_mode(config):
     startup_mode = config["optimus"]["startup_mode"]
     kernel_parameters = get_kernel_parameters()
 
-    print("The argument --set-startup is deprecated. Set startup_mode through the\n"
-          "configuration file at %s instead." % envs.USER_CONFIG_PATH)
     print("GPU at startup : %s" % startup_mode)
 
     if kernel_parameters["startup_mode"] is not None:
@@ -166,7 +163,6 @@ def _print_status(config, state):
     _print_startup_mode(config)
     _print_temp_config_path()
 
-
 def _send_command(command):
 
     msg = json.dumps(command).encode('utf-8')
@@ -178,44 +174,25 @@ def _send_command(command):
         client.close()
 
     except (ConnectionRefusedError, OSError):
+        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
+            "\nYou can enable and start it by running those commands as root :\n")
         if _detect_init_system(init="systemd"):
-            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                  "\nYou can enable and start it by running those commands as root :\n"
-                  "\nsystemctl enable optimus-manager.service\n"
-                  "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
+            print("\nsystemctl enable optimus-manager.service\n"
+                "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
         elif _detect_init_system(init="openrc"):
-            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                  "\nYou can enable and start it by running those commands as root :\n"
-                  "\nrc-update add optimus-manager default\n"
-                  "rc-service optimus-manager start\n" % envs.SOCKET_PATH)
+            print("\nrc-update add optimus-manager default\n"
+                "rc-service optimus-manager start\n" % envs.SOCKET_PATH)
         elif _detect_init_system(init="runit"):
             if checks.detect_os():
-                print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                    "\nYou can enable and start it by running this command as root :\n"
-                    "ln -s /etc/runit/sv/optimus-manager /var/run/runit/service\n"
+                print("ln -s /etc/runit/sv/optimus-manager /var/run/runit/service\n"
                     "sv u optimus-manager\n" % envs.SOCKET_PATH)
             elif not checks.detect_os():
-                print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                        "\nYou can enable and start it by running this command as root :\n"
-                        "ln -s /etc/sv/optimus-manager /var/service\n"
-                        "sv u optimus-manager\n" % envs.SOCKET_PATH)
+                print("ln -s /etc/sv/optimus-manager /var/service\n"
+                    "sv u optimus-manager\n" % envs.SOCKET_PATH)
         elif _detect_init_system(init="s6"):
-            print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-                  "\nYou can enable and start it by running this command as root :\n"
-                  "s6-rc-bundle-update add default optimus-manager\n"
-                  "s6-rc -u change optimus-manager\n" % envs.SOCKET_PATH)
+            print("s6-rc-bundle-update add default optimus-manager\n"
+                "s6-rc -u change optimus-manager\n" % envs.SOCKET_PATH)
         sys.exit(1)
-
-def _set_startup_and_exit(startup_arg):
-
-    if startup_arg not in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]:
-        print("Invalid startup mode : %s" % startup_arg)
-        sys.exit(1)
-
-    print("Setting startup mode to : %s" % startup_arg)
-    command = {"type": "startup", "args": {"mode": startup_arg}}
-    _send_command(command)
-    sys.exit(0)
 
 def _set_temp_config_and_exit(rel_path):
 

@@ -58,7 +58,6 @@ def is_module_available(module_name):
     else:
         return True
 
-
 def is_module_loaded(module_name):
 
     try:
@@ -155,7 +154,6 @@ def is_xorg_intel_module_available():
 def is_xorg_amd_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
 
-
 def is_login_manager_active():
     return _is_service_active("display-manager")
 
@@ -173,7 +171,6 @@ def is_daemon_active():
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
-
 
 def _is_gl_provider_nvidia():
 

@@ -13,7 +13,6 @@ post_install() {
 }
 
 pre_upgrade() {
-
     bold=$(tput bold)
     red=$(tput setaf 1)
     normal=$(tput sgr0)

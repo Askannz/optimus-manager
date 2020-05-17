@@ -68,9 +68,6 @@ package() {
   install -Dm755 config/nvidia-enable.sh "$pkgdir/etc/optimus-manager/nvidia-enable.sh"
   install -Dm755 config/nvidia-disable.sh "$pkgdir/etc/optimus-manager/nvidia-disable.sh"
 
-  install -Dm644 var/startup_mode "$pkgdir/var/lib/optimus-manager/persistent/startup_mode"
-  install -Dm644 var/requested_mode "$pkgdir/var/lib/optimus-manager/persistent/requested_mode"
- 
   python3 setup.py install --root="$pkgdir/" --optimize=1 --skip-build
  
 } 

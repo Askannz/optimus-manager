@@ -218,7 +218,6 @@ def _generate_hybrid_amd(config, bus_ids, xorg_extra):
 
     return text
 
-
 def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
     options = config["nvidia"]["options"].replace(" ", "").split(",")
@@ -237,7 +236,6 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
-
 
 def _make_intel_device_section(config, bus_ids, xorg_extra):
 
@@ -302,7 +300,6 @@ def _make_server_flags_section(config):
         )
     return ""
 
-
 def _write_xorg_conf(xorg_conf_text):
 
     logger = get_logger()
@@ -316,7 +313,6 @@ def _write_xorg_conf(xorg_conf_text):
             f.write(xorg_conf_text)
     except IOError:
         raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath))
-
 
 def _is_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
