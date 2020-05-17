@@ -2,7 +2,7 @@
 #Writen by Abhiram Shibu to easily run programs with nvidia gpu
 if [[ $(optimus-manager --status) == *"Current GPU mode : hybrid"* ]]
 then
-    if [ -z $@ ]
+    if [ -z $@ ] || [ ${1:0:2} == "-h" ] || [  ${1:0:2} == "-" ]
     then
         echo "Try nvrun <command>"
         exit -1
