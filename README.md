@@ -90,6 +90,7 @@ Auto-logout is supported for Gnome, KDE Plasma, Xfce, Deepin, i3, Openbox, Aweso
 
 You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
 
+When in hybrid mode `nvrun <command>` will run the command using Nvidia GPU
 
 #### System Tray App
 
