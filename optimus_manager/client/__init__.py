@@ -29,9 +29,9 @@ def main():
     if args.version:
         _print_version()
     elif args.print_startup:
-        _print_startup_deperecation_and_exit()
-    elif args.set_startup:
         _print_startup_mode(config)
+    elif args.set_startup:
+        _print_startup_deperecation_and_exit()
     elif args.temp_config:
         _set_temp_config_and_exit(args.temp_config)
     elif args.unset_temp_config:

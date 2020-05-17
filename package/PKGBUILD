@@ -1,5 +1,5 @@
 # Maintainer: Robin Lange <robin dot langenc at gmail dot com>
-# Contributor: Robin Lange <robin dot langenc at gmail dot com>
+
 pkgname=optimus-manager-git
 pkgver=1.3.2
 pkgrel=1

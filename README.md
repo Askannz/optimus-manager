@@ -136,7 +136,11 @@ You can also specify which GPU you want to be used by default when the system bo
 The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
-A Gnome Shell extension is also available here : [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+Unofficial Gnome Shell extensions are also avaialble :
+
+* [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+
+* [optimus-manager-indicator](https://extensions.gnome.org/extension/2908/optimus-manager-indicator/)
 
 #### Kernel parameter
 
