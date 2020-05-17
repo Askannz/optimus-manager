@@ -10,7 +10,7 @@ setup(
     description='Management utility for Optimus laptops on Linux.',
     long_description=open(
         join(dirname(__file__), 'README.md')).read(),
-    url='https://github.com/Askannz/optimus-manager',
+    url='https://github.com/ABHIRAMSHIBU/optimus-manager',
     author='Robin Lange',
     author_email='robin.langenc@gmail.com',
     license='MIT',
