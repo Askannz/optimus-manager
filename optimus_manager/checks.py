@@ -158,10 +158,13 @@ def is_login_manager_active():
     return _is_service_active("display-manager")
 
 def is_elogind_active():
-    return _is_service_active("elogind")
-
-def is_sddm_active():
-    return _is_service_active("sddm")
+    
+    try:
+        exec_bash("pgrep -a elogind")
+    except BashError:
+        return False
+    else:
+        return True
 
 def is_lxdm_active():
     return _is_service_active("lxdm")
