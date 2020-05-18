@@ -62,7 +62,6 @@ package() {
 		echo "No Display Manager selected, installing standalone script"
 		install -Dm755 optimus-manager/runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	fi
-  fi
   # openrc
   elif [ -n $(command -v rc-service) ]; then
 	install="openrc.install"
