@@ -41,16 +41,43 @@ build() {
  
  
 package() {
-
-  install="optimus-manager.install"
  
   cd "${srcdir}/optimus-manager/"
- 
+  # runit
+  if [ -n $(command -v sv) ]; then
+	install="runit.install"
+	install -Dm755 optimus-manager/runit/optimus-manager/finish "$pkgdir/etc/runit/sv/optimus-manager/finish"
+	CONDM=0
+	echo "Choose the Display Manager you use or if none press enter."
+	read -rp "`echo $'\n	1.SDDM\n	2.LightDM\n	[1-2?]: '`" CONDM;
+	if [ "$CONDM" == "1" ]; then
+		echo "Installing SDDM runit script"
+		install -Dm755 optimus-manager/runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/sddm/run"
+		install -Dm755 optimus-manager/runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+	elif [ "$CONDM" == "2" ]; then
+		echo "Installing LightDM runit script"
+		install -Dm755 optimus-manager/runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/lightdm/run"
+		install -Dm755 optimus-manager/runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+	else
+		echo "No Display Manager selected, installing standalone script"
+		install -Dm755 optimus-manager/runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
+	fi
+  fi
+  # openrc
+  elif [ -n $(command -v rc-service) ]; then
+	install="openrc.install"
+	install -Dm755 optimus-manager/openrc/optimus-manager "$pkgdir/etc/init.d/optimus-manager"
+  # systemd
+  else
+  	install="optimus-manager.install"
+	install -Dm644 systemd/optimus-manager.service "$pkgdir/usr/lib/systemd/system/optimus-manager.service"
+  fi
+
+
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   install -Dm644 modules/optimus-manager.conf "$pkgdir/usr/lib/modprobe.d/optimus-manager.conf"
-  install -Dm644 systemd/optimus-manager.service "$pkgdir/usr/lib/systemd/system/optimus-manager.service"
+    
   install -Dm644 optimus-manager.conf "$pkgdir/usr/share/optimus-manager.conf"
-  
   install -Dm644 systemd/logind/10-optimus-manager.conf "$pkgdir/usr/lib/systemd/logind.conf.d/10-optimus-manager.conf"
   
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"

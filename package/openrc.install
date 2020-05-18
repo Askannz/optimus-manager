@@ -1,0 +1,30 @@
+post_install() {
+
+    echo "optimus-manager : enabling optimus-manager"
+    rc-update add optimus-manager default
+
+    bold=$(tput bold)
+    red=$(tput setaf 1)
+    normal=$(tput sgr0)
+    echo "${bold}${red}Please reboot your computer before using optimus-manager${normal}"
+
+}
+
+post_remove() {
+
+        echo "optimus-manager : cleaning up auto-generated Xorg conf"
+
+    xorg_conf=/etc/X11/xorg.conf.d/10-optimus-manager.conf
+    if [ -f "$xorg_conf" ]; then
+        rm $xorg_conf
+    fi
+
+
+    echo "optimus-manager : disabling optimus-manager"
+
+    service_file_link=/etc/init.d/optimus-manager
+    if [ -L "$service_file_link" ]; then
+        rm $service_file_link
+    fi
+
+}
