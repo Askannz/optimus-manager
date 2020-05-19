@@ -1,7 +1,7 @@
 # Maintainer: Robin Lange <robin dot langenc at gmail dot com>
 
 pkgname=optimus-manager-git
-pkgver=1.3.2
+pkgver=1.3.3.r2.g1bde529
 pkgrel=1
 pkgdesc="Management utility to handle GPU switching for Optimus laptops (Git version)"
 arch=('any')
@@ -46,21 +46,21 @@ package() {
   # runit
   if [ -n $(command -v sv) ]; then
 	install="runit.install"
-	install -Dm755 optimus-manager/runit/optimus-manager/finish "$pkgdir/etc/runit/sv/optimus-manager/finish"
+	install -Dm755 runit/optimus-manager/finish "$pkgdir/etc/runit/sv/optimus-manager/finish"
 	CONDM=0
 	echo "Choose the Display Manager you use or if none press enter."
 	read -rp "`echo $'\n	1.SDDM\n	2.LightDM\n	[1-2?]: '`" CONDM;
 	if [ "$CONDM" == "1" ]; then
 		echo "Installing SDDM runit script"
-		install -Dm755 optimus-manager/runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/sddm/run"
-		install -Dm755 optimus-manager/runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+		install -Dm755 runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/sddm/run"
+		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
 	elif [ "$CONDM" == "2" ]; then
 		echo "Installing LightDM runit script"
-		install -Dm755 optimus-manager/runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/lightdm/run"
-		install -Dm755 optimus-manager/runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+		install -Dm755 runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/lightdm/run"
+		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
 	else
 		echo "No Display Manager selected, installing standalone script"
-		install -Dm755 optimus-manager/runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
+		install -Dm755 runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	fi
   # openrc
   elif [ -n $(command -v rc-service) ]; then
