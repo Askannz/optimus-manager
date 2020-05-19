@@ -47,7 +47,7 @@ Naturally, you must have the proprietary nvidia driver installed on your system.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
-For Artix OpenRC or runit you will need to install the corresponding init script package in the init folder using `makepkg -si`
+The PKGBUILD will autodetect your init system and install the files needed for it with your choice of Display Manager (LightDM, SDDM and No Display Manager).
 
 For VoidLinux, you will need to clone my [void-packages](https://github.com/Hyper-KVM/void-packages) repo for now and use xbps-src to install.
 
