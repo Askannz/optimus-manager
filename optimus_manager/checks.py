@@ -82,7 +82,7 @@ def _detect_init_system(init):
     except BashError:
         pass
     try:
-        exec_bash("command -v sv")
+        exec_bash("pgrep -a runit")
         if detect_os():
             return init == "runit-artix"
         elif not detect_os():

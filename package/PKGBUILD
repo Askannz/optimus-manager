@@ -44,7 +44,7 @@ package() {
  
   cd "${srcdir}/optimus-manager/"
   # runit
-  if [ -n $(command -v sv) ]; then
+  if [ -n $(pgrep -a runit) ]; then
 	install="runit.install"
 	install -Dm755 runit/optimus-manager/finish "$pkgdir/etc/runit/sv/optimus-manager/finish"
 	CONDM=0
@@ -63,7 +63,7 @@ package() {
 		install -Dm755 runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	fi
   # openrc
-  elif [ -n $(command -v rc-service) ]; then
+  elif [ -n $(pgrep -a openrc) ]; then
 	install="openrc.install"
 	install -Dm755 optimus-manager/openrc/optimus-manager "$pkgdir/etc/init.d/optimus-manager"
   # systemd
