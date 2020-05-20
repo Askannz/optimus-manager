@@ -3,7 +3,7 @@ optimus-manager
 
 **IMPORTANT :** this README is for version v1.3. If you are still using the previous version (v1.2), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.2-README
 
-This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU configuration).
+This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU or Nvidia/AMD configuration).
 
 Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 
@@ -16,7 +16,7 @@ optimus-manager can also work with other display managers (or with no display ma
 
 Introduction
 ----------
-GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel GPU only acts as a "relay" between the Nvidia GPU and your screen.
+GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel/AMD GPU only acts as a "relay" between the Nvidia GPU and your screen.
 
 This is essentially a port to VoidLinux and Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
