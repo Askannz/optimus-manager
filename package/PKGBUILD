@@ -44,7 +44,7 @@ package() {
  
   cd "${srcdir}/optimus-manager/"
   # runit
-  if [ -n $(pgrep -a runit) ]; then
+  if [[ -n $(pgrep -a runit) ]]; then
 	install="runit.install"
 	install -Dm755 runit/optimus-manager/finish "$pkgdir/etc/runit/sv/optimus-manager/finish"
 	CONDM=0
@@ -53,19 +53,19 @@ package() {
 	if [ "$CONDM" == "1" ]; then
 		echo "Installing SDDM runit script"
 		install -Dm755 runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/sddm/run"
-		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	elif [ "$CONDM" == "2" ]; then
 		echo "Installing LightDM runit script"
 		install -Dm755 runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/lightdm/run"
-		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/sv/optimus-manager/run"
+		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	else
 		echo "No Display Manager selected, installing standalone script"
 		install -Dm755 runit/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	fi
   # openrc
-  elif [ -n $(pgrep -a openrc) ]; then
+  elif [[ -n $(pgrep -a openrc) ]]; then
 	install="openrc.install"
-	install -Dm755 optimus-manager/openrc/optimus-manager "$pkgdir/etc/init.d/optimus-manager"
+	install -Dm755 openrc/optimus-manager "$pkgdir/etc/init.d/optimus-manager"
   # systemd
   else
   	install="optimus-manager.install"
