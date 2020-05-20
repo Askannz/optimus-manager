@@ -1,4 +1,4 @@
-VERSION = "1.3.2"
+VERSION = "1.3.3"
 from optimus_manager.pci import get_available_igpu
 
 SOCKET_PATH = "/tmp/optimus-manager"
