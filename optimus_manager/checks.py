@@ -170,7 +170,23 @@ def is_lxdm_active():
     return _is_service_active("lxdm")
 
 def is_daemon_active():
-    return _is_service_active("optimus-manager")
+
+    if _detect_init_system(init="runit-artix"):
+        try:
+            exec_bash("pgrep -a python3 | grep -o optimus_manager")
+        except BashError:
+            return False
+        else:
+            return True
+    elif _detect_init_system(init="runit-void"):
+        try:
+            exec_bash("pgrep -a python3 | grep  -o optimus_manager")
+        except BashError:
+            return False
+        else:
+            return True
+    else:
+        return _is_service_active("optimus-manager")
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
@@ -257,7 +273,7 @@ def _is_service_active_bash(service_name):
 
     if _detect_init_system(init="runit-void"):
         try:
-            exec_bash("sudo cat /var/service/%s/supervise/stat | grep run" % service_name)
+            exec_bash("pgrep -a %s" % service_name)
         except BashError:
             return False
         else:
@@ -265,7 +281,7 @@ def _is_service_active_bash(service_name):
             
     if _detect_init_system(init="runit-artix"):
         try:
-            exec_bash("sudo cat /run/runit/service/%s/supervise/stat | grep run" % service_name)
+            exec_bash("pgrep -a %s" % service_name)
         except BashError:
             return False
         else:
