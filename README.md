@@ -100,7 +100,7 @@ AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-ma
 
 Unofficial Gnome Shell extensions are also avaialble :
 
-* [optimus-manager-argos](https://github.com/inzar98/optimus-manager-argos).
+* [optimus-manager-argos (unmaintained)](https://github.com/inzar98/optimus-manager-argos).
 
 * [optimus-manager-indicator](https://extensions.gnome.org/extension/2908/optimus-manager-indicator/)
 
