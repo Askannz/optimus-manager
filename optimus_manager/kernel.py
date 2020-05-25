@@ -37,7 +37,6 @@ def _setup_intel_mode(config, available_modules):
         _nvidia_up(config)
 
     elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode in ["intel", "amd"]:
-    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode == "intel":
         _nvidia_down(config)
 
 
@@ -48,6 +47,10 @@ def _setup_intel_mode(config, available_modules):
     _set_base_state(config, available_modules)
 
     print("Setting up Intel state")
+    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
+        _nvidia_down(config)
+
+
 def _nvidia_up(config):
 
     # Power switching according to the switching backend

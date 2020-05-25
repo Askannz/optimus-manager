@@ -81,7 +81,7 @@ def _gpu_switch(config, state, switch_mode, no_confirm):
             confirmation = ask_confirmation()
 
         if confirmation:
-            _send_switch_command(config, requested_mode)
+            _send_switch_command(config, switch_mode)
 
     else:
         _send_switch_command(config, requested_mode)

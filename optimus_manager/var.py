@@ -78,7 +78,7 @@ def write_startup_mode(mode):
     assert mode in ["intel", "nvidia", "hybrid", "ac_auto"]
     assert mode in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel", "auto"]
 
-    folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
+    filepath = Path(envs.ACPI_CALL_STRING_VAR_PATH)
 
     if not os.path.isdir(folder_path):
         os.makedirs(folder_path)
