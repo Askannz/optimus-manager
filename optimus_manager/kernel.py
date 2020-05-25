@@ -1,129 +1,100 @@
-import optimus_manager.envs as envs
-import optimus_manager.var as var
-import optimus_manager.checks as checks
-import optimus_manager.pci as pci
-from optimus_manager.acpi_data import ACPI_STRINGS
-from optimus_manager.bash import exec_bash, BashError
+from . import envs
+from . import var
+from . import checks
+from . import pci
+from .acpi_data import ACPI_STRINGS
+from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 class KernelSetupError(Exception):
     pass
 
 
-def setup_kernel_state(config, requested_gpu_mode):
+def setup_kernel_state(config, prev_state, requested_mode):
 
-    assert requested_gpu_mode in ["intel", "nvidia", "hybrid"]
+    assert requested_mode in ["intel", "nvidia", "hybrid"]
+    assert prev_state["type"] == "pending_pre_xorg_start"
+
+    current_mode = prev_state["current_mode"]
+
+    if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
+        _nvidia_up(config)
+
+    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
+        _nvidia_down(config)
+
+
+def _nvidia_up(config):
+
+    logger = get_logger()
 
     available_modules = _get_available_modules()
-    print("Available kernel modules : %s" % str(available_modules))
+    logger.info("Available modules: %s", str(available_modules))
 
-    if requested_gpu_mode == "intel":
-        _setup_intel_mode(config, available_modules)
-
-    elif requested_gpu_mode == "nvidia":
-        _setup_nvidia_mode(config, available_modules)
-
-    elif requested_gpu_mode == "hybrid":
-        _setup_hybrid_mode(config, available_modules)
-
-def _setup_intel_mode(config, available_modules):
-
-    # Resetting the system to its base state
-    _set_base_state(config, available_modules)
-
-    print("Setting up Intel state")
-
-    # Power switching according to the switching backend
-    if config["optimus"]["switching"] == "nouveau":
-        _try_load_nouveau(config, available_modules)
-
-    elif config["optimus"]["switching"] == "bbswitch":
-        _set_bbswitch_state("OFF")
-
-    elif config["optimus"]["switching"] == "acpi_call":
-        _try_set_acpi_call_state("OFF")
-
-    elif config["optimus"]["switching"] == "none":
-        _try_custom_set_power_state("OFF")
-
-    # PCI remove
-    if config["optimus"]["pci_remove"] == "yes":
-
-        switching_mode = config["optimus"]["switching"]
-        if switching_mode == "nouveau" or switching_mode == "bbswitch":
-            print("%s is selected, pci_remove option ignored." % switching_mode)
-        else:
-            print("Removing Nvidia from PCI bus")
-            _try_remove_pci()
-
-    # PCI power control
-    if config["optimus"]["pci_power_control"] == "yes":
-
-        switching_mode = config["optimus"]["switching"]
-        if switching_mode == "bbswitch" or switching_mode == "acpi_call":
-            print("%s is enabled, pci_power_control option ignored." % switching_mode)
-        elif config["optimus"]["pci_remove"] == "yes":
-            print("pci_remove is enabled, pci_power_control option ignored.")
-        else:
-            _try_set_pci_power_state("auto")
-
-def _setup_nvidia_mode(config, available_modules):
-
-    _set_base_state(config, available_modules)
-
-    print("Setting up Nvidia state")
-    _load_nvidia_modules(config, available_modules)
-
-def _setup_hybrid_mode(config, available_modules):
-
-    _set_base_state(config, available_modules)
-
-    print("Setting up Hybrid state")
-    _load_nvidia_modules(config, available_modules)
-
-def _set_base_state(config, available_modules):
-
-    print("Setting up base state")
-
-    _unload_nvidia_modules(available_modules)
     _unload_nouveau(available_modules)
 
     switching_mode = config["optimus"]["switching"]
     if switching_mode == "bbswitch":
         _try_load_bbswitch(available_modules)
+        _try_set_bbswitch_state("ON")
     elif switching_mode == "acpi_call":
         _try_load_acpi_call(available_modules)
-
-    if checks.is_module_loaded("bbswitch"):
-        _try_set_bbswitch_state("ON")
-
-    if checks.is_module_loaded("acpi_call"):
-
-        try:
-            last_acpi_call_state = var.read_last_acpi_call_state()
-            should_send_acpi_call = (last_acpi_call_state == "OFF")
-        except var.VarError:
-            should_send_acpi_call = False
-
-        if should_send_acpi_call:
-            _try_set_acpi_call_state("ON")
-
-    if switching_mode == "none":
+        _try_set_acpi_call_state("ON")
+    elif switching_mode == "custom":
         _try_custom_set_power_state("ON")
 
     if not pci.is_nvidia_visible():
-        print("Nvidia card not visible in PCI bus, rescanning")
+        logger.info("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-    if config["optimus"]["pci_reset"] != "no":
+    if config["optimus"]["pci_reset"] == "yes":
         _try_pci_reset(config, available_modules)
 
-    if switching_mode == "bbswitch":
-        # Re-loading bbswitch in case it was unloaded before PCI reset
-        _try_load_bbswitch(available_modules)
-    else:
-        _try_unload_bbswitch(available_modules)
+    if config["optimus"]["pci_power_control"] == "yes":
+        _try_set_pci_power_state("on")
 
-    _try_set_pci_power_state("on")
+    _load_nvidia_modules(config, available_modules)
+
+def _nvidia_down(config):
+
+    logger = get_logger()
+
+    available_modules = _get_available_modules()
+    logger.info("Available modules: %s", str(available_modules))
+
+    _unload_nvidia_modules(available_modules)
+
+    switching_mode = config["optimus"]["switching"]
+    if switching_mode == "nouveau":
+        _try_load_nouveau(config, available_modules)
+    elif switching_mode == "bbswitch":
+        _try_load_bbswitch(available_modules)
+        _set_bbswitch_state("OFF")
+    elif switching_mode == "acpi_call":
+        _try_load_acpi_call(available_modules)
+        _try_set_acpi_call_state("OFF")
+    elif switching_mode == "custom":
+        _try_custom_set_power_state("OFF")
+
+
+    if config["optimus"]["pci_remove"] == "yes":
+
+        if switching_mode == "nouveau" or switching_mode == "bbswitch":
+            logger.warning("%s is selected, pci_remove option ignored.", switching_mode)
+        else:
+            logger.info("Removing Nvidia from PCI bus")
+            _try_remove_pci()
+
+
+    if config["optimus"]["pci_power_control"] == "yes":
+
+        switching_mode = config["optimus"]["switching"]
+        if switching_mode == "bbswitch" or switching_mode == "acpi_call":
+            logger.warning("%s is enabled, pci_power_control option ignored.", switching_mode)
+        elif config["optimus"]["pci_remove"] == "yes":
+            logger.warning("pci_remove is enabled, pci_power_control option ignored.")
+        else:
+            _try_set_pci_power_state("auto")
 
 
 def _get_available_modules():
@@ -143,22 +114,34 @@ def _load_nouveau(config, available_modules):
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
 def _try_load_nouveau(config, available_modules):
+
+    logger = get_logger()
+
     try:
         _load_nouveau(config, available_modules)
     except KernelSetupError as e:
-        print("ERROR : cannot load nouveau. Continuing anyways. Error is : %s" %  str(e))
+        logger.error(
+            "Cannot load nouveau. Continuing anyways. Error is: %s", str(e))
 
 def _try_load_bbswitch(available_modules):
+
+    logger = get_logger()
+
     try:
         _load_module(available_modules, "bbswitch")
     except KernelSetupError as e:
-        print("ERROR : cannot load bbswitch. Continuing anyways. Error is : %s" %  str(e))
+        logger.error(
+            "Cannot load bbswitch. Continuing anyways. Error is: %s", str(e))
 
 def _try_load_acpi_call(available_modules):
+
+    logger = get_logger()
+
     try:
         _load_module(available_modules, "acpi_call")
     except KernelSetupError as e:
-        print("ERROR : cannot load acpi_call. Continuing anyways. Error is : %s" %  str(e))
+        logger.error(
+            "Cannot load acpi_call. Continuing anyway. Error is: %s", str(e))
 
 
 def _unload_nvidia_modules(available_modules):
@@ -168,23 +151,30 @@ def _unload_nouveau(available_modules):
     _unload_modules(available_modules, ["nouveau"])
 
 def _try_unload_bbswitch(available_modules):
+
+    logger = get_logger()
+
     try:
         _unload_modules(available_modules, ["bbswitch"])
     except KernelSetupError as e:
-        print("ERROR : cannot unload bbswitch. Continuing anyways. Error is : %s" %  str(e))
+        logger.error(
+            "Cannot unload bbswitch. Continuing anyway. Error is: %s", str(e))
 
 def _unload_bbswitch(available_modules):
     _unload_modules(available_modules, ["bbswitch"])
 
 def _load_module(available_modules, module, options=None):
 
+    logger = get_logger()
+
     options = options or ""
 
-    print("Loading module %s" % module)
+    logger.info("Loading module %s", module)
 
     if module not in available_modules:
-        raise KernelSetupError("module %s is not available for current kernel."
-                               " Is the corresponding package installed ?" % module)
+        raise KernelSetupError(
+            "module %s is not available for current kernel."
+            " Is the corresponding package installed ?" % module)
     try:
         exec_bash("modprobe %s %s" % (module, options))
     except BashError as e:
@@ -192,12 +182,14 @@ def _load_module(available_modules, module, options=None):
 
 def _unload_modules(available_modules, modules_list):
 
+    logger = get_logger()
+
     modules_to_unload = [m for m in modules_list if m in available_modules]
 
     if len(modules_to_unload) == 0:
         return
 
-    print("Unloading modules %s (if loaded)" % str(modules_to_unload))
+    logger.info("Unloading modules %s (if loaded)", str(modules_to_unload))
 
     try:
         # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
@@ -208,20 +200,25 @@ def _unload_modules(available_modules, modules_list):
 
 def _get_PAT_parameter_value(config):
 
+    logger = get_logger()
+
     pat_value = {"yes": 1, "no": 0}[config["nvidia"]["pat"]]
 
     if not checks.is_pat_available():
-        print("Warning : Page Attribute Tables are not available on your system.\n"
-              "Disabling the PAT option for Nvidia.")
+        logger.warning(
+            "Page Attribute Tables are not available on your system.\n"
+            "Disabling the PAT option for Nvidia.")
         pat_value = 0
 
     return pat_value
 
 def _set_bbswitch_state(state):
 
+    logger = get_logger()
+
     assert state in ["OFF", "ON"]
 
-    print("Setting GPU power to %s via bbswitch" % state)
+    logger.info("Setting GPU power to %s via bbswitch", state)
 
     try:
         with open("/proc/acpi/bbswitch", "w") as f:
@@ -234,17 +231,19 @@ def _set_bbswitch_state(state):
 
 def _set_acpi_call_state(state):
 
+    logger = get_logger()
+
     assert state in ["OFF", "ON"]
 
-    print("Setting GPU power to %s via acpi_call" % state)
+    logger.info("Setting GPU power to %s via acpi_call", state)
 
     try:
         acpi_strings_list = var.read_acpi_call_strings()
-        print("Found saved ACPI strings")
+        logger.info("Found saved ACPI strings")
 
     except var.VarError:
         acpi_strings_list = ACPI_STRINGS
-        print("No ACPI string saved, trying them all (expect kernel messages spam)")
+        logger.info("No ACPI string saved, trying them all (expect kernel messages spam)")
 
     working_strings = []
 
@@ -253,7 +252,7 @@ def _set_acpi_call_state(state):
         string = off_str if state == "OFF" else on_str
 
         try:
-            print("Sending ACPI string %s" % string)
+            logger.info("Sending ACPI string %s", string)
             with open("/proc/acpi/call", "w") as f:
                 f.write(string)
 
@@ -265,7 +264,7 @@ def _set_acpi_call_state(state):
             continue
 
         if not "Error" in output:
-            print("ACPI string %s works, saving" % string)
+            logger.info("ACPI string %s works, saving", string)
             working_strings.append((off_str, on_str))
 
     var.write_last_acpi_call_state(state)
@@ -273,60 +272,88 @@ def _set_acpi_call_state(state):
 
 def _try_remove_pci():
 
+    logger = get_logger()
+
     try:
         pci.remove_nvidia()
     except pci.PCIError as e:
-        print("ERROR : cannot remove Nvidia from PCI bus. Continuing. Error is : %s" % str(e))
+        logger.error(
+            "Cannot remove Nvidia from PCI bus. Continuing anyways. Error is: %s", str(e))
 
 def _try_rescan_pci():
+
+    logger = get_logger()
+
+    logger.info("Rescanning PCI bus")
 
     try:
         pci.rescan()
         if not pci.is_nvidia_visible():
-            print("ERROR : Nvidia card not showing up in PCI bus after rescan. Continuing anyways.")
+            logger.error("Nvidia card not showing up in PCI bus after rescan. Continuing anyways.")
     except pci.PCIError as e:
-        print("ERROR : cannot rescan PCI bus. Continuing. Error is : %s" % str(e))
+        logger.error("Cannot rescan PCI bus. Continuing anyways. Error is: %s", str(e))
 
 def _try_set_pci_power_state(state):
+
+    logger = get_logger()
+
+    logger.info("Setting Nvidia PCI power state to %s", state)
 
     try:
         pci.set_power_state(state)
     except pci.PCIError as e:
-        print("ERROR : cannot set PCI power management state. Continuing. Error is : %s" % str(e))
+        logger.error(
+            "Cannot set PCI power management state. Continuing anyways. Error is: %s", str(e))
 
 def _try_pci_reset(config, available_modules):
+
+    logger = get_logger()
+
+    logger.info("Resetting Nvidia PCI device")
 
     try:
         _pci_reset(config, available_modules)
     except KernelSetupError as e:
-        print("ERROR : Nvidia PCI reset failed. Continuing. Error is : %s" % str(e))
+        logger.error(
+            "Nvidia PCI reset failed. Continuing anyways. Error is: %s", str(e))
 
 def _try_set_acpi_call_state(state):
+
+    logger = get_logger()
 
     try:
         _set_acpi_call_state(state)
     except KernelSetupError as e:
-        print("ERROR : setting acpi_call to %s. Continuing anyways. Error is : %s" % (state, str(e)))
+        logger.error(
+            "Setting acpi_call to %s. Continuing anyways. Error is: %s",
+            state, str(e))
 
 
 def _try_set_bbswitch_state(state):
 
+    logger = get_logger()
+
     try:
         _set_bbswitch_state(state)
     except KernelSetupError as e:
-        print("ERROR : setting bbswitch to %s. Continuing anyways. Error is : %s" % (state, str(e)))
+        logger.error(
+            "Setting bbswitch to %s. Continuing anyways. Error is: %s",
+            state, str(e))
+
 
 def _pci_reset(config, available_modules):
+
+    logger = get_logger()
 
     _unload_bbswitch(available_modules)
 
     try:
         if config["optimus"]["pci_reset"] == "function_level":
-            print("Performing function-level reset of Nvidia")
+            logger.info("Performing function-level reset of Nvidia")
             pci.function_level_reset_nvidia()
 
         elif config["optimus"]["pci_reset"] == "hot_reset":
-            print("Starting hot reset sequence")
+            logger.info("Starting hot reset sequence")
             pci.hot_reset_nvidia()
 
     except pci.PCIError as e:
@@ -334,15 +361,18 @@ def _pci_reset(config, available_modules):
 
 def _try_custom_set_power_state(state):
 
+    logger = get_logger()
+
     if state == "ON":
         script_path = envs.NVIDIA_MANUAL_ENABLE_SCRIPT_PATH
     elif state == "OFF":
         script_path = envs.NVIDIA_MANUAL_DISABLE_SCRIPT_PATH
 
-    print("Running %s" % script_path)
+    logger.info("Running custom power switching script %s", script_path)
 
     try:
         exec_bash(script_path)
     except BashError as e:
-        print("ERROR : cannot run %s. Continuing anyways. Error is : %s"
-              % (script_path, str(e)))
+        logger.error(
+            "Cannot run %s. Continuing anyways. Error is : %s",
+            script_path, str(e))

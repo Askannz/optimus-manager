@@ -1,6 +1,7 @@
 import os
 import re
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"
@@ -24,6 +25,8 @@ def function_level_reset_nvidia():
 
 def hot_reset_nvidia():
 
+    logger = get_logger()
+
     bus_ids = get_gpus_bus_ids(notation_fix=False)
 
     if "nvidia" not in bus_ids.keys():
@@ -39,16 +42,16 @@ def hot_reset_nvidia():
 
     nvidia_pci_bridge = nvidia_pci_bridges_ids_list[0]
 
-    print("Removing Nvidia from PCI bridge")
+    logger.info("Removing Nvidia from PCI bridge")
     remove_nvidia()
 
-    print("Triggering PCI hot reset of bridge %s" % nvidia_pci_bridge)
+    logger.info("Triggering PCI hot reset of bridge %s", nvidia_pci_bridge)
     try:
         exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)
     except BashError as e:
         raise PCIError("failed to run setpci command : %s" % str(e))
 
-    print("Rescanning PCI bus")
+    logger.info("Rescanning PCI bus")
     rescan()
 
     if not is_nvidia_visible():
@@ -70,6 +73,8 @@ def rescan():
 
 def get_gpus_bus_ids(notation_fix=True):
 
+    logger = get_logger()
+
     nvidia_ids_list = _get_bus_ids(match_pci_class=GPU_PCI_CLASS_PATTERN,
                                    match_vendor_id=NVIDIA_VENDOR_ID,
                                    notation_fix=notation_fix)
@@ -79,10 +84,10 @@ def get_gpus_bus_ids(notation_fix=True):
                                   notation_fix=notation_fix)
 
     if len(nvidia_ids_list) > 1:
-        print("WARNING : Multiple Nvidia GPUs found ! Picking the first one.")
+        logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
 
     if len(intel_ids_list) > 1:
-        print("WARNING : Multiple Intel GPUs found ! Picking the first one.")
+        logger.warning("Multiple Intel GPUs found ! Picking the first one.")
 
     bus_ids = {}
     if len(nvidia_ids_list) > 0:
@@ -95,13 +100,13 @@ def get_gpus_bus_ids(notation_fix=True):
 def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     try:
-        lspci_output = exec_bash("lspci -n").stdout.decode('utf-8')
+        out = exec_bash("lspci -n")
     except BashError as e:
         raise PCIError("cannot run lspci -n : %s" % str(e))
 
     bus_ids_list = []
 
-    for line in lspci_output.splitlines():
+    for line in out.splitlines():
 
         items = line.split(" ")
 
@@ -116,7 +121,7 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
             )
 
         pci_class = items[1][:-1]
-        vendor_id, product_id = items[2].split(":")
+        vendor_id, _ = items[2].split(":")
 
         if re.fullmatch(match_pci_class, pci_class) and re.fullmatch(match_vendor_id, vendor_id):
             bus_ids_list.append(bus_id)

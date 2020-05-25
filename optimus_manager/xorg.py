@@ -1,10 +1,11 @@
 import os
+from pathlib import Path
 from optimus_manager.bash import exec_bash, BashError
-from optimus_manager.var import read_requested_mode, VarError
 import optimus_manager.envs as envs
-from optimus_manager.pci import get_gpus_bus_ids
-from optimus_manager.config import load_extra_xorg_options
-from optimus_manager import manjaro_hacks
+from .pci import get_gpus_bus_ids
+from .config import load_extra_xorg_options
+from .hacks.manjaro import remove_mhwd_conf
+from .log_utils import get_logger
 
 
 class XorgSetupError(Exception):
@@ -23,15 +24,18 @@ def configure_xorg(config, requested_gpu_mode):
     elif requested_gpu_mode == "hybrid":
         xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
-    manjaro_hacks.remove_mhwd_conf()
+    remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
 
 
 def cleanup_xorg_conf():
 
+    logger = get_logger()
+
+    logger.info("Removing %s (if present)", envs.XORG_CONF_PATH)
+
     try:
         os.remove(envs.XORG_CONF_PATH)
-        print("Removed %s" % envs.XORG_CONF_PATH)
     except FileNotFoundError:
         pass
 
@@ -61,44 +65,27 @@ def is_there_a_MHWD_file():
     return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
 
 
-def setup_PRIME():
+def do_xsetup(requested_mode):
 
-    try:
-        requested_mode = read_requested_mode()
-    except VarError as e:
-        raise XorgSetupError("Cannot setup PRIME : cannot read requested mode : %s" % str(e))
+    logger = get_logger()
 
     if requested_mode == "nvidia":
 
-        print("Running xrandr commands")
+        logger.info("Running xrandr commands")
 
         try:
             exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
             exec_bash("xrandr --auto")
         except BashError as e:
-            raise XorgSetupError("Cannot setup PRIME : %s" % str(e))
+            logger.error("Cannot setup PRIME : %s", str(e))
 
-        print("Running %s" % envs.XSETUP_SCRIPT_NVIDIA)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_NVIDIA)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_NVIDIA, str(e)))
+    script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
+    logger.info("Running %s", script_path)
+    try:
+        exec_bash(script_path)
+    except BashError as e:
+        logger.error("ERROR : cannot run %s : %s", script_path, str(e))
 
-    elif requested_mode == "intel":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_INTEL)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_INTEL)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_INTEL, str(e)))
-
-    elif requested_mode == "hybrid":
-
-        print("Running %s" % envs.XSETUP_SCRIPT_HYBRID)
-        try:
-            exec_bash(envs.XSETUP_SCRIPT_HYBRID)
-        except BashError as e:
-            print("ERROR : cannot run %s : %s" % (envs.XSETUP_SCRIPT_HYBRID, str(e)))
 
 def set_DPI(config):
 
@@ -154,7 +141,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "\tDevice \"intel\"\n" \
             "EndSection\n\n"
 
-    text += _make_server_flags_section(config, bus_ids, xorg_extra)
+    text += _make_server_flags_section(config)
 
     return text
 
@@ -190,7 +177,7 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
            "\tDevice \"nvidia\"\n" \
            "EndSection\n\n"
 
-    text += _make_server_flags_section(config, bus_ids, xorg_extra)
+    text += _make_server_flags_section(config)
 
     return text
 
@@ -215,8 +202,10 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
 def _make_intel_device_section(config, bus_ids, xorg_extra):
 
+    logger = get_logger()
+
     if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
-        print("WARNING : The Xorg intel module is not available. Defaulting to modesetting.")
+        logger.warning("The Xorg intel module is not available. Defaulting to modesetting.")
         driver = "modesetting"
     else:
         driver = config["intel"]["driver"]
@@ -240,7 +229,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 
     return text
 
-def _make_server_flags_section(config, bus_ids, xorg_extra):
+def _make_server_flags_section(config):
     if config["nvidia"]["ignore_abi"] == "yes":
         return (
             "Section \"ServerFlags\"\n"
@@ -251,13 +240,17 @@ def _make_server_flags_section(config, bus_ids, xorg_extra):
 
 def _write_xorg_conf(xorg_conf_text):
 
+    logger = get_logger()
+
+    filepath = Path(envs.XORG_CONF_PATH)
+
     try:
-        os.makedirs(envs.XORG_CONF_DIR, mode=0o755, exist_ok=True)
-        with open(envs.XORG_CONF_PATH, 'w') as f:
-            print("Writing to %s" % envs.XORG_CONF_PATH)
+        os.makedirs(filepath.parent, mode=0o755, exist_ok=True)
+        with open(filepath, 'w') as f:
+            logger.info("Writing to %s", envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
     except IOError:
-        raise XorgSetupError("Cannot write Xorg conf at %s" % envs.XORG_CONF_PATH)
+        raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath))
 
 
 def _is_intel_module_available():

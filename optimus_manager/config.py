@@ -1,8 +1,12 @@
 import os
+import shutil
+from pathlib import Path
 import copy
 import json
 import configparser
-import optimus_manager.envs as envs
+from . import envs
+from . import var
+from .log_utils import get_logger
 
 
 class ConfigError(Exception):
@@ -11,10 +15,12 @@ class ConfigError(Exception):
 
 def load_config():
 
+    logger = get_logger()
+
     base_config = configparser.ConfigParser()
     base_config.read(envs.DEFAULT_CONFIG_PATH)
     base_config = _parsed_config_to_dict(base_config)
-    validate_config(base_config)
+    _validate_config(base_config)
 
     if not os.path.isfile(envs.USER_CONFIG_COPY_PATH):
         return base_config
@@ -24,16 +30,45 @@ def load_config():
         user_config.read([envs.DEFAULT_CONFIG_PATH, envs.USER_CONFIG_COPY_PATH])
         user_config = _parsed_config_to_dict(user_config)
     except configparser.ParsingError as e:
-        print("ERROR : error parsing config file %s. Falling back to default config %s. Error is : %s"
-              % (envs.USER_CONFIG_COPY_PATH, envs.DEFAULT_CONFIG_PATH, str(e)))
+        logger.error(
+            "Error parsing config file %s. Falling back to default config %s. Error is : %s",
+            envs.USER_CONFIG_COPY_PATH, envs.DEFAULT_CONFIG_PATH, str(e))
         return base_config
 
-    corrected_config = validate_config(user_config, fallback_config=base_config)
+    corrected_config = _validate_config(user_config, fallback_config=base_config)
 
     return corrected_config
 
+def copy_user_config():
 
-def validate_config(config, fallback_config=None):
+    logger = get_logger()
+
+    try:
+        temp_config_path = var.read_temp_conf_path_var()
+    except var.VarError:
+        config_path = envs.USER_CONFIG_PATH
+    else:
+        logger.info("Using temporary configuration %s", temp_config_path)
+        var.remove_temp_conf_path_var()
+        if os.path.isfile(temp_config_path):
+            config_path = temp_config_path
+        else:
+            logger.warning(
+                "Warning : temporary config file at %s not found."
+                " Using normal config file %s instead.",
+                temp_config_path, envs.USER_CONFIG_PATH)
+            config_path = envs.USER_CONFIG_PATH
+
+    if os.path.isfile(config_path):
+        copy_path = Path(envs.USER_CONFIG_COPY_PATH)
+        os.makedirs(copy_path.parent, exist_ok=True)
+        logger.info("Copying %s to %s", config_path, copy_path)
+        shutil.copy(config_path, copy_path)
+
+
+def _validate_config(config, fallback_config=None):
+
+    logger = get_logger()
 
     folder_path = os.path.dirname(os.path.abspath(__file__))
     schema_path = os.path.join(folder_path, "config_schema.json")
@@ -57,10 +92,10 @@ def validate_config(config, fallback_config=None):
             valid, msg = _validate_option(schema[section][option], config[section][option])
 
             if not valid:
-                error_msg = "ERROR : config parsing : error in option \"%s\" in section [%s] : %s" % (option, section, msg)
+                error_msg = "Config parsing : error in option \"%s\" in section [%s] : %s" % (option, section, msg)
                 if fallback_config is not None:
-                    print(error_msg)
-                    print("Falling back to default value \"%s\"" % fallback_config[section][option])
+                    logger.error(error_msg)
+                    logger.info("Falling back to default value \"%s\"", fallback_config[section][option])
                     corrected_config[section][option] = fallback_config[section][option]
 
                 else:
@@ -70,12 +105,12 @@ def validate_config(config, fallback_config=None):
     for section in config.keys():
 
         if section not in schema.keys():
-            print("WARNING : config parsing : unknown section [%s]. Ignoring." % section)
+            logger.warning("Config parsing : unknown section [%s]. Ignoring.", section)
             continue
 
         for option in config[section].keys():
             if option not in schema[section].keys():
-                print("WARNING : config parsing : unknown option \"%s\" in section [%s]. Ignoring." % (option, section))
+                logger.warning("Config parsing : unknown option \"%s\" in section [%s]. Ignoring.", option, section)
                 del corrected_config[section][option]
 
     return corrected_config
@@ -183,21 +218,18 @@ def _validate_integer(schema_option_info, config_option_value):
 
 def load_extra_xorg_options():
 
+    logger = get_logger()
+
     xorg_extra = {}
 
-    try:
-        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_INTEL_PATH)
-        print("Loaded extra Intel Xorg options (%d lines)" % len(config_lines))
-        xorg_extra["intel"] = config_lines
-    except FileNotFoundError:
-        pass
+    for mode, path in envs.EXTRA_XORG_OPTIONS_PATHS.items():
 
-    try:
-        config_lines = _load_extra_xorg_file(envs.EXTRA_XORG_OPTIONS_NVIDIA_PATH)
-        print("Loaded extra Nvidia Xorg options (%d lines)" % len(config_lines))
-        xorg_extra["nvidia"] = config_lines
-    except FileNotFoundError:
-        pass
+        try:
+            config_lines = _load_extra_xorg_file(path)
+            logger.info("Loaded extra Intel Xorg options (%d lines)", len(config_lines))
+            xorg_extra[mode] = config_lines
+        except FileNotFoundError:
+            pass
 
     return xorg_extra
 
@@ -216,7 +248,6 @@ def _load_extra_xorg_file(path):
             if len(line_nospaces) == 0 or line_nospaces[0] == "#":
                 continue
 
-            else:
-                config_lines.append(line)
+            config_lines.append(line)
 
         return config_lines
