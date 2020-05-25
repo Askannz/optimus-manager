@@ -20,19 +20,6 @@ def setup_kernel_state(config, prev_state, requested_mode):
     if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
         _nvidia_up(config)
 
-def _setup_intel_mode(config, available_modules):
-    assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
-    assert prev_state["type"] == "pending_pre_xorg_start"
-
-    current_mode = prev_state["current_mode"]
-
-    if current_mode in ["intel", "amd", None] and requested_mode in ["nvidia", "hybrid-intel", "hybrid-amd"]:
-        _nvidia_up(config)
-
-    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode in ["intel", "amd"]:
-        _nvidia_down(config)
-
-
 def _nvidia_up(config):
 
     logger = get_logger()
@@ -118,17 +105,16 @@ def _load_nvidia_modules(config, available_modules):
     _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
     _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
 
-def _load_nouveau(config, available_modules):
-    modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
+def _load_nouveau(config, available_modules, igpu):
+    modeset_value = 1 if config[igpu]["modeset"] == "yes" else 0
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
-def _try_load_nouveau(config, available_modules):
+def _try_load_nouveau(config, available_modules, igpu):
 
     logger = get_logger()
 
-def _try_load_nouveau(config, available_modules, igpu):
     try:
-        _load_nouveau(config, available_modules)
+        _load_nouveau(config, available_modules, igpu)
     except KernelSetupError as e:
         logger.error(
             "Cannot load nouveau. Continuing anyways. Error is: %s", str(e))

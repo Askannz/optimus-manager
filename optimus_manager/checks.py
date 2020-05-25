@@ -46,7 +46,7 @@ def get_active_renderer():
         if check_offloading_available():
             return "hybrid-" + get_integrated_gpu()
         else:
-            return "intel"
+            return get_integrated_gpu()
 
 
 def is_module_available(module_name):
@@ -91,7 +91,7 @@ def check_offloading_available():
     try:
         out = exec_bash("xrandr --listproviders")
     except BashError as e:
-        raise CheckError("Cannot list xrand providers : %s" % str(e))
+        raise CheckError("Cannot list xrandr providers : %s" % str(e))
 
     for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
@@ -101,6 +101,9 @@ def check_offloading_available():
 
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
+
+def is_xorg_amd_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
 
 
 def is_login_manager_active():

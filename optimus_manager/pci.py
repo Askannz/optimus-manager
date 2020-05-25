@@ -5,6 +5,8 @@ from .log_utils import get_logger
 
 NVIDIA_VENDOR_ID = "10de"
 INTEL_VENDOR_ID = "8086"
+AMD_VENDOR_ID = "1002"
+
 
 GPU_PCI_CLASS_PATTERN = "03[0-9a-f]{2}"
 PCI_BRIDGE_PCI_CLASS_PATTERN = "0604"
@@ -83,17 +85,27 @@ def get_gpus_bus_ids(notation_fix=True):
                                   match_vendor_id=INTEL_VENDOR_ID,
                                   notation_fix=notation_fix)
 
+    amd_ids_list = _get_bus_ids(match_pci_class=GPU_PCI_CLASS_PATTERN,
+                                  match_vendor_id=AMD_VENDOR_ID,
+                                  notation_fix=notation_fix)
+
     if len(nvidia_ids_list) > 1:
         logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
 
     if len(intel_ids_list) > 1:
         logger.warning("Multiple Intel GPUs found ! Picking the first one.")
 
+    if len(amd_ids_list) > 1:
+        print("WARNING : Multiple AMD GPUs found ! Picking the first one.")
+
     bus_ids = {}
     if len(nvidia_ids_list) > 0:
         bus_ids["nvidia"] = nvidia_ids_list[0]
     if len(intel_ids_list) > 0:
         bus_ids["intel"] = intel_ids_list[0]
+    if len(amd_ids_list) > 0:
+        bus_ids["amd"] = amd_ids_list[0]
+
 
     return bus_ids
 
@@ -157,7 +169,6 @@ def get_available_igpu(notation_fix=True):
 
     return detected_igpu
 
->>>>>>> d6b8cd7... add AMD iGPU support
 
 def _write_to_nvidia_path(relative_path, string):
 

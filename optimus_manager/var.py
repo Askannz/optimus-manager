@@ -44,30 +44,7 @@ def remove_temp_conf_path_var():
 
 def write_acpi_call_strings(call_strings_list):
 
-def read_startup_mode():
-
-    try:
-        with open(envs.STARTUP_MODE_VAR_PATH, 'r') as f:
-            content = f.read()
-
-            if len(content) > 0 and content[-1] == "\n":
-                content = content[:-1]
-
-            if content in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel", "auto"]:
-                mode = content
-            else:
-                raise VarError("Invalid value : %s" % content)
-    except IOError:
-        raise VarError("Cannot open or read %s" % envs.STARTUP_MODE_VAR_PATH)
-
-    return mode
-
-
-def write_startup_mode(mode):
-
-    assert mode in ["nvidia", "amd", "intel", "hybrid-amd", "hybrid-intel", "auto"]
-
-    filepath = Path(envs.ACPI_CALL_STRING_VAR_PATH)
+    folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
 
     os.makedirs(filepath.parent, exist_ok=True)
 

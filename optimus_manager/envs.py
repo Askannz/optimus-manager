@@ -13,7 +13,6 @@ STATE_FILE_PATH = "%s/state.json" % TMP_VARS_FOLDER_PATH
 USER_CONFIG_COPY_PATH = "%s/config_copy.conf" % TMP_VARS_FOLDER_PATH
 CURRENT_DAEMON_RUN_ID = "%s/daemon_run_id" % TMP_VARS_FOLDER_PATH
 
-
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
 
 DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
@@ -34,6 +33,7 @@ XSETUP_SCRIPTS_PATHS = {
     "hybrid-amd": "/etc/optimus-manager/xsetup-hybrid.sh",
     "amd": "/etc/optimus-manager/xsetup-amd.sh"
 }
+USER_CONFIG_COPY_PATH = "/var/lib/optimus-manager/config_copy.conf"
 
 NVIDIA_MANUAL_ENABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-enable.sh"
 NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"
