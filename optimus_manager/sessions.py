@@ -1,5 +1,6 @@
 import dbus
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 
 class SessionsError(Exception):
@@ -8,7 +9,9 @@ class SessionsError(Exception):
 
 def logout_current_desktop_session():
 
-    print("Logging out the current desktop session")
+    logger = get_logger()
+
+    logger.info("Logging out the current desktop session")
 
     try:
         session_bus = dbus.SessionBus()
@@ -64,6 +67,12 @@ def logout_current_desktop_session():
     # bspwm
     try:
         exec_bash("bspc quit")
+    except BashError:
+        pass
+
+    # lxde
+    try:
+        exec_bash("pkill -SIGTERM -f lxsession")
     except BashError:
         pass
 

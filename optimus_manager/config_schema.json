@@ -1,17 +1,20 @@
 {
 	"optimus":
 	{
-		"switching": ["single_word", ["nouveau", "bbswitch", "acpi_call", "none"], false],
+		"switching": ["single_word", ["nouveau", "bbswitch", "acpi_call", "custom", "none"], false],
 		"pci_power_control": ["single_word", ["yes", "no"], false],
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
-		"auto_logout": ["single_word", ["yes", "no"], false]
+		"auto_logout": ["single_word", ["yes", "no"], false],
+		"startup_mode": ["single_word", ["intel", "hybrid", "nvidia", "auto"], false],
+		"startup_auto_battery_mode": ["single_word", ["intel", "hybrid", "nvidia"], false],
+		"startup_auto_extpower_mode": ["single_word", ["intel", "hybrid", "nvidia"], false]
 	},
 
 	"intel":
 	{
 		"driver": ["single_word", ["modesetting", "intel"], false],
-		"accel": ["single_word", ["sna", "xna"], true],
+		"accel": ["single_word", ["sna", "xna", "uxa"], true],
 		"tearfree": ["single_word", ["yes", "no"], true],
 		"dri": ["single_word", ["2", "3"], false],
 		"modeset": ["single_word", ["yes", "no"], false]

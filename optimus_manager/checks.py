@@ -1,11 +1,33 @@
 import os
+from pathlib import Path
 import re
 import dbus
-from optimus_manager.bash import exec_bash, BashError
+from .bash import exec_bash, BashError
+from .log_utils import get_logger
 
 
 class CheckError(Exception):
     pass
+
+
+def is_ac_power_connected():
+
+    for power_source_path in Path("/sys/class/power_supply/").iterdir():
+
+        try:
+
+            with open(power_source_path / "type", 'r') as f:
+                if f.read().strip() != "Mains":
+                    continue
+
+            with open(power_source_path / "online", 'r') as f:
+                if f.read(1) == "1":
+                    return True
+
+        except IOError:
+            continue
+
+    return False
 
 
 def is_pat_available():
@@ -16,13 +38,11 @@ def is_pat_available():
         return False
 
 
-def read_gpu_mode():
+def get_active_renderer():
 
     if _is_gl_provider_nvidia():
         return "nvidia"
     else:
-        if _is_offloading_available():
-            return "hybrid"
         if check_offloading_available():
             return "hybrid-" + get_integrated_gpu()
         else:
@@ -66,16 +86,14 @@ def using_patched_GDM():
 
     return os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2)
 
-def _is_offloading_available():
+def check_offloading_available():
 
     try:
-        ret = exec_bash("xrandr --listproviders")
+        out = exec_bash("xrandr --listproviders")
     except BashError as e:
         raise CheckError("Cannot list xrand providers : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
             return True
     return False
@@ -99,13 +117,11 @@ def is_bumblebeed_service_active():
 def _is_gl_provider_nvidia():
 
     try:
-        ret = exec_bash("glxinfo")
+        out = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
     except BashError as e:
         raise CheckError("Cannot run glxinfo : %s" % str(e))
 
-    stdout = ret.stdout.decode('utf-8')[:-1]
-
-    for line in stdout.splitlines():
+    for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
     return False
@@ -122,11 +138,14 @@ def get_integrated_gpu():
 
 def _is_service_active(service_name):
 
+    logger = get_logger()
+
     try:
         system_bus = dbus.SystemBus()
     except dbus.exceptions.DBusException:
-        print("WARNING : Cannot communicate with the DBus system bus to check status of %s."
-              " Is DBus running ? Falling back to bash commands" % service_name)
+        logger.warning(
+            "Cannot communicate with the DBus system bus to check status of %s."
+            " Is DBus running ? Falling back to bash commands", service_name)
         return _is_service_active_bash(service_name)
     else:
         return _is_service_active_dbus(system_bus, service_name)
