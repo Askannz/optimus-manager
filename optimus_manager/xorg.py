@@ -27,6 +27,8 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "hybrid-amd":
         xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid":
+        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -89,6 +91,7 @@ def do_xsetup(requested_mode):
         exec_bash(script_path)
     except BashError as e:
         logger.error("ERROR : cannot run %s : %s", script_path, str(e))
+
 
 def set_DPI(config):
 

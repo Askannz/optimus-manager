@@ -44,7 +44,7 @@ def remove_temp_conf_path_var():
 
 def write_acpi_call_strings(call_strings_list):
 
-    folder_path, _ = os.path.split(envs.STARTUP_MODE_VAR_PATH)
+    filepath = Path(envs.ACPI_CALL_STRING_VAR_PATH)
 
     os.makedirs(filepath.parent, exist_ok=True)
 
