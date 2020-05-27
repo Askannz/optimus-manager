@@ -127,7 +127,7 @@ def _print_next_mode(state):
 def _print_startup_deperecation_and_exit():
     print(
         "The argument --set-startup is deprecated. Set startup_mode through the"
-        "configuration file at %s instead" % envs.USER_CONFIG_PATH)
+        " configuration file at %s instead" % envs.USER_CONFIG_PATH)
     sys.exit(1)
 
 
