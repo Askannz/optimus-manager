@@ -10,7 +10,16 @@ def main():
     prev_state = var.load_state()
 
     if prev_state is None or prev_state["type"] != "pending_post_xorg_start":
-        return
+        if prev_state["current_mode"] == "nvidia":
+
+            requested_mode = prev_state["current_mode"]
+
+            do_xsetup(requested_mode)
+            config = load_config()
+            set_DPI(config, requested_mode)
+            return
+        else:
+            return
 
     switch_id = prev_state["switch_id"]
 
