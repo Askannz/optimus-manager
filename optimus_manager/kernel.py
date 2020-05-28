@@ -13,6 +13,7 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, prev_state, requested_mode):
 
+    assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
     assert prev_state["type"] == "pending_pre_xorg_start"
 
     current_mode = prev_state["current_mode"]

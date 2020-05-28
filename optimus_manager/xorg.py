@@ -26,8 +26,6 @@ def configure_xorg(config, requested_gpu_mode):
         xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
     elif requested_gpu_mode == "hybrid-amd":
         xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid":
-        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -198,7 +196,7 @@ def _generate_hybrid_amd(config, bus_ids, xorg_extra):
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
-    text += _make_server_flags_section(config)
+    text += _make_amd_device_section(config, bus_ids, xorg_extra)
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"amd\"\n" \
@@ -270,8 +268,10 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 
 def _make_amd_device_section(config, bus_ids, xorg_extra):
 
+    logger = get_logger()
+
     if config["amd"]["driver"] == "amdgpu" and not _is_amd_module_available():
-        print("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
+        logger.warning("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
         driver = "modesetting"
     else:
         driver = config["amd"]["driver"]

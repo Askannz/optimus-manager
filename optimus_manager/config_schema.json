@@ -9,7 +9,6 @@
 		"startup_mode": ["single_word", ["intel", "amd", "hybrid-intel", "hybrid-amd", "nvidia", "auto"], false],
 		"startup_auto_battery_mode": ["single_word", ["intel", "amd", "hybrid-intel", "hybrid-amd", "nvidia"], false],
 		"startup_auto_extpower_mode": ["single_word", ["intel", "amd", "hybrid-intel", "hybrid-amd", "nvidia"], false]
-=======
 	},
 
 	"intel":
