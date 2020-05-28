@@ -55,6 +55,10 @@ For VoidLinux, you will need to clone my [void-packages](https://github.com/Hype
 
 To use optimus-manager on Void linux OR Artix-runit, you'll also need to install the corresponding DM package script for the DM you use, which is currently
 
+The service scripts are different from the ones that come with the Display Manager, you MUST disable the current display manager script first, then enable the optimus-manager one.
+
+for example: `sudo rm -rf /var/service/sddm && sudo ln -s /etc/sv/optimus-manager-sddm /var/service/`
+
 Void: optimus-manager-lightdm and optimus-manager-sddm. Without a Display Manager, install optimus-manager-xinit.
 
 Artix: optimus-manager-runit-lightdm and optimus-manager-sddm. Without a Display Manager, install optimus-manager-runit-xinit.

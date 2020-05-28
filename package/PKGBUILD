@@ -52,11 +52,11 @@ package() {
 	read -rp "`echo $'\n	1.SDDM\n	2.LightDM\n	[1-2?]: '`" CONDM;
 	if [ "$CONDM" == "1" ]; then
 		echo "Installing SDDM runit script"
-		install -Dm755 runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/sddm/run"
+		install -Dm755 runit/displaymanager/sddm/run "$pkgdir/etc/runit/sv/optimus-manager-sddm/run"
 		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	elif [ "$CONDM" == "2" ]; then
 		echo "Installing LightDM runit script"
-		install -Dm755 runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/lightdm/run"
+		install -Dm755 runit/displaymanager/lightdm/run "$pkgdir/etc/runit/sv/optimus-manager-lightdm/run"
 		install -Dm755 runit/displaymanager/optimus-manager/run "$pkgdir/etc/runit/sv/optimus-manager/run"
 	else
 		echo "No Display Manager selected, installing standalone script"
