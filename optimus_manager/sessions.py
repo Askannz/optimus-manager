@@ -72,8 +72,8 @@ def logout_current_desktop_session():
 
     # dwm
     try:
-        exec_bash("killall dwm")
-    except BasshError:
+        exec_bash("pkill -SIGTERM -f dwm")
+    except BashError:
         pass
 
     # lxde
