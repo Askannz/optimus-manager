@@ -5,6 +5,7 @@ from . import pci
 from .acpi_data import ACPI_STRINGS
 from .bash import exec_bash, BashError
 from .log_utils import get_logger
+from .pci import get_available_igpu
 
 class KernelSetupError(Exception):
     pass
@@ -108,16 +109,20 @@ def _load_nvidia_modules(config, available_modules):
     _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
     _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
 
-def _load_nouveau(config, available_modules, igpu):
+def _load_nouveau(config, available_modules):
+
+    igpu = get_available_igpu()
+
     modeset_value = 1 if config[igpu]["modeset"] == "yes" else 0
+
     _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
 
-def _try_load_nouveau(config, available_modules, igpu):
+def _try_load_nouveau(config, available_modules):
 
     logger = get_logger()
 
     try:
-        _load_nouveau(config, available_modules, igpu)
+        _load_nouveau(config, available_modules)
     except KernelSetupError as e:
         logger.error(
             "Cannot load nouveau. Continuing anyways. Error is: %s", str(e))
