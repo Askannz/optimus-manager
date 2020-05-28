@@ -7,7 +7,6 @@ from .config import load_extra_xorg_options
 from .hacks.manjaro import remove_mhwd_conf
 from .log_utils import get_logger
 
-
 class XorgSetupError(Exception):
     pass
 
@@ -186,6 +185,8 @@ def _generate_hybrid_intel(config, bus_ids, xorg_extra):
             "\tIdentifier \"nvidia\"\n" \
             "\tDevice \"nvidia\"\n" \
             "EndSection\n\n"
+
+    text += _make_server_flags_section(config)
 
     return text
 

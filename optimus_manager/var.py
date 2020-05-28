@@ -10,7 +10,6 @@ from .log_utils import get_logger
 class VarError(Exception):
     pass
 
-
 def read_temp_conf_path_var():
 
     filepath = Path(envs.TEMP_CONFIG_PATH_VAR_PATH)

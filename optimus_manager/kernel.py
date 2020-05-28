@@ -16,7 +16,7 @@ def setup_kernel_state(config, prev_state, requested_mode):
 
     current_mode = prev_state["current_mode"]
 
-    if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
+    if current_mode in ["intel", "amd", None] and requested_mode in ["nvidia", "hybrid-intel", "hybrid-amd"]:
         _nvidia_up(config)
 
     elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode in ["intel", "amd"]:
