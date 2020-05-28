@@ -72,7 +72,7 @@ def logout_current_desktop_session():
 
     # dwm
     try:
-        exec_bash("killall dwm")
+        exec_bash("pkill -SIGTERM -f dwm")
     except BashError:
         pass
 
