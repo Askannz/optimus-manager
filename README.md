@@ -28,7 +28,13 @@ IMPORTANT : Gnome and GDM users
 
 If you use Gnome or the Gnome Display Manager (GDM), there are a couple extra requirements to be able to use optimus-manager :
 
-* The default `gdm` package from the Archlinux and Manjaro repositories is not compatible with optimus-manager, so you must replace it with this patched version : [gdm-prime](https://aur.archlinux.org/packages/gdm-prime/) (also replaces `libgdm`). The patch was written by Canonical for Ubuntu and simply adds two script entry points specifically for Prime switching. The package is otherwise identical to the official one.
+* The default `gdm` package from the Archlinux, Manjaro and Voidlinux repositories is not compatible with optimus-manager, so you must replace it with this patched version: 
+
+Arch: [gdm-prime](https://aur.archlinux.org/packages/gdm-prime/) (also replaces `libgdm`)
+
+Void: NOTE: you must install gdm first as the gnome package has a dependency on it, then install gdm-prime. clone my void-packages repo: [gdm-prime](https://github.com/Hyper-KVM/void-packages/tree/gdm-prime) (also replaces `libgdm`) 
+
+The patch was written by Canonical for Ubuntu and simply adds two script entry points specifically for Prime switching. The package is otherwise identical to the official one.
 
 * Gnome launches Wayland sessions by default, which are incompatible with optimus-manager. To force Xorg sessions, You need to edit the file `/etc/gdm/custom.conf` and remove the `#` before the line `#WaylandEnable=false`.
 
@@ -158,7 +164,7 @@ The default configuration file can be found at `/usr/share/optimus-manager.conf`
 
 Any parameter not specified in your config file will take value from the default file. Remember to include the section headers of the options you override.
 
-Please refer to the comments in the [default config file](https://github.com/Askannz/optimus-manager/blob/master/optimus-manager.conf) for descriptions of the available parameters. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
+Please refer to the comments in the [default config file](https://github.com/Hyper-KVM/optimus-manager/blob/master/optimus-manager.conf) for descriptions of the available parameters. In particular, it is possible to set common Xorg options like DRI version or triple buffering, as well as some kernel module loading options.
 
 No config changes will be effective until you computer is rebooted or the optimus-manager service is restarted.
 
