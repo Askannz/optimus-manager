@@ -118,6 +118,9 @@ def _get_openrc_display_manager():
 
     if not _detect_init_system(init="openrc"):
         return using_patched_GDM()
+    else:
+        pass
+
     if not os.path.isfile("/etc/init.d/xdm"):
         raise CheckError("No xdm init script fle found")
 
