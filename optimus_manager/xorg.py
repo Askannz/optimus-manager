@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from optimus_manager.bash import exec_bash, BashError
 import optimus_manager.envs as envs
-from .pci import get_gpus_bus_ids
+from .pci import get_gpus_bus_ids, get_available_igpu
 from .config import load_extra_xorg_options
 from .hacks.manjaro import remove_mhwd_conf
 from .log_utils import get_logger
@@ -10,22 +10,19 @@ from .log_utils import get_logger
 class XorgSetupError(Exception):
     pass
 
-
+    
 def configure_xorg(config, requested_gpu_mode):
 
     bus_ids = get_gpus_bus_ids()
     xorg_extra = load_extra_xorg_options()
+    igpu = get_available_igpu()
 
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "intel":
-        xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "amd":
-        xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid-intel":
-        xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid-amd":
-        xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "igpu":
+        xorg_conf_text = _generate_igpu(config, bus_ids, xorg_extra, igpu)
+    elif requested_gpu_mode == "hybrid":
+        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra, igpu)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -150,73 +147,79 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     return text
 
 
-def _generate_intel(config, bus_ids, xorg_extra):
-    text = _make_intel_device_section(config, bus_ids, xorg_extra)
-    return text
+def _generate_igpu(config, bus_ids, xorg_extra, igpu):
+    if igpu == "intel":
+        text = _make_intel_device_section(config, bus_ids, xorg_extra, igpu)
+        return text
 
-def _generate_amd(config, bus_ids, xorg_extra):
-    text = _make_amd_device_section(config, bus_ids, xorg_extra)
-    return text
+    elif igpu == "amd":
+        text = _make_amd_device_section(config, bus_ids, xorg_extra, igpu)
+        return text
 
-def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
-    text = "Section \"ServerLayout\"\n" \
-           "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"intel\"\n" \
-           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
-           "EndSection\n\n"
+def _generate_hybrid(config, bus_ids, xorg_extra, igpu):
 
-    text += _make_intel_device_section(config, bus_ids, xorg_extra)
+    if igpu == "intel":
+        text = "Section \"ServerLayout\"\n" \
+               "\tIdentifier \"layout\"\n" \
+               "\tScreen 0 \"intel\"\n" \
+               "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+               "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"intel\"\n" \
             "\tDevice \"intel\"\n"
 
-    if config["nvidia"]["allow_external_gpus"] == "yes":
-        text += "\tOption \"AllowExternalGpus\"\n"
+        text += _make_intel_device_section(config, bus_ids, xorg_extra, igpu)
 
-    text += "EndSection\n\n"
+        text += "Section \"Screen\"\n" \
+                "\tIdentifier \"intel\"\n" \
+                "\tDevice \"intel\"\n"
 
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+        if config["nvidia"]["allow_external_gpus"] == "yes":
+            text += "\tOption \"AllowExternalGpus\"\n"
 
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"nvidia\"\n" \
-            "\tDevice \"nvidia\"\n" \
-            "EndSection\n\n"
+        text += "EndSection\n\n"
 
-    text += _make_server_flags_section(config)
+        text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
-    return text
+        text += "Section \"Screen\"\n" \
+                "\tIdentifier \"nvidia\"\n" \
+                "\tDevice \"nvidia\"\n" \
+                "EndSection\n\n"
 
-def _generate_hybrid_amd(config, bus_ids, xorg_extra):
+        text += _make_server_flags_section(config)
 
-    text = "Section \"ServerLayout\"\n" \
-           "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"amd\"\n" \
-           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
-           "EndSection\n\n"
+        return text
 
-    text += _make_amd_device_section(config, bus_ids, xorg_extra)
+    elif igpu == "amd":
+        text = "Section \"ServerLayout\"\n" \
+               "\tIdentifier \"layout\"\n" \
+               "\tScreen 0 \"amd\"\n" \
+                "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+                "EndSection\n\n"
 
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"amd\"\n" \
-            "\tDevice \"amd\"\n"
+        text += _make_amd_device_section(config, bus_ids, xorg_extra, igpu)
 
-    if config["nvidia"]["allow_external_gpus"] == "yes":
-        text += "\tOption \"AllowExternalGpus\"\n"
+        text += "Section \"Screen\"\n" \
+                "\tIdentifier \"amd\"\n" \
+                "\tDevice \"amd\"\n"
 
-    text += "EndSection\n\n"
+        if config["nvidia"]["allow_external_gpus"] == "yes":
+            text += "\tOption \"AllowExternalGpus\"\n"
 
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+        text += "EndSection\n\n"
 
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"nvidia\"\n" \
-            "\tDevice \"nvidia\"\n" \
-            "EndSection\n\n"
+        text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
-    text += _make_server_flags_section(config)
+        text += "Section \"Screen\"\n" \
+                "\tIdentifier \"nvidia\"\n" \
+                "\tDevice \"nvidia\"\n" \
+                "EndSection\n\n"
 
-    return text
+        text += _make_server_flags_section(config)
+
+        return text
 
 def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
@@ -237,57 +240,57 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
     return text
 
-def _make_intel_device_section(config, bus_ids, xorg_extra):
+def _make_intel_device_section(config, bus_ids, xorg_extra, igpu):
 
     logger = get_logger()
 
-    if config["intel"]["driver"] == "intel" and not _is_intel_module_available():
+    if config["igpu"]["driver"] == "xorg" and not _is_intel_module_available():
         logger.warning("The Xorg intel module is not available. Defaulting to modesetting.")
         driver = "modesetting"
-    else:
-        driver = config["intel"]["driver"]
+    elif config["igpu"]["driver"] == "xorg":
+        driver = "intel"
 
-    dri = int(config["intel"]["dri"])
+    dri = int(config["igpu"]["dri"])
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"intel\"\n"
     text += "\tDriver \"%s\"\n" % driver
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
-    if config["intel"]["accel"] != "":
-        text += "\tOption \"AccelMethod\" \"%s\"\n" % config["intel"]["accel"]
-    if config["intel"]["tearfree"] != "":
-        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["intel"]["tearfree"]]
+    if config["igpu"]["accel"] != "":
+        text += "\tOption \"AccelMethod\" \"%s\"\n" % config["igpu"]["accel"]
+    if config["igpu"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["igpu"]["tearfree"]]
         text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
     text += "\tOption \"DRI\" \"%d\"\n" % dri
     if "intel" in xorg_extra.keys():
-        for line in xorg_extra["intel"]:
+        for line in xorg_extra["igpu"]:
             text += ("\t" + line + "\n")
     text += "EndSection\n\n"
 
     return text
 
-def _make_amd_device_section(config, bus_ids, xorg_extra):
+def _make_amd_device_section(config, bus_ids, xorg_extra, igpu):
 
     logger = get_logger()
 
-    if config["amd"]["driver"] == "amdgpu" and not _is_amd_module_available():
-        logger.warning("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
+    if config["igpu"]["driver"] == "xorg" and not _is_amd_module_available():
+        print("WARNING : The Xorg amdgpu module is not available. Defaulting to modesetting.")
         driver = "modesetting"
-    else:
-        driver = config["amd"]["driver"]
+    elif config["igpu"]["driver"] == "xorg":
+        driver = "amdgpu"
 
-    dri = int(config["amd"]["dri"])
+    dri = int(config["igpu"]["dri"])
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"amd\"\n"
     text += "\tDriver \"%s\"\n" % driver
     text += "\tBusID \"%s\"\n" % bus_ids["amd"]
-    if config["amd"]["tearfree"] != "":
-        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
+    if config["igpu"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["igpu"]["tearfree"]]
         text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
     text += "\tOption \"DRI\" \"%d\"\n" % dri
     if "amd" in xorg_extra.keys():
-        for line in xorg_extra["amd"]:
+        for line in xorg_extra["igpu"]:
             text += ("\t" + line + "\n")
     text += "EndSection\n\n"
 

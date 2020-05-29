@@ -19,19 +19,15 @@ DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager.conf"
 USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 
 EXTRA_XORG_OPTIONS_PATHS = {
-    "intel": "/etc/optimus-manager/xorg-intel.conf",
+    "igpu": "/etc/optimus-manager/xorg-igpu.conf",
     "nvidia": "/etc/optimus-manager/xorg-nvidia.conf",
-    "hybrid-intel": "/etc/optimus-manager/xorg-hybrid.conf",
-    "hybrid-amd": "/etc/optimus-manager/xorg-hybrid.conf",
-    "amd": "/etc/optimus-manager/xorg-amd.conf"
+    "hybrid": "/etc/optimus-manager/xorg-hybrid.conf",
 }
 
 XSETUP_SCRIPTS_PATHS = {
-    "intel": "/etc/optimus-manager/xsetup-intel.sh",
+    "igpu": "/etc/optimus-manager/xsetup-igpu.sh",
     "nvidia": "/etc/optimus-manager/xsetup-nvidia.sh",
-    "hybrid-intel": "/etc/optimus-manager/xsetup-hybrid.sh",
-    "hybrid-amd": "/etc/optimus-manager/xsetup-hybrid.sh",
-    "amd": "/etc/optimus-manager/xsetup-amd.sh"
+    "hybrid": "/etc/optimus-manager/xsetup-hybrid.sh",
 }
 USER_CONFIG_COPY_PATH = "/var/lib/optimus-manager/config_copy.conf"
 

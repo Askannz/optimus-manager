@@ -8,18 +8,20 @@ from ..pci import get_available_igpu
 
 def run_switch_checks(config, requested_mode):
 
+    igpu = get_available_igpu()
+
+    _check_elogind_active()
     _check_daemon_active()
     _check_power_switching(config)
     _check_bbswitch_module(config)
     _check_nvidia_module(requested_mode)
     _check_patched_GDM()
-    _check_igpu(requested_mode)
     _check_wayland()
     _check_bumblebeed()
     _check_xorg_conf()
     _check_MHWD_conf()
-    _check_intel_xorg_module(config, requested_mode)
-    _check_amd_xorg_module(config, requested_mode)
+    _check_intel_xorg_module(config, requested_mode, igpu)
+    _check_amd_xorg_module(config, requested_mode, igpu)
     _check_number_of_sessions()
 
 
@@ -138,45 +140,33 @@ def _check_MHWD_conf():
         if not confirmation:
             sys.exit(0)
 
-def _check_intel_xorg_module(config, requested_mode):
+def _check_intel_xorg_module(config, requested_mode, igpu):
 
-    if requested_mode == "intel" and config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
-        print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
-              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
-              " the package \"xf86-video-intel.\"\n"
-              "Continue ? (y/N)")
+    if igpu == "intel":
+        if requested_mode == "igpu" and config["igpu"]["driver"] == "xorg" and not checks.is_xorg_intel_module_available():
+            print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
+                " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
+                " the package \"xf86-video-intel.\"\n"
+                "Continue ? (y/N)")
 
-        confirmation = ask_confirmation()
+            confirmation = ask_confirmation()
 
-        if not confirmation:
-            sys.exit(0)
+            if not confirmation:
+                sys.exit(0)
 
-def _check_amd_xorg_module(config, requested_mode):
+def _check_amd_xorg_module(config, requested_mode, igpu):
 
-    if requested_mode == "amd" and config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amd_module_available():
-        print("WARNING : The Xorg driver \"amdgpu\" is selected in the configuration file but this driver is not installed."
-              " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"amdgpu\" driver from"
-              " the package \"xf86-video-amdgpu\".\n"
-              "Continue ? (y/N)")
+    if igpu == "amd":
+        if requested_mode == "igpu" and config["ipgu"]["driver"] == "xorg" and not checks.is_xorg_amd_module_available():
+            print("WARNING : The Xorg driver \"amdgpu\" is selected in the configuration file but this driver is not installed."
+                " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"amdgpu\" driver from"
+                " the package \"xf86-video-amdgpu\".\n"
+                "Continue ? (y/N)")
 
-        confirmation = _ask_confirmation()
+            confirmation = _ask_confirmation()
 
-        if not confirmation:
-            sys.exit(0)
-
-def _check_igpu(requested_mode):
-
-    detected_igpu = get_available_igpu()
-
-    if requested_mode in ["amd", "hybrid-amd"] and detected_igpu == "intel":
-        print("ERROR: No AMD iGPU found!\n"
-              "Cannot continue!")
-        sys.exit(0)
-
-    elif requested_mode in ["intel", "hybrid-intel"] and detected_igpu == "amd":
-        print("ERROR: No Intel GPU found!\n"
-              "Cannot continue!")
-        sys.exit(0)
+            if not confirmation:
+                sys.exit(0)
 
 def _check_number_of_sessions():
 

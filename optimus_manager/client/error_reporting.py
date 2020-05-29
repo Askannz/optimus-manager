@@ -1,5 +1,6 @@
 from .. import envs
 from ..checks import get_active_renderer, check_offloading_available
+from ..pci import get_available_igpu
 
 
 def report_errors(state):
@@ -42,14 +43,18 @@ def report_errors(state):
         return True
 
     elif state["type"] == "done":
-
-        expected_renderer = {
-            "intel": "intel",
-            "hybrid-intel": "hybrid-intel",
-            "hybrid-amd": "hybrid-amd",
-            "nvidia": "nvidia",
-            "amd": "amd"
-        }[state["current_mode"]]
+        if get_available_igpu() == "amd":
+            expected_renderer = {
+                "igpu": "amd",
+                "hybrid": "hybrid-amd",
+                "nvidia": "nvidia",
+            }[state["current_mode"]]
+        elif get_available_igpu() == "intel":
+            expected_renderer = {
+                "igpu": "intel",
+                "hybrid": "hybrid-intel",
+                "nvidia": "nvidia",
+            }[state["current_mode"]]
 
         active_renderer = get_active_renderer()
 

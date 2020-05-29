@@ -14,10 +14,10 @@ optdepends=('bbswitch: alternative power switching method'
             'acpi_call: alternative power switching method'
             'xf86-video-intel: provides the Xorg intel driver')
 makedepends=('python-setuptools' 'git')
-backup=('etc/optimus-manager/xorg-intel.conf'
+backup=('etc/optimus-manager/xorg-igpu.conf'
         'etc/optimus-manager/xorg-nvidia.conf'
 
-        'etc/optimus-manager/xsetup-intel.sh'
+        'etc/optimus-manager/xsetup-igpu.sh'
         'etc/optimus-manager/xsetup-nvidia.sh'
         'etc/optimus-manager/xsetup-hybrid.sh'
 
@@ -57,14 +57,12 @@ package() {
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"
   
-  install -Dm644 config/xorg-intel.conf "$pkgdir/etc/optimus-manager/xorg-intel.conf"
+  install -Dm644 config/xorg-igpu.conf "$pkgdir/etc/optimus-manager/xorg-igpu.conf"
   install -Dm644 config/xorg-nvidia.conf "$pkgdir/etc/optimus-manager/xorg-nvidia.conf"
-  install -Dm644 config/xorg-amd.conf "$pkgdir/etc/optimus-manager/xorg-amd.conf"
   
-  install -Dm755 config/xsetup-intel.sh "$pkgdir/etc/optimus-manager/xsetup-intel.sh"
+  install -Dm755 config/xsetup-igpu.sh "$pkgdir/etc/optimus-manager/xsetup-igpu.sh"
   install -Dm755 config/xsetup-nvidia.sh "$pkgdir/etc/optimus-manager/xsetup-nvidia.sh"
   install -Dm755 config/xsetup-hybrid.sh "$pkgdir/etc/optimus-manager/xsetup-hybrid.sh"
-  install -Dm755 config/xsetup-amd.sh "$pkgdir/etc/optimus-manager/xsetup-amd.sh"
 
   install -Dm755 config/nvidia-enable.sh "$pkgdir/etc/optimus-manager/nvidia-enable.sh"
   install -Dm755 config/nvidia-disable.sh "$pkgdir/etc/optimus-manager/nvidia-disable.sh"

@@ -13,15 +13,17 @@ class KernelSetupError(Exception):
 
 def setup_kernel_state(config, prev_state, requested_mode):
 
-    assert requested_mode in ["intel", "amd", "nvidia", "hybrid-intel", "hybrid-amd"]
+    igpu = get_available_igpu()
+
+    assert requested_mode in ["igpu", "nvidia", "hybrid"]
     assert prev_state["type"] == "pending_pre_xorg_start"
 
     current_mode = prev_state["current_mode"]
 
-    if current_mode in ["intel", "amd", None] and requested_mode in ["nvidia", "hybrid-intel", "hybrid-amd"]:
+    if current_mode in ["igpu", None] and requested_mode in ["nvidia", "hybrid"]:
         _nvidia_up(config)
 
-    elif current_mode in ["nvidia", "hybrid-intel", "hybrid-amd", None] and requested_mode in ["intel", "amd"]:
+    elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "igpu":
         _nvidia_down(config)
 
 
