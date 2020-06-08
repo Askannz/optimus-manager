@@ -12,8 +12,13 @@ from .log_utils import get_logger
 class ConfigError(Exception):
     pass
 
-
 def load_config():
+    config = _load_config()
+    config = _convert_deprecated(config)
+    return config
+
+
+def _load_config():
 
     logger = get_logger()
 
@@ -38,6 +43,30 @@ def load_config():
     corrected_config = _validate_config(user_config, fallback_config=base_config)
 
     return corrected_config
+
+def _convert_deprecated(config):
+
+    logger = get_logger()
+
+    def _log_warning(param):
+        logger.warning(
+            "Config parsing : value \"intel\" deprecated for \"%s\", use \"integrated\" instead."
+            " The old value is still accepted for now, but consider updating your config file.",
+            param)
+
+    if config["optimus"]["startup_mode"] == "intel":
+        _log_warning("startup_mode")
+        config["optimus"]["startup_mode"] = "integrated"
+
+    if config["optimus"]["startup_auto_battery_mode"] == "intel":
+        _log_warning("startup_auto_battery_mode")
+        config["optimus"]["startup_auto_battery_mode"] = "integrated"
+
+    if config["optimus"]["startup_auto_extpower_mode"] == "intel":
+        _log_warning("startup_auto_extpower_mode")
+        config["optimus"]["startup_auto_extpower_mode"] = "integrated"
+
+    return config
 
 def copy_user_config():
 
@@ -226,7 +255,7 @@ def load_extra_xorg_options():
 
         try:
             config_lines = _load_extra_xorg_file(path)
-            logger.info("Loaded extra Intel Xorg options (%d lines)", len(config_lines))
+            logger.info("Loaded extra %s Xorg options (%d lines)", mode, len(config_lines))
             xorg_extra[mode] = config_lines
         except FileNotFoundError:
             pass

@@ -1,6 +1,6 @@
 from .. import envs
-from ..checks import get_active_renderer, check_offloading_available
 from ..pci import get_available_igpu
+from ..checks import get_active_renderer, check_offloading_available, CheckError
 
 
 def report_errors(state):
@@ -45,21 +45,27 @@ def report_errors(state):
     elif state["type"] == "done":
         if get_available_igpu() == "amd":
             expected_renderer = {
-                "igpu": "amd",
+                "integrated": "amd",
                 "hybrid": "hybrid-amd",
                 "nvidia": "nvidia",
             }[state["current_mode"]]
         elif get_available_igpu() == "intel":
             expected_renderer = {
-                "igpu": "intel",
+                "integrated": "intel",
                 "hybrid": "hybrid-intel",
                 "nvidia": "nvidia",
             }[state["current_mode"]]
 
-        active_renderer = get_active_renderer()
+        try:
+            active_renderer = get_active_renderer()
+        except CheckError as e:
+            print("ERROR: cannot check the active card (should be \"%s\"). Reason: %s" % (expected_renderer, str(e)))
+            print("Something went wrong during the last GPU setup...")
+            print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+            return True
 
         if expected_renderer != active_renderer:
-            print("ERROR: the active card is \"%s\" but it should be \"%s\"." % (expected_renderer, active_renderer))
+            print("ERROR: the active card is \"%s\" but it should be \"%s\"." % (active_renderer, expected_renderer))
             print("Something went wrong during the last GPU setup...")
             print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
             return True

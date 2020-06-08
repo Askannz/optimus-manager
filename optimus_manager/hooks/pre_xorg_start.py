@@ -11,26 +11,38 @@ def main():
 
     prev_state = var.load_state()
 
-    if prev_state is None or prev_state["type"] != "pending_pre_xorg_start":
+    if prev_state is None:
         return
 
-    switch_id = var.make_switch_id()
+    elif prev_state["type"] == "pending_pre_xorg_start":
+
+        switch_id = var.make_switch_id()
+        setup_kernel = True
+        requested_mode = prev_state["requested_mode"]
+
+    elif prev_state["type"] == "done":
+
+        switch_id = prev_state["switch_id"]
+        setup_kernel = False
+        requested_mode = prev_state["current_mode"]
+
+    else:
+        return
+
 
     set_logger_config("switch", switch_id)
     logger = get_logger()
 
-    requested_mode = None
-
     try:
         logger.info("# Xorg pre-start hook")
 
-        requested_mode = prev_state["requested_mode"]
-
+        logger.info("Previous state was: %s", str(prev_state))
         logger.info("Requested mode is: %s", requested_mode)
 
         kill_gdm_server()
         config = load_config()
-        setup_kernel_state(config, prev_state, requested_mode)
+        if setup_kernel:
+            setup_kernel_state(config, prev_state, requested_mode)
         configure_xorg(config, requested_mode)
 
         state = {

@@ -6,12 +6,12 @@
 		"pci_remove": ["single_word", ["yes", "no"], false],
 		"pci_reset": ["single_word", ["no", "function_level", "hot_reset"], false],
 		"auto_logout": ["single_word", ["yes", "no"], false],
-		"startup_mode": ["single_word", ["igpu", "hybrid", "nvidia", "auto"], false],
-		"startup_auto_battery_mode": ["single_word", ["igpu", "hybrid", "nvidia"], false],
-		"startup_auto_extpower_mode": ["single_word", ["igpu", "hybrid", "nvidia"], false]
+		"startup_mode": ["single_word", ["integrated", "hybrid", "nvidia", "auto", "intel"], false],
+		"startup_auto_battery_mode": ["single_word", ["integrated", "hybrid", "nvidia"], false],
+		"startup_auto_extpower_mode": ["single_word", ["integrated", "hybrid", "nvidia"], false]
 	},
 
-	"igpu":
+	"integrated":
 	{
 		"driver": ["single_word", ["modesetting", "xorg"], false],
 		"accel": ["single_word", ["sna", "xna", "uxa"], true],

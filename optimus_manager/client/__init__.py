@@ -62,9 +62,13 @@ def main():
 
 def _gpu_switch(config, switch_mode, no_confirm):
 
-    if switch_mode not in ["igpu", "nvidia", "hybrid"]:
+    if switch_mode not in ["integrated", "nvidia", "hybrid", "intel"]:
         print("Invalid mode : %s" % switch_mode)
         sys.exit(1)
+
+    if switch_mode == "intel":
+        print("Warning: mode \"intel\" is deprecated, use \"integrated\" instead")
+        switch_mode = "integrated"
 
     run_switch_checks(config, switch_mode)
 
@@ -128,7 +132,7 @@ def _print_next_mode(state):
 def _print_startup_deperecation_and_exit():
     print(
         "The argument --set-startup is deprecated. Set startup_mode through the"
-        "configuration file at %s instead" % envs.USER_CONFIG_PATH)
+        " configuration file at %s instead" % envs.USER_CONFIG_PATH)
     sys.exit(1)
 
 
