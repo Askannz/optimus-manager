@@ -92,10 +92,6 @@ def get_gpus_bus_ids(notation_fix=True):
         notation_fix=notation_fix)
 
 
-    amd_ids_list = _get_bus_ids(match_pci_class=GPU_PCI_CLASS_PATTERN,
-                                  match_vendor_id=AMD_VENDOR_ID,
-                                  notation_fix=notation_fix)
-
     if len(nvidia_ids_list) > 1:
         logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
 
@@ -152,6 +148,7 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
 
 def get_available_igpu(match_pci_class, match_vendor_id, notation_fix=True):
+
     try:
         lspci_output = exec_bash("lspci -n")
     except BashError as e:

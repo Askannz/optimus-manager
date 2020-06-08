@@ -64,7 +64,7 @@ def is_there_a_MHWD_file():
     return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
 
 
-def do_xsetup(requested_mode, available_igpu):
+def do_xsetup(requested_mode):
 
     logger = get_logger()
 
@@ -148,11 +148,11 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
 def _generate_integrated(config, bus_ids, xorg_extra, available_igpu):
     if available_igpu == "intel":
-        text = _make_intel_device_section(config, bus_ids, xorg_extra, available_igpu)
+        text = _make_intel_device_section(config, bus_ids, xorg_extra)
         return text
 
     elif available_igpu == "amd":
-        text = _make_amd_device_section(config, bus_ids, xorg_extra, available_igpu)
+        text = _make_amd_device_section(config, bus_ids, xorg_extra)
         return text
 
 
@@ -169,7 +169,7 @@ def _generate_hybrid(config, bus_ids, xorg_extra, available_igpu):
                 "\tIdentifier \"intel\"\n" \
                 "\tDevice \"intel\"\n"
 
-        text += _make_intel_device_section(config, bus_ids, xorg_extra, available_igpu)
+        text += _make_intel_device_section(config, bus_ids, xorg_extra)
 
         text += "Section \"Screen\"\n" \
                 "\tIdentifier \"intel\"\n" \
@@ -198,7 +198,7 @@ def _generate_hybrid(config, bus_ids, xorg_extra, available_igpu):
                 "\tOption \"AllowNVIDIAGPUScreens\"\n" \
                 "EndSection\n\n"
 
-        text += _make_amd_device_section(config, bus_ids, xorg_extra, available_igpu)
+        text += _make_amd_device_section(config, bus_ids, xorg_extra)
 
         text += "Section \"Screen\"\n" \
                 "\tIdentifier \"amd\"\n" \
@@ -220,28 +220,6 @@ def _generate_hybrid(config, bus_ids, xorg_extra, available_igpu):
 
         return text
 
-def _generate_hybrid_amd(config, bus_ids, xorg_extra):
-
-    text = "Section \"ServerLayout\"\n" \
-           "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"amd\"\n" \
-           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
-           "EndSection\n\n"
-
-    text += _make_amd_device_section(config, bus_ids, xorg_extra)
-
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"amd\"\n" \
-            "\tDevice \"amd\"\n" \
-            "EndSection\n\n"
-
-    text += "Section \"Device\"\n" \
-            "\tIdentifier \"nvidia\"\n" \
-            "\tDriver \"nvidia\"\n" \
-            "EndSection\n\n"
-
-    return text
-
 def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
     options = config["nvidia"]["options"].replace(" ", "").split(",")
@@ -261,7 +239,7 @@ def _make_nvidia_device_section(config, bus_ids, xorg_extra):
 
     return text
 
-def _make_intel_device_section(config, bus_ids, xorg_extra, available_igpu):
+def _make_intel_device_section(config, bus_ids, xorg_extra):
 
     logger = get_logger()
 
@@ -290,7 +268,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra, available_igpu):
 
     return text
 
-def _make_amd_device_section(config, bus_ids, xorg_extra, available_igpu):
+def _make_amd_device_section(config, bus_ids, xorg_extra):
 
     logger = get_logger()
 

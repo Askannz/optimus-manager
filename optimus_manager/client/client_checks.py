@@ -8,9 +8,8 @@ from ..pci import get_available_igpu
 
 def run_switch_checks(config, requested_mode):
 
-    igpu = get_available_igpu()
+    available_igpu = get_available_igpu()
 
-    _check_elogind_active()
     _check_daemon_active()
     _check_power_switching(config)
     _check_bbswitch_module(config)
@@ -20,8 +19,8 @@ def run_switch_checks(config, requested_mode):
     _check_bumblebeed()
     _check_xorg_conf()
     _check_MHWD_conf()
-    _check_intel_xorg_module(config, requested_mode, igpu)
-    _check_amd_xorg_module(config, requested_mode, igpu)
+    _check_intel_xorg_module(config, requested_mode, available_igpu)
+    _check_amd_xorg_module(config, requested_mode, available_igpu)
     _check_number_of_sessions()
 
 
@@ -140,9 +139,9 @@ def _check_MHWD_conf():
         if not confirmation:
             sys.exit(0)
 
-def _check_intel_xorg_module(config, requested_mode, igpu):
+def _check_intel_xorg_module(config, requested_mode, available_igpu):
 
-    if igpu == "intel":
+    if available_igpu == "intel":
         if requested_mode == "integrated" and config["integrated"]["driver"] == "xorg" and not checks.is_xorg_intel_module_available():
             print("WARNING : The Xorg driver \"intel\" is selected in the configuration file but this driver is not installed."
                 " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"intel\" driver from"
@@ -154,9 +153,9 @@ def _check_intel_xorg_module(config, requested_mode, igpu):
             if not confirmation:
                 sys.exit(0)
 
-def _check_amd_xorg_module(config, requested_mode, igpu):
+def _check_amd_xorg_module(config, requested_mode, available_igpu):
 
-    if igpu == "amd":
+    if available_igpu == "amd":
         if requested_mode == "integrated" and config["integrated"]["driver"] == "xorg" and not checks.is_xorg_amd_module_available():
             print("WARNING : The Xorg driver \"amdgpu\" is selected in the configuration file but this driver is not installed."
                 " optimus-manager will default to the \"modesetting\" driver instead. You can install the \"amdgpu\" driver from"
