@@ -1,5 +1,5 @@
 #!/bin/sh
 
-# This script is only executed if you set switching to none in optimus-manager.conf.
+# This script is only executed if you set switching to "custom" in optimus-manager.conf.
 # Everything you write here will be executed by optimus-manager as root after unloading the nvidia kernel modules.
-# Use this for clean up tasks and commands related to the power management of the nvidia gpu.
+# Use this to set your own commands for powering down the Nvidia GPU.

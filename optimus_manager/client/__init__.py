@@ -8,7 +8,7 @@ from .. import envs
 from .. import checks
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
-from ..var import read_startup_mode, read_temp_conf_path_var, load_state, VarError
+from ..var import read_temp_conf_path_var, load_state, VarError
 from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
 from .. import sessions
 from .args import parse_args
@@ -23,44 +23,50 @@ def main():
     state = load_state()
     fatal = report_errors(state)
 
-    if fatal:
-        sys.exit(1)
-
     config = _get_config()
     print("")
 
     if args.version:
         _print_version()
-    elif args.print_mode:
-        _print_current_mode(state)
-    elif args.print_next_mode:
-        _print_next_mode(state)
     elif args.print_startup:
-        _print_startup_mode()
-    elif args.status:
-        _print_status(state)
-    elif args.switch:
-        _gpu_switch(config, state, args.switch, args.no_confirm)
+        _print_startup_mode(config)
     elif args.set_startup:
-        _set_startup_and_exit(args.set_startup)
+        _print_startup_deperecation_and_exit()
     elif args.temp_config:
         _set_temp_config_and_exit(args.temp_config)
     elif args.unset_temp_config:
         _unset_temp_config_and_exit()
     elif args.cleanup:
         _cleanup_xorg_and_exit()
+
     else:
-        print("Invalid arguments.")
-        sys.exit(1)
+
+        if fatal:
+            print("Cannot execute command because of previous errors.")
+            sys.exit(1)
+
+        if args.print_mode:
+            _print_current_mode(state)
+        elif args.print_next_mode:
+            _print_next_mode(state)
+        elif args.status:
+            _print_status(config, state)
+        elif args.switch:
+            _gpu_switch(config, args.switch, args.no_confirm)
+        else:
+            print("Invalid arguments.")
+            sys.exit(1)
 
     sys.exit(0)
 
 
-def _gpu_switch(config, state, switch_arg, no_confirm):
+def _gpu_switch(config, switch_mode, no_confirm):
 
-    requested_mode = _get_switch_mode(state, switch_arg)
+    if switch_mode not in ["integrated", "nvidia", "hybrid"]:
+        print("Invalid mode : %s" % switch_mode)
+        sys.exit(1)
 
-    run_switch_checks(config, requested_mode)
+    run_switch_checks(config, switch_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
 
@@ -74,10 +80,10 @@ def _gpu_switch(config, state, switch_arg, no_confirm):
             confirmation = ask_confirmation()
 
         if confirmation:
-            _send_switch_command(config, requested_mode)
+            _send_switch_command(config, switch_mode)
 
     else:
-        _send_switch_command(config, requested_mode)
+        _send_switch_command(config, switch_mode)
         print("Please logout all graphical sessions then log back in to apply the change.")
 
 
@@ -118,20 +124,26 @@ def _print_next_mode(state):
 
     print("GPU mode requested for next login : %s" % res_str)
 
+def _print_startup_deperecation_and_exit():
+    print(
+        "The argument --set-startup is deprecated. Set startup_mode through the"
+        " configuration file at %s instead" % envs.USER_CONFIG_PATH)
+    sys.exit(1)
 
-def _print_startup_mode():
 
+def _print_startup_mode(config):
+
+    startup_mode = config["optimus"]["startup_mode"]
     kernel_parameters = get_kernel_parameters()
 
-    try:
-        startup_mode = read_startup_mode()
-        print("GPU mode for next startup : %s" % startup_mode)
-    except VarError as e:
-        print("Error reading startup mode : %s" % str(e))
+    print("GPU at startup : %s" % startup_mode)
 
     if kernel_parameters["startup_mode"] is not None:
-        print("\nNote : the startup mode for the current boot was set to \"%s\" with"
-              " a kernel parameter. Kernel parameters override the value above.\n" % kernel_parameters["startup_mode"])
+        print(
+            "\nNote : the startup mode for the current boot was set to \"%s\" with"
+            " a kernel parameter. Kernel parameters override the value above.\n"
+            % kernel_parameters["startup_mode"])
+
 
 def _print_temp_config_path():
 
@@ -142,39 +154,14 @@ def _print_temp_config_path():
     else:
         print("Temporary config path: %s" % path)
 
-def _print_status(state):
+def _print_status(config, state):
 
     _print_version()
     print("")
     _print_current_mode(state)
     _print_next_mode(state)
-    _print_startup_mode()
+    _print_startup_mode(config)
     _print_temp_config_path()
-
-
-def _get_switch_mode(state, switch_arg):
-
-    if switch_arg not in ["auto", "intel", "integrated", "nvidia", "hybrid", "ac_auto"]:
-        print("Invalid mode : %s" % switch_arg)
-        sys.exit(1)
-
-    if switch_arg == "intel":
-        switch_arg = "integrated"
-
-    if switch_arg == "auto":
-
-        requested_mode = {
-            "nvidia": "integrated",
-            "integrated": "nvidia",
-            "hybrid": "integrated"
-        }[state["current_mode"]]
-
-        print("Switching to : %s" % requested_mode)
-
-    else:
-        requested_mode = switch_arg
-
-    return requested_mode
 
 def _send_command(command):
 
@@ -192,21 +179,6 @@ def _send_command(command):
               "\nsystemctl enable optimus-manager.service\n"
               "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
         sys.exit(1)
-
-
-def _set_startup_and_exit(startup_arg):
-
-    if startup_arg not in ["intel", "integrated", "nvidia", "hybrid", "ac_auto"]:
-        print("Invalid startup mode : %s" % startup_arg)
-        sys.exit(1)
-
-    if startup_arg == "intel":
-        startup_arg = "integrated"
-
-    print("Setting startup mode to : %s" % startup_arg)
-    command = {"type": "startup", "args": {"mode": startup_arg}}
-    _send_command(command)
-    sys.exit(0)
 
 def _set_temp_config_and_exit(rel_path):
 
