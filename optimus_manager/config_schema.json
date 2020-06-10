@@ -23,7 +23,9 @@
 
 	"amd":
 	{
-
+		"driver": ["single_word", ["modesetting", "amdgpu"], false],
+		"tearfree": ["single_word", ["yes", "no"], true],
+		"dri": ["single_word", ["2", "3"], false]
 	},
 
 	"nvidia":
