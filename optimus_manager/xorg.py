@@ -116,6 +116,8 @@ def set_DPI(config):
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
+    integrated_gpu = "intel" if "intel" in bus_ids else "amd"
+
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
            "\tModulePath \"/usr/lib32/nvidia\"\n" \
@@ -129,7 +131,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"ServerLayout\"\n" \
             "\tIdentifier \"layout\"\n" \
             "\tScreen 0 \"nvidia\"\n" \
-            "\tInactive \"intel\"\n" \
+            "\tInactive \"integrated\"\n" \
             "EndSection\n\n"
 
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
@@ -145,14 +147,14 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
-            "\tIdentifier \"intel\"\n" \
+            "\tIdentifier \"integrated\"\n" \
             "\tDriver \"modesetting\"\n"
-    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+    text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
-            "\tIdentifier \"intel\"\n" \
-            "\tDevice \"intel\"\n" \
+            "\tIdentifier \"integrated\"\n" \
+            "\tDevice \"integrated\"\n" \
             "EndSection\n\n"
 
     text += _make_server_flags_section(config)
