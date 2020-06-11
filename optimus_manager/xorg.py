@@ -17,7 +17,7 @@ def configure_xorg(config, requested_gpu_mode):
     available_igpu = get_available_igpu()
 
     if requested_gpu_mode == "nvidia":
-        xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
+        xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra, available_igpu)
     elif requested_gpu_mode == "integrated":
         xorg_conf_text = _generate_integrated(config, bus_ids, xorg_extra, available_igpu)
     elif requested_gpu_mode == "hybrid":
@@ -99,7 +99,7 @@ def set_DPI(config):
         raise XorgSetupError("Cannot set DPI : %s" % str(e))
 
 
-def _generate_nvidia(config, bus_ids, xorg_extra):
+def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
 
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
@@ -132,8 +132,10 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"Device\"\n" \
             "\tIdentifier \"integrated\"\n" \
             "\tDriver \"modesetting\"\n"
-    ## TODO: check if this is mandatorily required (and if so, generalize it for Intel/AMD) :
-    #text += "\tBusID \"%s\"\n" % bus_ids["intel"] \  # (between "Driver" and "EndSection")
+    if available_igpu == "intel":
+        text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+    elif available_igpu == "amd":
+        text += "\tBusID \"%s\"\n" % bus_ids["amd"]
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
