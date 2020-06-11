@@ -273,7 +273,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 def _make_amd_device_section(config, bus_ids, xorg_extra):
 
     driver = config["amd"]["driver"]
-    dri = int(config["amd"]["DRI"])
+    dri = int(config["amd"]["dri"])
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"amd\"\n"
