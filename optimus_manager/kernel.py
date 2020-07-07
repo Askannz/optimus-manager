@@ -266,6 +266,7 @@ def _set_acpi_call_state(state):
         if not "Error" in output:
             logger.info("ACPI string %s works, saving", string)
             working_strings.append((off_str, on_str))
+            break
 
     var.write_last_acpi_call_state(state)
     var.write_acpi_call_strings(working_strings)
