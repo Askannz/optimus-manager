@@ -70,6 +70,12 @@ def logout_current_desktop_session():
     except BashError:
         pass
 
+    # dwm
+    try:
+        exec_bash("pkill -SIGTERM -f dwm")
+    except BashError:
+        pass
+
     # lxde
     try:
         exec_bash("pkill -SIGTERM -f lxsession")
