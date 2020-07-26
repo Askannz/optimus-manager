@@ -98,6 +98,14 @@ def check_offloading_available():
             return True
     return False
 
+def get_integrated_provider():
+
+    try:
+        provider = exec_bash("xrandr --listproviders | egrep -io \"name:.*AMD.*|name:.*Intel.*\" | sed 's/name://;s/^/\"/;s/$/\"/'")
+    except BashError:
+        # default to modesetting
+        return provider == "modesetting"
+    return provider
 
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")

@@ -6,6 +6,7 @@ from .pci import get_gpus_bus_ids, get_available_igpu
 from .config import load_extra_xorg_options
 from .hacks.manjaro import remove_mhwd_conf
 from .log_utils import get_logger
+from .checks import get_integrated_provider
 
 class XorgSetupError(Exception):
     pass
@@ -73,7 +74,8 @@ def do_xsetup(requested_mode):
         logger.info("Running xrandr commands")
 
         try:
-            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+            provider = get_integrated_provider()
+            exec_bash("xrandr --setprovideroutputsource %s NVIDIA-0" % provider)
             exec_bash("xrandr --auto")
         except BashError as e:
             logger.error("Cannot setup PRIME : %s", str(e))
@@ -115,9 +117,12 @@ def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
 
     text += "Section \"ServerLayout\"\n" \
             "\tIdentifier \"layout\"\n" \
-            "\tScreen 0 \"nvidia\"\n" \
-            "\tInactive \"integrated\"\n" \
-            "EndSection\n\n"
+            "\tScreen 0 \"nvidia\"\n"
+    if igpu == "intel":
+        text += "\tInactive \"intel\"\n"
+    elif igpu == "amd":
+        text += "\tInactive \"amd\"\n"
+    text += "EndSection\n\n"
 
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
 
@@ -131,16 +136,19 @@ def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
 
     text += "EndSection\n\n"
 
-    text += "Section \"Device\"\n" \
-            "\tIdentifier \"integrated\"\n" \
-            "\tDriver \"modesetting\"\n"
-    text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
-    text += "EndSection\n\n"
+    if igpu == "intel":
+        text += _make_intel_device_section(config, bus_ids, xorg_extra)
+    elif igpu == "amd":
+        text += _make_amd_device_section(config, bus_ids, xorg_extra)
 
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"integrated\"\n" \
-            "\tDevice \"integrated\"\n" \
-            "EndSection\n\n"
+    text += "Section \"Screen\"\n"
+    if igpu == "intel":
+            text += "\tIdentifier \"intel\"\n" \
+                    "\tDevice \"intel\"\n"
+    elif igpu == "amd":
+            text+= "\tIdentifier \"intel\"\n" \
+                   "\tDevice \"intel\"\n"
+    text +="EndSection\n\n"
 
     text += _make_server_flags_section(config)
 
@@ -254,6 +262,8 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
         driver = "modesetting"
     elif config["integrated"]["driver"] == "xorg":
         driver = "intel"
+    elif config["integrated"]["driver"] != "xorg":
+        driver = "modesetting"
         text += "\tDriver \"%s\"\n" % driver
 
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
@@ -285,6 +295,8 @@ def _make_amd_device_section(config, bus_ids, xorg_extra):
         driver = "modesetting"
     elif config["integrated"]["driver"] == "xorg":
         driver = "amdgpu"
+    elif config["integrated"]["driver"] != "xorg":
+        driver = "modesetting"
         text += "\tDriver \"%s\"\n" % driver
 
     text += "\tBusID \"%s\"\n" % bus_ids["amd"]
