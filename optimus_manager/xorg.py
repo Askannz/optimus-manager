@@ -75,7 +75,10 @@ def do_xsetup(requested_mode):
 
         try:
             provider = get_integrated_provider()
-            exec_bash("xrandr --setprovideroutputsource %s NVIDIA-0" % provider)
+            if config["integrated"]["driver"] == "modesetting":
+                exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
+            else:
+                exec_bash("xrandr --setprovideroutputsource %s NVIDIA-0" % provider)
             exec_bash("xrandr --auto")
         except BashError as e:
             logger.error("Cannot setup PRIME : %s", str(e))
