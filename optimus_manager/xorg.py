@@ -101,6 +101,8 @@ def set_DPI(config):
 
 def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
 
+    integrated_gpu = "intel" if "intel" in bus_ids else "amd"
+
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
            "\tModulePath \"/usr/lib32/nvidia\"\n" \
@@ -132,10 +134,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
     text += "Section \"Device\"\n" \
             "\tIdentifier \"integrated\"\n" \
             "\tDriver \"modesetting\"\n"
-    if available_igpu == "intel":
-        text += "\tBusID \"%s\"\n" % bus_ids["intel"]
-    elif available_igpu == "amd":
-        text += "\tBusID \"%s\"\n" % bus_ids["amd"]
+    text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
@@ -276,6 +275,7 @@ def _make_amd_device_section(config, bus_ids, xorg_extra):
     logger = get_logger()
 
     dri = int(config["integrated"]["dri"])
+    driver = config["amd"]["driver"]
 
     text = "Section \"Device\"\n" \
            "\tIdentifier \"amd\"\n"
