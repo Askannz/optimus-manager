@@ -16,6 +16,7 @@ def configure_xorg(config, requested_gpu_mode):
 
     xorg_extra = load_extra_xorg_options()
     available_igpu = get_available_igpu()
+    bus_ids = get_gpus_bus_ids()
 
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra, available_igpu)
@@ -65,7 +66,7 @@ def is_there_a_MHWD_file():
     return os.path.isfile("/etc/X11/xorg.conf.d/90-mhwd.conf")
 
 
-def do_xsetup(requested_mode):
+def do_xsetup(requested_mode, config):
 
     logger = get_logger()
 
@@ -91,22 +92,24 @@ def do_xsetup(requested_mode):
         logger.error("ERROR : cannot run %s : %s", script_path, str(e))
 
 
-def set_DPI(config):
+def set_DPI(requested_mode, config):
 
     dpi_str = config["nvidia"]["dpi"]
 
     if dpi_str == "":
         return
 
-    try:
-        exec_bash("xrandr --dpi %s" % dpi_str)
-    except BashError as e:
-        raise XorgSetupError("Cannot set DPI : %s" % str(e))
+    elif requested_mode == "nvidia":
+        try:
+            exec_bash("xrandr --dpi %s" % dpi_str)
+        except BashError as e:
+            raise XorgSetupError("Cannot set DPI : %s" % str(e))
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra, available_igpu):
 
     integrated_gpu = "intel" if "intel" in bus_ids else "amd"
+    igpu = available_igpu
 
     text = "Section \"Files\"\n" \
            "\tModulePath \"/usr/lib/nvidia\"\n" \
@@ -176,10 +179,6 @@ def _generate_hybrid(config, bus_ids, xorg_extra, available_igpu):
                "\tScreen 0 \"intel\"\n" \
                "\tOption \"AllowNVIDIAGPUScreens\"\n" \
                "EndSection\n\n"
-
-        text += "Section \"Screen\"\n" \
-                "\tIdentifier \"intel\"\n" \
-                "\tDevice \"intel\"\n"
 
         text += _make_intel_device_section(config, bus_ids, xorg_extra)
 
