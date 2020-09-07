@@ -5,6 +5,7 @@ from . import pci
 from .acpi_data import ACPI_STRINGS
 from .bash import exec_bash, BashError
 from .log_utils import get_logger
+from time import sleep
 
 class KernelSetupError(Exception):
     pass
@@ -191,11 +192,17 @@ def _unload_modules(available_modules, modules_list):
 
     logger.info("Unloading modules %s (if loaded)", str(modules_to_unload))
 
-    try:
-        # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
-        exec_bash("modprobe -r " + " ".join(modules_to_unload))
-    except BashError as e:
-        raise KernelSetupError("Cannot unload modules %s : %s" % (str(modules_to_unload), str(e)))
+    counter = 0
+    while True:
+        try:
+            # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
+            exec_bash("modprobe -r " + " ".join(modules_to_unload))
+            return
+        except BashError as e:
+            if counter >= 3:
+                raise KernelSetupError("Cannot unload modules %s : %s" % (str(modules_to_unload), str(e)))
+            sleep(2)
+            counter += 1
 
 
 def _get_PAT_parameter_value(config):
