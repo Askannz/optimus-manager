@@ -19,13 +19,13 @@ def setup_kernel_state(config, prev_state, requested_mode):
     current_mode = prev_state["current_mode"]
 
     if current_mode in ["intel", None] and requested_mode in ["nvidia", "hybrid"]:
-        _nvidia_up(config)
+        _nvidia_up(config, hybrid=(requested_mode == "hybrid"))
 
     elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "intel":
         _nvidia_down(config)
 
 
-def _nvidia_up(config):
+def _nvidia_up(config, hybrid):
 
     logger = get_logger()
 
@@ -52,7 +52,7 @@ def _nvidia_up(config):
         _try_pci_reset(config, available_modules)
 
     if config["optimus"]["pci_power_control"] == "yes":
-        _try_set_pci_power_state("on")
+        _try_set_pci_power_state("auto" if hybrid else "on")
 
     _load_nvidia_modules(config, available_modules)
 
