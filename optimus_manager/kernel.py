@@ -1,3 +1,4 @@
+import time
 from . import envs
 from . import var
 from . import checks
@@ -18,13 +19,13 @@ def setup_kernel_state(config, prev_state, requested_mode):
     current_mode = prev_state["current_mode"]
 
     if current_mode in ["integrated", None] and requested_mode in ["nvidia", "hybrid"]:
-        _nvidia_up(config)
+        _nvidia_up(config, hybrid=(requested_mode == "hybrid"))
 
     elif current_mode in ["nvidia", "hybrid", None] and requested_mode == "integrated":
         _nvidia_down(config)
 
 
-def _nvidia_up(config):
+def _nvidia_up(config, hybrid):
 
     logger = get_logger()
 
@@ -51,7 +52,7 @@ def _nvidia_up(config):
         _try_pci_reset(config, available_modules)
 
     if config["optimus"]["pci_power_control"] == "yes":
-        _try_set_pci_power_state("on")
+        _try_set_pci_power_state("auto" if hybrid else "on")
 
     _load_nvidia_modules(config, available_modules)
 
@@ -62,6 +63,7 @@ def _nvidia_down(config):
     available_modules = _get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
+    _wait_no_processes_on_nvidia()
     _unload_nvidia_modules(available_modules)
 
     switching_mode = config["optimus"]["switching"]
@@ -143,6 +145,38 @@ def _try_load_acpi_call(available_modules):
     except KernelSetupError as e:
         logger.error(
             "Cannot load acpi_call. Continuing anyway. Error is: %s", str(e))
+
+
+def _wait_no_processes_on_nvidia():
+
+    logger = get_logger()
+
+    tries_counter = 0
+
+    while True:
+
+        processes_list = checks.list_processes_on_nvidia()
+        tries_counter += 1
+
+        if len(processes_list) == 0:
+            logger.info("No processes currently holding the Nvidia GPU")
+            break
+
+        logger.info(
+            "%d processes still using the Nvidia GPU. Waiting %.1f seconds.",
+            len(processes_list), envs.NVIDIA_PROCESSES_WAIT_PERIOD)
+
+        pid_table = "Processes:\n"
+        for p in processes_list:
+            pid_table += f"  {p['pid']} {p['cmdline']}\n"
+
+        logger.info(pid_table)
+
+        if tries_counter > envs.NVIDIA_PROCESSES_WAIT_MAX_TRIES:
+            raise KernelSetupError("Timeout waiting for active processes to release the Nvidia GPU")
+
+        time.sleep(envs.NVIDIA_PROCESSES_WAIT_PERIOD)
+
 
 
 def _unload_nvidia_modules(available_modules):
@@ -267,6 +301,7 @@ def _set_acpi_call_state(state):
         if not "Error" in output:
             logger.info("ACPI string %s works, saving", string)
             working_strings.append((off_str, on_str))
+            break
 
     var.write_last_acpi_call_state(state)
     var.write_acpi_call_strings(working_strings)

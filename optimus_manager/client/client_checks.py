@@ -68,7 +68,7 @@ def _check_patched_GDM():
         return
 
     if dm_name == "gdm" and not checks.using_patched_GDM():
-        print("WARNING : It does not seem like you are using a version of the Gnome Display Manager (GDM)"
+        print("WARNING : It does not seem like you are using a version of the GNOME Display Manager (GDM)"
               " that has been patched for Prime switching. Follow instructions at https://github.com/Askannz/optimus-manager"
               " to install a patched version. Without a patched GDM version, GPU switching will likely fail.\n"
               "Continue anyway ? (y/N)")

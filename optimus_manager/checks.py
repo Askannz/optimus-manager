@@ -2,6 +2,8 @@ import os
 from pathlib import Path
 import re
 import dbus
+import psutil
+import py3nvml.py3nvml as nvml
 from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
@@ -110,6 +112,27 @@ def is_daemon_active():
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
+
+def list_processes_on_nvidia():
+
+    nvml.nvmlInit()
+
+    gpu_handle = nvml.nvmlDeviceGetHandleByIndex(0)
+    proc_list = nvml.nvmlDeviceGetGraphicsRunningProcesses(gpu_handle)
+
+    result = []
+    for p_nvml in proc_list:
+        p_psutil = psutil.Process(p_nvml.pid)
+        cmdline = p_psutil.cmdline()
+        result.append({
+            "pid": p_nvml.pid,
+            "cmdline": cmdline[0] if len(cmdline) > 0 else ""
+        })
+
+    nvml.nvmlShutdown()
+
+    return result
+
 
 def _is_gl_provider_nvidia():
 

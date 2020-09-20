@@ -24,7 +24,6 @@ def main():
     fatal = report_errors(state)
 
     config = _get_config()
-    print("")
 
     if args.version:
         _print_version()

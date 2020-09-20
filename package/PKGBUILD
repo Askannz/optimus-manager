@@ -9,7 +9,8 @@ url="https://github.com/Askannz/optimus-manager"
 license=('MIT')
 conflicts=("optimus-manager")
 provides=("optimus-manager=$pkgver")
-depends=('python3' 'python-setuptools' 'python-dbus' 'mesa-demos' 'xorg-xrandr')
+depends=('python3' 'python-setuptools' 'python-dbus' 'mesa-demos' 'xorg-xrandr'
+         'python-py3nvml' 'python-psutil')
 optdepends=('bbswitch: alternative power switching method'
             'acpi_call: alternative power switching method'
             'xf86-video-intel: provides the Xorg intel driver')
@@ -36,7 +37,7 @@ pkgver() {
 build() {
  
   cd "${srcdir}/optimus-manager/"
-  python3 setup.py build
+  /usr/bin/python3 setup.py build
  
 }
  
@@ -67,6 +68,6 @@ package() {
   install -Dm755 config/nvidia-enable.sh "$pkgdir/etc/optimus-manager/nvidia-enable.sh"
   install -Dm755 config/nvidia-disable.sh "$pkgdir/etc/optimus-manager/nvidia-disable.sh"
  
-  python3 setup.py install --root="$pkgdir/" --optimize=1 --skip-build
+  /usr/bin/python3 setup.py install --root="$pkgdir/" --optimize=1 --skip-build
  
 } 
