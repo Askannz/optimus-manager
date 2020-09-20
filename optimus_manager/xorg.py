@@ -118,15 +118,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
     integrated_gpu = "intel" if "intel" in bus_ids else "amd"
 
-    text = "Section \"Files\"\n" \
-           "\tModulePath \"/usr/lib/nvidia\"\n" \
-           "\tModulePath \"/usr/lib32/nvidia\"\n" \
-           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
-           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
-           "EndSection\n\n"
+    text = _make_modules_paths_section()
 
     text += "Section \"ServerLayout\"\n" \
             "\tIdentifier \"layout\"\n" \
@@ -162,6 +154,19 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     return text
 
 
+def _make_modules_paths_section():
+
+    return "Section \"Files\"\n" \
+           "\tModulePath \"/usr/lib/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
+           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
+           "EndSection\n\n"
+
+
 def _generate_intel(config, bus_ids, xorg_extra):
     text = _make_intel_device_section(config, bus_ids, xorg_extra)
     return text
@@ -172,7 +177,9 @@ def _generate_amd(config, bus_ids, xorg_extra):
 
 def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
-    text = "Section \"ServerLayout\"\n" \
+    text = _make_modules_paths_section()
+
+    text += "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
            "\tScreen 0 \"intel\"\n" \
            "\tInactive \"nvidia\"\n" \
@@ -203,7 +210,9 @@ def _generate_hybrid_intel(config, bus_ids, xorg_extra):
 
 def _generate_hybrid_amd(config, bus_ids, xorg_extra):
 
-    text = "Section \"ServerLayout\"\n" \
+    text = _make_modules_paths_section()
+
+    text += "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
            "\tScreen 0 \"amd\"\n" \
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
