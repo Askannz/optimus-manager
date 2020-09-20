@@ -1,3 +1,4 @@
+import time
 from . import envs
 from . import var
 from . import checks
@@ -62,6 +63,7 @@ def _nvidia_down(config):
     available_modules = _get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
+    _wait_no_processes_on_nvidia()
     _unload_nvidia_modules(available_modules)
 
     switching_mode = config["optimus"]["switching"]
@@ -142,6 +144,38 @@ def _try_load_acpi_call(available_modules):
     except KernelSetupError as e:
         logger.error(
             "Cannot load acpi_call. Continuing anyway. Error is: %s", str(e))
+
+
+def _wait_no_processes_on_nvidia():
+
+    logger = get_logger()
+
+    tries_counter = 0
+
+    while True:
+
+        processes_list = checks.list_processes_on_nvidia()
+        tries_counter += 1
+
+        if len(processes_list) == 0:
+            logger.info("No processes currently holding the Nvidia GPU")
+            break
+
+        logger.info(
+            "%d processes still using the Nvidia GPU. Waiting %.1f seconds.",
+            len(processes_list), envs.NVIDIA_PROCESSES_WAIT_PERIOD)
+
+        pid_table = "Processes:\n"
+        for p in processes_list:
+            pid_table += f"  {p['pid']} {p['cmdline']}\n"
+
+        logger.info(pid_table)
+
+        if tries_counter > envs.NVIDIA_PROCESSES_WAIT_MAX_TRIES:
+            raise KernelSetupError("Timeout waiting for active processes to release the Nvidia GPU")
+
+        time.sleep(envs.NVIDIA_PROCESSES_WAIT_PERIOD)
+
 
 
 def _unload_nvidia_modules(available_modules):

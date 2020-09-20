@@ -9,7 +9,8 @@ url="https://github.com/Askannz/optimus-manager"
 license=('MIT')
 conflicts=("optimus-manager")
 provides=("optimus-manager=$pkgver")
-depends=('python3' 'python-setuptools' 'python-dbus' 'mesa-demos' 'xorg-xrandr')
+depends=('python3' 'python-setuptools' 'python-dbus' 'mesa-demos' 'xorg-xrandr'
+         'python-py3nvml' 'python-psutil')
 optdepends=('bbswitch: alternative power switching method'
             'acpi_call: alternative power switching method'
             'xf86-video-intel: provides the Xorg intel driver')
