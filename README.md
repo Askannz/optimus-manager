@@ -23,14 +23,14 @@ This is essentially a port to Archlinux of the **nvidia-prime** solution created
 To learn more about the current Optimus situation on Linux and how this solution works, read the [Home Wiki page](https://github.com/Askannz/optimus-manager/wiki).
 
 
-IMPORTANT : GNOME and GDM users
+IMPORTANT : Gnome and GDM users
 ----------
 
-If you use GNOME or the GNOME Display Manager (GDM), there are a couple extra requirements to be able to use optimus-manager :
+If you use Gnome or the Gnome Display Manager (GDM), there are a couple extra requirements to be able to use optimus-manager :
 
 * The default `gdm` package from the Archlinux and Manjaro repositories is not compatible with optimus-manager, so you must replace it with this patched version : [gdm-prime](https://aur.archlinux.org/packages/gdm-prime/) (also replaces `libgdm`). The patch was written by Canonical for Ubuntu and simply adds two script entry points specifically for Prime switching. The package is otherwise identical to the official one.
 
-* GNOME launches Wayland sessions by default, which are incompatible with optimus-manager. To force Xorg sessions, You need to edit the file `/etc/gdm/custom.conf` and remove the `#` before the line `#WaylandEnable=false`.
+* Gnome launches Wayland sessions by default, which are incompatible with optimus-manager. To force Xorg sessions, You need to edit the file `/etc/gdm/custom.conf` and remove the `#` before the line `#WaylandEnable=false`.
 
 Another quirk of GDM is that the X server may not automatically restart after a GPU switch. If you see an empty black screen or a black screen with a blinking cursor, try switching back to an empty TTY (with Ctrl+Alt+F5 for instance), then back to TTY1 with Ctrl+Alt+F1. See [this FAQ question](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#after-trying-to-switch-gpus-i-am-stuck-with-a-black-screen-or-a-black-screen-with-a-blinking-cursor-or-a-tty-login-screen).
 
@@ -57,7 +57,7 @@ After installation, the optimus-manager daemon should have been started automati
 
 * **Manjaro-generated Xorg config :** Manjaro has its own driver utility called MHWD that also auto-generates a Xorg config file at `/etc/X11/xorg.conf.d/90-mhwd.conf`. optimus-manager will automatically delete that file to avoid issues.
 
-* **Manjaro GNOME** : see the previous section **GNOME and GDM users**
+* **Manjaro Gnome** : see the previous section **Gnome and GDM users**
 
 * **Manjaro KDE** : see the previous section **Manjaro KDE users**
 
@@ -86,7 +86,7 @@ Run
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-Auto-logout is supported for GNOME, KDE Plasma, LXDE, Deepin, Xfce, i3, Openbox, AwesomeWM, bspwm and dwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for Gnome, KDE Plasma, LXDE, Deepin, Xfce, i3, Openbox, AwesomeWM, bspwm and dwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
 You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
 
@@ -98,7 +98,7 @@ You can also specify which GPU you want to be used by default when the system bo
 The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
-Unofficial GNOME Shell extensions are also avaialble :
+Unofficial Gnome Shell extensions are also avaialble :
 
 * [optimus-manager-argos (unmaintained)](https://github.com/inzar98/optimus-manager-argos).
 

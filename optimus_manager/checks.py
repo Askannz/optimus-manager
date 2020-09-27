@@ -90,7 +90,7 @@ def check_offloading_available():
     try:
         out = exec_bash("xrandr --listproviders")
     except BashError as e:
-        raise CheckError("Cannot list xrand providers : %s" % str(e))
+        raise CheckError("Cannot list xrandr providers : %s" % str(e))
 
     for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
