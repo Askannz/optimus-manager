@@ -101,6 +101,9 @@ def check_offloading_available():
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
 
+def is_xorg_amdgpu_module_available():
+    return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
+
 
 def is_login_manager_active():
     return _is_service_active("display-manager")

@@ -257,7 +257,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     logger = get_logger()
 
     if config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
-        logger.warning("The Xorg intel module is not available. Defaulting to modesetting.")
+        logger.warning("The Xorg module intel is not available. Defaulting to modesetting.")
         driver = "modesetting"
     else:
         driver = config["intel"]["driver"]
@@ -284,7 +284,14 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
 
 def _make_amd_device_section(config, bus_ids, xorg_extra):
 
-    driver = config["amd"]["driver"]
+    logger = get_logger()
+
+    if config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amdgpu_module_available():
+        logger.warning("The Xorg module amdgpu is not available. Defaulting to modesetting.")
+        driver = "modesetting"
+    else:
+        driver = config["amd"]["driver"]
+
     dri = int(config["amd"]["dri"])
 
     text = "Section \"Device\"\n" \
