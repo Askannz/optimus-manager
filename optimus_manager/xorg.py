@@ -85,17 +85,10 @@ def do_xsetup(requested_mode):
             logger.error("Cannot setup PRIME : %s", str(e))
 
 
-    if requested_mode == "integrated":
-        bus_ids = get_gpus_bus_ids()
-        if "intel" in bus_ids:
-            script_name = "intel"
-        else:
-            script_name = "amd"
-    else:
-        script_name = requested_mode
+    script_path = _get_xsetup_script_path(requested_mode)
 
-    script_path = envs.XSETUP_SCRIPTS_PATHS[script_name]
     logger.info("Running %s", script_path)
+
     try:
         exec_bash(script_path)
     except BashError as e:
@@ -113,6 +106,42 @@ def set_DPI(config):
         exec_bash("xrandr --dpi %s" % dpi_str)
     except BashError as e:
         raise XorgSetupError("Cannot set DPI : %s" % str(e))
+
+def _get_xsetup_script_path(requested_mode):
+
+    logger = get_logger()
+
+    if requested_mode == "integrated":
+
+        bus_ids = get_gpus_bus_ids()
+        if "intel" in bus_ids:
+
+            if Path(envs.XSETUP_SCRIPTS_PATHS["intel"]).exists():
+
+                logger.warning(
+                    "The custom xsetup script path %s is deprecated."
+                    "It will still work for now, but you should move its content to %s.",
+                    envs.XSETUP_SCRIPTS_PATHS["intel"],
+                    envs.XSETUP_SCRIPTS_PATHS["integrated"])
+
+                script_name = "intel"
+
+            else:
+                script_name = "integrated"
+
+        else:
+            script_name = "amd"
+
+    elif requested_mode == "nvidia":
+        script_name = "nvidia"
+    elif requested_mode == "hybrid":
+        script_name = "hybrid"
+    else:
+        assert False
+
+    script_path = envs.XSETUP_SCRIPTS_PATHS[script_name]
+
+    return script_path
 
 
 def _generate_nvidia(config, bus_ids, xorg_extra):

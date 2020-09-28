@@ -27,8 +27,10 @@ EXTRA_XORG_OPTIONS_PATHS = {
 }
 
 XSETUP_SCRIPTS_PATHS = {
-    "intel": "/etc/optimus-manager/xsetup-intel.sh",
-    "amd": "/etc/optimus-manager/xsetup-amd.sh",
+
+    "intel": "/etc/optimus-manager/xsetup-intel.sh", # DEPRECATED
+
+    "integrated": "/etc/optimus-manager/xsetup-integrated.sh",
     "nvidia": "/etc/optimus-manager/xsetup-nvidia.sh",
     "hybrid": "/etc/optimus-manager/xsetup-hybrid.sh"
 }
