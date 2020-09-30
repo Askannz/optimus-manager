@@ -80,6 +80,8 @@ def _gpu_switch(config, switch_mode, no_confirm):
 
         if confirmation:
             _send_switch_command(config, switch_mode)
+        else:
+            sys.exit(1)
 
     else:
         _send_switch_command(config, switch_mode)
