@@ -252,13 +252,21 @@ def _generate_hybrid_amd(config, bus_ids, xorg_extra):
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"amd\"\n" \
-            "\tDevice \"amd\"\n" \
-            "EndSection\n\n"
+            "\tDevice \"amd\"\n"
 
-    text += "Section \"Device\"\n" \
-            "\tIdentifier \"nvidia\"\n" \
-            "\tDriver \"nvidia\"\n" \
-            "EndSection\n\n"
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDevice \"nvidia\"\n" \
+           "EndSection\n\n"
+
+    text += _make_server_flags_section(config)
 
     return text
 
