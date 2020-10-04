@@ -16,6 +16,7 @@ optdepends=('bbswitch: alternative power switching method'
             'xf86-video-intel: provides the Xorg intel driver')
 makedepends=('python-setuptools' 'git')
 backup=('etc/optimus-manager/xorg-intel.conf'
+        'etc/optimus-manager/xorg-amd.conf'
         'etc/optimus-manager/xorg-nvidia.conf'
 
         'etc/optimus-manager/xsetup-integrated.sh'
@@ -59,6 +60,7 @@ package() {
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"
   
   install -Dm644 config/xorg-intel.conf "$pkgdir/etc/optimus-manager/xorg-intel.conf"
+  install -Dm644 config/xorg-amd.conf "$pkgdir/etc/optimus-manager/xorg-amd.conf"
   install -Dm644 config/xorg-nvidia.conf "$pkgdir/etc/optimus-manager/xorg-nvidia.conf"
   
   install -Dm755 config/xsetup-nvidia.sh "$pkgdir/etc/optimus-manager/xsetup-nvidia.sh"
