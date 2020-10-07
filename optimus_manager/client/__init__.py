@@ -61,9 +61,13 @@ def main():
 
 def _gpu_switch(config, switch_mode, no_confirm):
 
-    if switch_mode not in ["intel", "nvidia", "hybrid"]:
+    if switch_mode not in ["integrated", "nvidia", "hybrid", "intel"]:
         print("Invalid mode : %s" % switch_mode)
         sys.exit(1)
+
+    if switch_mode == "intel":
+        print("Warning: mode \"intel\" is deprecated, use \"integrated\" instead")
+        switch_mode = "integrated"
 
     run_switch_checks(config, switch_mode)
 

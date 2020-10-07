@@ -44,8 +44,8 @@ def report_errors(state):
     elif state["type"] == "done":
 
         expected_renderer = {
-            "intel": "intel",
-            "hybrid": "intel",
+            "integrated": "integrated",
+            "hybrid": "integrated",
             "nvidia": "nvidia"
         }[state["current_mode"]]
 

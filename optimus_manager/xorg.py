@@ -20,10 +20,14 @@ def configure_xorg(config, requested_gpu_mode):
 
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "intel":
+    elif requested_gpu_mode == "integrated" and "intel" in bus_ids:
         xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid":
-        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "integrated" and "amd" in bus_ids:
+        xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid" and "intel" in bus_ids:
+        xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid" and "amd" in bus_ids:
+        xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -80,8 +84,11 @@ def do_xsetup(requested_mode):
         except BashError as e:
             logger.error("Cannot setup PRIME : %s", str(e))
 
-    script_path = envs.XSETUP_SCRIPTS_PATHS[requested_mode]
+
+    script_path = _get_xsetup_script_path(requested_mode)
+
     logger.info("Running %s", script_path)
+
     try:
         exec_bash(script_path)
     except BashError as e:
@@ -100,23 +107,53 @@ def set_DPI(config):
     except BashError as e:
         raise XorgSetupError("Cannot set DPI : %s" % str(e))
 
+def _get_xsetup_script_path(requested_mode):
+
+    logger = get_logger()
+
+    if requested_mode == "integrated":
+
+        bus_ids = get_gpus_bus_ids()
+        if "intel" in bus_ids:
+
+            if Path(envs.XSETUP_SCRIPTS_PATHS["intel"]).exists():
+
+                logger.warning(
+                    "The custom xsetup script path %s is deprecated."
+                    "It will still work for now, but you should move its content to %s.",
+                    envs.XSETUP_SCRIPTS_PATHS["intel"],
+                    envs.XSETUP_SCRIPTS_PATHS["integrated"])
+
+                script_name = "intel"
+
+            else:
+                script_name = "integrated"
+
+        else:
+            script_name = "amd"
+
+    elif requested_mode == "nvidia":
+        script_name = "nvidia"
+    elif requested_mode == "hybrid":
+        script_name = "hybrid"
+    else:
+        assert False
+
+    script_path = envs.XSETUP_SCRIPTS_PATHS[script_name]
+
+    return script_path
+
 
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
-    text = "Section \"Files\"\n" \
-           "\tModulePath \"/usr/lib/nvidia\"\n" \
-           "\tModulePath \"/usr/lib32/nvidia\"\n" \
-           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
-           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
-           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
-           "EndSection\n\n"
+    integrated_gpu = "intel" if "intel" in bus_ids else "amd"
+
+    text = _make_modules_paths_section()
 
     text += "Section \"ServerLayout\"\n" \
             "\tIdentifier \"layout\"\n" \
             "\tScreen 0 \"nvidia\"\n" \
-            "\tInactive \"intel\"\n" \
+            "\tInactive \"integrated\"\n" \
             "EndSection\n\n"
 
     text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
@@ -132,14 +169,14 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     text += "Section \"Device\"\n" \
-            "\tIdentifier \"intel\"\n" \
+            "\tIdentifier \"integrated\"\n" \
             "\tDriver \"modesetting\"\n"
-    text += "\tBusID \"%s\"\n" % bus_ids["intel"]
+    text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
-            "\tIdentifier \"intel\"\n" \
-            "\tDevice \"intel\"\n" \
+            "\tIdentifier \"integrated\"\n" \
+            "\tDevice \"integrated\"\n" \
             "EndSection\n\n"
 
     text += _make_server_flags_section(config)
@@ -147,13 +184,32 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     return text
 
 
+def _make_modules_paths_section():
+
+    return "Section \"Files\"\n" \
+           "\tModulePath \"/usr/lib/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia\"\n" \
+           "\tModulePath \"/usr/lib32/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib32/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg/modules\"\n" \
+           "\tModulePath \"/usr/lib64/nvidia/xorg\"\n" \
+           "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
+           "EndSection\n\n"
+
+
 def _generate_intel(config, bus_ids, xorg_extra):
     text = _make_intel_device_section(config, bus_ids, xorg_extra)
     return text
 
-def _generate_hybrid(config, bus_ids, xorg_extra):
+def _generate_amd(config, bus_ids, xorg_extra):
+    text = _make_amd_device_section(config, bus_ids, xorg_extra)
+    return text
 
-    text = "Section \"ServerLayout\"\n" \
+def _generate_hybrid_intel(config, bus_ids, xorg_extra):
+
+    text = _make_modules_paths_section()
+
+    text += "Section \"ServerLayout\"\n" \
            "\tIdentifier \"layout\"\n" \
            "\tScreen 0 \"intel\"\n" \
            "\tInactive \"nvidia\"\n" \
@@ -165,6 +221,38 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
     text += "Section \"Screen\"\n" \
            "\tIdentifier \"intel\"\n" \
            "\tDevice \"intel\"\n"
+
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDevice \"nvidia\"\n" \
+           "EndSection\n\n"
+
+    text += _make_server_flags_section(config)
+
+    return text
+
+def _generate_hybrid_amd(config, bus_ids, xorg_extra):
+
+    text = _make_modules_paths_section()
+
+    text += "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"amd\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+           "EndSection\n\n"
+
+    text += _make_amd_device_section(config, bus_ids, xorg_extra)
+
+    text += "Section \"Screen\"\n" \
+            "\tIdentifier \"amd\"\n" \
+            "\tDevice \"amd\"\n"
 
     if config["nvidia"]["allow_external_gpus"] == "yes":
         text += "\tOption \"AllowExternalGpus\"\n"
@@ -206,7 +294,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     logger = get_logger()
 
     if config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
-        logger.warning("The Xorg intel module is not available. Defaulting to modesetting.")
+        logger.warning("The Xorg module intel is not available. Defaulting to modesetting.")
         driver = "modesetting"
     else:
         driver = config["intel"]["driver"]
@@ -229,6 +317,35 @@ def _make_intel_device_section(config, bus_ids, xorg_extra):
     text += "EndSection\n\n"
 
     return text
+
+
+def _make_amd_device_section(config, bus_ids, xorg_extra):
+
+    logger = get_logger()
+
+    if config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amdgpu_module_available():
+        logger.warning("The Xorg module amdgpu is not available. Defaulting to modesetting.")
+        driver = "modesetting"
+    else:
+        driver = config["amd"]["driver"]
+
+    dri = int(config["amd"]["dri"])
+
+    text = "Section \"Device\"\n" \
+           "\tIdentifier \"amd\"\n"
+    text += "\tDriver \"%s\"\n" % driver
+    text += "\tBusID \"%s\"\n" % bus_ids["amd"]
+    if config["amd"]["tearfree"] != "":
+        tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
+        text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
+    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    if "amd" in xorg_extra.keys():
+        for line in xorg_extra["amd"]:
+            text += ("\t" + line + "\n")
+    text += "EndSection\n\n"
+
+    return text
+
 
 def _make_server_flags_section(config):
     if config["nvidia"]["ignore_abi"] == "yes":
