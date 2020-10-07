@@ -1,9 +1,9 @@
 optimus-manager
 ==================
 
-**IMPORTANT :** this README is for version v1.3. If you are still using the previous version (v1.2), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.2-README
+**IMPORTANT :** this README is for the current **master** branch, which contains some new features that have not been added to an official release yet (most notably, support for AMD GPUs). If you are using the latest stable release (v1.3.1), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.3.1-README.
 
-This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel GPU or Nvidia/AMD configuration).
+This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel or Nvidia/AMD configuration).
 
 Obviously this is unofficial, I am not affiliated with Nvidia in any way.
 
@@ -65,7 +65,7 @@ After installation, the optimus-manager daemon should have been started automati
 
 * **nvidia-xrun :** if you have previously installed nvidia-xrun by following [instructions](https://wiki.archlinux.org/index.php/Nvidia-xrun#Configuration) on the Arch Wiki, make sure all its configuration files are removed. See issue (https://github.com/Askannz/optimus-manager/issues/135).
 
-* **GPU monitoring apps** : if you have an application (or tray widget) that automatically monitors the Nvidia GPU for things like load, temperature, VRAM usage, etc, make sure it is not running before switching to Intel mode. Those applications work by constantly polling the nvidia driver, which may prevent it from being unloaded by optimus-manager.
+* **GPU monitoring apps** : if you have an application (or tray widget) that automatically monitors the Nvidia GPU for things like load, temperature, VRAM usage, etc, make sure it is not running before switching to integrated mode. Those applications work by constantly polling the nvidia driver, which may prevent it from being unloaded by optimus-manager.
 
 Uninstallation
 ----------
@@ -106,7 +106,7 @@ Unofficial Gnome Shell extensions are also avaialble :
 
 #### Kernel parameter
 
-As an alternative to `startup_mode`, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the Intel GPU, and a "gaming" mode that starts with Nvidia).
+As an alternative to `startup_mode`, optimus-manager also allows you to set the startup GPU mode using a kernel parameter. This is useful if you want to create multiple entries in your bootloader with different GPU startup modes (for instance a "battery-saving" mode that starts with the integrated GPU, and a "gaming" mode that starts with Nvidia).
 
 Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where `MODE` can be any startup mode. Note that this parameter overrides whatever startup mode was set in the config file.
 
@@ -130,9 +130,9 @@ Please refer to the comments in the [default config file](https://github.com/Ask
 
 No config changes will be effective until you computer is rebooted or the optimus-manager service is restarted.
 
-You can also add your own Xorg options in `/etc/optimus-manager/xorg-intel.conf`, `/etc/optimus-manager/xorg-nvidia.conf` and `/etc/optimus-manager/xorg-hybrid.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
+You can also add your own Xorg options in `/etc/optimus-manager/xorg-nvidia-gpu.conf`, `/etc/optimus-manager/xorg-integrated-gpu.conf` and `/etc/optimus-manager/xorg-hybrid.conf`. Anything you put in those files will be written to the "Device" section of the auto-generated Xorg configuration file corresponding to their respective GPU mode.
 
-If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-intel.sh`, `/etc/optimus-manager/xsetup-nvidia.sh` and `/etc/optimus-manager/xsetup-hybrid.sh`.
+If you need the display manager to run some specific commands to set up the display (to force a particular resolution, for instance), you can write them to `/etc/optimus-manager/xsetup-integrated.sh`, `/etc/optimus-manager/xsetup-nvidia.sh` and `/etc/optimus-manager/xsetup-hybrid.sh`.
 
 Finally, if you need to run some specific code prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if bbswitch is not supported), you can write the commands to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
