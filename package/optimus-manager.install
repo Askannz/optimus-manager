@@ -12,13 +12,6 @@ post_install() {
     echo "${bold}${red}Please reboot your computer before using optimus-manager${normal}"
 }
 
-pre_upgrade() {
-    bold=$(tput bold)
-    red=$(tput setaf 1)
-    normal=$(tput sgr0)
-    echo "${bold}${red}optimus-manager: --set-startup is deprecated in v1.3. You need to set your startup mode in the config file, it will revert to Intel in the meantime.${normal}"
-}
-
 post_remove() {
 
 	echo "optimus-manager : cleaning up auto-generated Xorg conf"
