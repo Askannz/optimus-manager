@@ -54,6 +54,8 @@ package() {
   install -Dm644 optimus-manager.conf "$pkgdir/usr/share/optimus-manager.conf"
   
   install -Dm644 systemd/logind/10-optimus-manager.conf "$pkgdir/usr/lib/systemd/logind.conf.d/10-optimus-manager.conf"
+  install -Dm755 systemd/suspend/optimus-manager.py "$pkgdir/usr/lib/systemd/system-sleep/optimus-manager.py"
+  
   
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"

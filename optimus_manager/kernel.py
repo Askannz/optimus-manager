@@ -25,14 +25,18 @@ def setup_kernel_state(config, prev_state, requested_mode):
         _nvidia_down(config)
 
 
-def _nvidia_up(config, hybrid):
+def get_available_modules():
+
+    MODULES = [
+        "nouveau", "bbswitch", "acpi_call", "nvidia",
+        "nvidia_drm", "nvidia_modeset", "nvidia_uvm"
+    ]
+
+    return [module for module in MODULES if checks.is_module_available(module)]
+
+def nvidia_power_up(config, available_modules):
 
     logger = get_logger()
-
-    available_modules = _get_available_modules()
-    logger.info("Available modules: %s", str(available_modules))
-
-    _unload_nouveau(available_modules)
 
     switching_mode = config["optimus"]["switching"]
     if switching_mode == "bbswitch":
@@ -43,6 +47,36 @@ def _nvidia_up(config, hybrid):
         _try_set_acpi_call_state("ON")
     elif switching_mode == "custom":
         _try_custom_set_power_state("ON")
+    else:
+        logger.info("switching=%s, nothing to do", switching_mode)
+
+def nvidia_power_down(config, available_modules):
+
+    logger = get_logger()
+
+    switching_mode = config["optimus"]["switching"]
+    if switching_mode == "bbswitch":
+        _try_load_bbswitch(available_modules)
+        _set_bbswitch_state("OFF")
+    elif switching_mode == "acpi_call":
+        _try_load_acpi_call(available_modules)
+        _try_set_acpi_call_state("OFF")
+    elif switching_mode == "custom":
+        _try_custom_set_power_state("OFF")
+    else:
+        logger.info("switching=%s, nothing to do", switching_mode)
+
+
+def _nvidia_up(config, hybrid):
+
+    logger = get_logger()
+
+    available_modules = get_available_modules()
+    logger.info("Available modules: %s", str(available_modules))
+
+    _unload_nouveau(available_modules)
+
+    nvidia_power_up(config, available_modules)
 
     if not pci.is_nvidia_visible():
         logger.info("Nvidia card not visible in PCI bus, rescanning")
@@ -60,24 +94,17 @@ def _nvidia_down(config):
 
     logger = get_logger()
 
-    available_modules = _get_available_modules()
+    available_modules = get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
     _wait_no_processes_on_nvidia()
     _unload_nvidia_modules(available_modules)
 
+    nvidia_power_down(config, available_modules)
+
     switching_mode = config["optimus"]["switching"]
     if switching_mode == "nouveau":
         _try_load_nouveau(config, available_modules)
-    elif switching_mode == "bbswitch":
-        _try_load_bbswitch(available_modules)
-        _set_bbswitch_state("OFF")
-    elif switching_mode == "acpi_call":
-        _try_load_acpi_call(available_modules)
-        _try_set_acpi_call_state("OFF")
-    elif switching_mode == "custom":
-        _try_custom_set_power_state("OFF")
-
 
     if config["optimus"]["pci_remove"] == "yes":
 
@@ -98,10 +125,6 @@ def _nvidia_down(config):
         else:
             _try_set_pci_power_state("auto")
 
-
-def _get_available_modules():
-    MODULES = ["nouveau", "bbswitch", "acpi_call", "nvidia", "nvidia_drm", "nvidia_modeset", "nvidia_uvm"]
-    return [module for module in MODULES if checks.is_module_available(module)]
 
 def _load_nvidia_modules(config, available_modules):
 
