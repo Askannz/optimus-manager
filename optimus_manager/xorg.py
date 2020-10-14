@@ -130,7 +130,7 @@ def _get_xsetup_script_path(requested_mode):
                 script_name = "integrated"
 
         else:
-            script_name = "amd"
+            script_name = "integrated"
 
     elif requested_mode == "nvidia":
         script_name = "nvidia"
