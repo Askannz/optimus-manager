@@ -1,4 +1,5 @@
 import time
+import py3nvml.py3nvml as nvml
 from . import envs
 from . import var
 from . import checks
@@ -97,7 +98,11 @@ def _nvidia_down(config):
     available_modules = get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
-    _wait_no_processes_on_nvidia()
+    try:
+        _wait_no_processes_on_nvidia()
+    except nvml.NVMLError as e:
+        logger.error("Py3nvml wait for processes check failed. Continuing anyways. Error is %s" % str(e))
+
     _unload_nvidia_modules(available_modules)
 
     nvidia_power_down(config, available_modules)
