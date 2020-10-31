@@ -173,12 +173,13 @@ def _try_load_acpi_call(available_modules):
 def _wait_no_processes_on_nvidia():
 
     logger = get_logger()
+    bus_ids = pci.get_gpus_bus_ids(notation_fix=False)
 
     tries_counter = 0
 
     while True:
 
-        processes_list = checks.list_processes_on_nvidia()
+        processes_list = checks.list_processes_on_nvidia(bus_ids)
         tries_counter += 1
 
         if len(processes_list) == 0:

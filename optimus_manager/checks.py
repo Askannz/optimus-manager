@@ -3,7 +3,6 @@ from pathlib import Path
 import re
 import dbus
 import psutil
-import py3nvml.py3nvml as nvml
 from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
@@ -116,25 +115,44 @@ def is_daemon_active():
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
 
-def list_processes_on_nvidia():
+def list_processes_on_nvidia(bus_ids):
 
-    nvml.nvmlInit()
+    nvidia_id = bus_ids["nvidia"]
 
-    gpu_handle = nvml.nvmlDeviceGetHandleByIndex(0)
-    proc_list = nvml.nvmlDeviceGetGraphicsRunningProcesses(gpu_handle)
+    paths = [
+        "/dev/nvidia",
+        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-card"),
+        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-render")
+    ]
 
-    result = []
-    for p_nvml in proc_list:
-        p_psutil = psutil.Process(p_nvml.pid)
-        cmdline = p_psutil.cmdline()
-        result.append({
-            "pid": p_nvml.pid,
-            "cmdline": cmdline[0] if len(cmdline) > 0 else ""
-        })
+    def _check_holds_nvidia(pid):
 
-    nvml.nvmlShutdown()
+        for fd_path in Path(f"/proc/{pid}/fd").iterdir():
+            try:
+                target = os.readlink(fd_path)
+                for p in paths:
+                    if p in target:
+                        return True
+            except FileNotFoundError:
+                pass
 
-    return result
+        return False
+
+    processes = []
+
+    for proc in psutil.process_iter(["pid", "cmdline"]):
+        try:
+            if _check_holds_nvidia(proc.pid):
+                cmdline = proc.cmdline()
+                cmdline = cmdline[0] if len(cmdline) > 0 else ""
+                processes.append({
+                    "pid": proc.pid,
+                    "cmdline":cmdline
+                })
+        except PermissionError:
+            pass
+
+    return processes
 
 
 def _is_gl_provider_nvidia():
