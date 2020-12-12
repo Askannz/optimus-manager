@@ -15,8 +15,7 @@ def report_errors(state):
 
     elif state["type"] == "pending_pre_xorg_start":
         if state["current_mode"] is None:
-            print("ERROR: a GPU setup was initiated but Xorg pre-start hook did not run.")
-            print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+            print("ERROR: a GPU setup was initiated on startup but Xorg pre-start hook did not run.")
             return True
         else:
             print("A GPU switch from %s to %s is pending." % (state["current_mode"], state["requested_mode"]))
