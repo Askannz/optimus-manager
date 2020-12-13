@@ -4,7 +4,6 @@ from ..config import load_config
 from ..kernel import setup_kernel_state
 from .. import var
 from ..xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running
-from ..hacks.gdm import kill_gdm_server
 from ..log_utils import set_logger_config, get_logger
 
 
@@ -47,7 +46,6 @@ def main():
         logger.info("Previous state was: %s", str(prev_state))
         logger.info("Requested mode is: %s", requested_mode)
 
-        kill_gdm_server()
         config = load_config()
         if setup_kernel:
             setup_kernel_state(config, prev_state, requested_mode)
