@@ -1,8 +1,9 @@
 import sys
+import os
 from ..config import load_config
 from ..kernel import setup_kernel_state
 from .. import var
-from ..xorg import configure_xorg, cleanup_xorg_conf
+from ..xorg import configure_xorg, cleanup_xorg_conf, is_xorg_running
 from ..hacks.gdm import kill_gdm_server
 from ..log_utils import set_logger_config, get_logger
 
@@ -35,6 +36,13 @@ def main():
 
     try:
         logger.info("# Xorg pre-start hook")
+
+        if os.environ.get("RUNNING_UNDER_GDM", False) and is_xorg_running():
+            logger.info(
+                "RUNNING_UNDER_GDM is set and Xorg is still running. "
+                "Aborting this hook because it was likely called by GDM "
+                "when closing its login screen.")
+            sys.exit(0)
 
         logger.info("Previous state was: %s", str(prev_state))
         logger.info("Requested mode is: %s", requested_mode)
