@@ -20,14 +20,10 @@ def configure_xorg(config, requested_gpu_mode):
 
     if requested_gpu_mode == "nvidia":
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "integrated" and "intel" in bus_ids:
-        xorg_conf_text = _generate_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "integrated" and "amd" in bus_ids:
-        xorg_conf_text = _generate_amd(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid" and "intel" in bus_ids:
-        xorg_conf_text = _generate_hybrid_intel(config, bus_ids, xorg_extra)
-    elif requested_gpu_mode == "hybrid" and "amd" in bus_ids:
-        xorg_conf_text = _generate_hybrid_amd(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "integrated":
+        xorg_conf_text = _generate_integrated(config, bus_ids, xorg_extra)
+    elif requested_gpu_mode == "hybrid":
+        xorg_conf_text = _generate_hybrid(config, bus_ids, xorg_extra)
 
     remove_mhwd_conf()
     _write_xorg_conf(xorg_conf_text)
@@ -105,7 +101,7 @@ def set_DPI(config):
     try:
         exec_bash("xrandr --dpi %s" % dpi_str)
     except BashError as e:
-        raise XorgSetupError("Cannot set DPI : %s" % str(e))
+        raise XorgSetupError("Cannot set DPI : %s" % str(e)) from e
 
 def _get_xsetup_script_path(requested_mode):
 
@@ -147,7 +143,8 @@ def _get_xsetup_script_path(requested_mode):
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
     integrated_gpu = "intel" if "intel" in bus_ids else "amd"
-    xorg_extra_lines = xorg_extra["nvidia-mode"]["nvidia-gpu"]
+    xorg_extra_nvidia = xorg_extra["nvidia-mode"]["nvidia-gpu"]
+    xorg_extra_integrated = xorg_extra["nvidia-mode"]["integrated-gpu"]
 
     text = _make_modules_paths_section()
 
@@ -157,7 +154,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "\tInactive \"integrated\"\n" \
             "EndSection\n\n"
 
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra_lines)
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra_nvidia)
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"nvidia\"\n" \
@@ -173,12 +170,61 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
             "\tIdentifier \"integrated\"\n" \
             "\tDriver \"modesetting\"\n"
     text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
+    for line in xorg_extra_integrated:
+        text += ("\t" + line + "\n")
     text += "EndSection\n\n"
 
     text += "Section \"Screen\"\n" \
             "\tIdentifier \"integrated\"\n" \
             "\tDevice \"integrated\"\n" \
             "EndSection\n\n"
+
+    text += _make_server_flags_section(config)
+
+    return text
+
+
+def _generate_integrated(config, bus_ids, xorg_extra):
+
+    xorg_extra_lines = xorg_extra["integrated-mode"]["integrated-gpu"]
+
+    if "intel" in bus_ids:
+        return _make_intel_device_section(config, bus_ids, xorg_extra_lines)
+    else:
+        return _make_amd_device_section(config, bus_ids, xorg_extra_lines)
+
+
+def _generate_hybrid(config, bus_ids, xorg_extra):
+
+    xorg_extra_lines_integrated = xorg_extra["hybrid-mode"]["integrated-gpu"]
+    xorg_extra_lines_nvidia = xorg_extra["hybrid-mode"]["nvidia-gpu"]
+
+    text = _make_modules_paths_section()
+
+    text += "Section \"ServerLayout\"\n" \
+           "\tIdentifier \"layout\"\n" \
+           "\tScreen 0 \"integrated\"\n" \
+           "\tInactive \"nvidia\"\n" \
+           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
+           "EndSection\n\n"
+
+    text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"integrated\"\n" \
+           "\tDevice \"integrated\"\n"
+
+    if config["nvidia"]["allow_external_gpus"] == "yes":
+        text += "\tOption \"AllowExternalGpus\"\n"
+
+    text += "EndSection\n\n"
+
+    text += _make_nvidia_device_section(config, bus_ids, xorg_extra_lines_nvidia)
+
+    text += "Section \"Screen\"\n" \
+           "\tIdentifier \"nvidia\"\n" \
+           "\tDevice \"nvidia\"\n" \
+           "EndSection\n\n"
 
     text += _make_server_flags_section(config)
 
@@ -197,87 +243,6 @@ def _make_modules_paths_section():
            "\tModulePath \"/usr/lib64/xorg/modules\"\n" \
            "EndSection\n\n"
 
-
-def _generate_intel(config, bus_ids, xorg_extra):
-    xorg_extra_lines = xorg_extra["integrated-mode"]["integrated-gpu"]
-    text = _make_intel_device_section(config, bus_ids, xorg_extra_lines)
-    return text
-
-def _generate_amd(config, bus_ids, xorg_extra):
-    xorg_extra_lines = xorg_extra["integrated-mode"]["integrated-gpu"]
-    text = _make_amd_device_section(config, bus_ids, xorg_extra_lines)
-    return text
-
-def _generate_hybrid_intel(config, bus_ids, xorg_extra):
-
-    xorg_extra_lines_integrated = xorg_extra["hybrid-mode"]["integrated-gpu"]
-    xorg_extra_lines_nvidia = xorg_extra["hybrid-mode"]["nvidia-gpu"]
-
-    text = _make_modules_paths_section()
-
-    text += "Section \"ServerLayout\"\n" \
-           "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"intel\"\n" \
-           "\tInactive \"nvidia\"\n" \
-           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
-           "EndSection\n\n"
-
-    text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
-
-    text += "Section \"Screen\"\n" \
-           "\tIdentifier \"intel\"\n" \
-           "\tDevice \"intel\"\n"
-
-    if config["nvidia"]["allow_external_gpus"] == "yes":
-        text += "\tOption \"AllowExternalGpus\"\n"
-
-    text += "EndSection\n\n"
-
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra_lines_nvidia)
-
-    text += "Section \"Screen\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDevice \"nvidia\"\n" \
-           "EndSection\n\n"
-
-    text += _make_server_flags_section(config)
-
-    return text
-
-def _generate_hybrid_amd(config, bus_ids, xorg_extra):
-
-    xorg_extra_lines_integrated = xorg_extra["hybrid-mode"]["integrated-gpu"]
-    xorg_extra_lines_nvidia = xorg_extra["hybrid-mode"]["nvidia-gpu"]
-
-    text = _make_modules_paths_section()
-
-    text += "Section \"ServerLayout\"\n" \
-           "\tIdentifier \"layout\"\n" \
-           "\tScreen 0 \"amd\"\n" \
-           "\tOption \"AllowNVIDIAGPUScreens\"\n" \
-           "EndSection\n\n"
-
-    text += _make_amd_device_section(config, bus_ids, xorg_extra_lines_integrated)
-
-    text += "Section \"Screen\"\n" \
-            "\tIdentifier \"amd\"\n" \
-            "\tDevice \"amd\"\n"
-
-    if config["nvidia"]["allow_external_gpus"] == "yes":
-        text += "\tOption \"AllowExternalGpus\"\n"
-
-    text += "EndSection\n\n"
-
-    text += _make_nvidia_device_section(config, bus_ids, xorg_extra_lines_nvidia)
-
-    text += "Section \"Screen\"\n" \
-           "\tIdentifier \"nvidia\"\n" \
-           "\tDevice \"nvidia\"\n" \
-           "EndSection\n\n"
-
-    text += _make_server_flags_section(config)
-
-    return text
 
 def _make_nvidia_device_section(config, bus_ids, xorg_extra_lines):
 
@@ -312,7 +277,7 @@ def _make_intel_device_section(config, bus_ids, xorg_extra_lines):
     dri = int(config["intel"]["dri"])
 
     text = "Section \"Device\"\n" \
-           "\tIdentifier \"intel\"\n"
+           "\tIdentifier \"integrated\"\n"
     text += "\tDriver \"%s\"\n" % driver
     text += "\tBusID \"%s\"\n" % bus_ids["intel"]
     if config["intel"]["accel"] != "":
@@ -343,7 +308,7 @@ def _make_amd_device_section(config, bus_ids, xorg_extra_lines):
     dri = int(config["amd"]["dri"])
 
     text = "Section \"Device\"\n" \
-           "\tIdentifier \"amd\"\n"
+           "\tIdentifier \"integrated\"\n"
     text += "\tDriver \"%s\"\n" % driver
     text += "\tBusID \"%s\"\n" % bus_ids["amd"]
     if config["amd"]["tearfree"] != "":
@@ -379,5 +344,5 @@ def _write_xorg_conf(xorg_conf_text):
         with open(filepath, 'w') as f:
             logger.info("Writing to %s", envs.XORG_CONF_PATH)
             f.write(xorg_conf_text)
-    except IOError:
-        raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath))
+    except IOError as e:
+        raise XorgSetupError("Cannot write Xorg conf at %s" % str(filepath)) from e
