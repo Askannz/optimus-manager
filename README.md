@@ -47,6 +47,8 @@ Naturally, you must have the proprietary nvidia driver installed on your system.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
+**Note :** Do not install this program by cloning this repository and running `setup.py`, or by using `pip` directly. Doing so will only install the Python package but leave out important files that optimus-manager needs. 
+
 After installation, the optimus-manager daemon should have been started automatically, but you can check its status with `systemctl status optimus-manager.service`.
 
 **Important notes :**
