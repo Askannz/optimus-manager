@@ -3,9 +3,11 @@ import re
 from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
-NVIDIA_VENDOR_ID = "10de"
-INTEL_VENDOR_ID = "8086"
-AMD_VENDOR_ID = "1002"
+VENDOR_IDS = {
+    "nvidia": "10de",
+    "intel": "8086",
+    "amd": "1002"
+}
 
 GPU_PCI_CLASS_PATTERN = "03[0-9a-f]{2}"
 PCI_BRIDGE_PCI_CLASS_PATTERN = "0604"
@@ -76,38 +78,19 @@ def get_gpus_bus_ids(notation_fix=True):
 
     logger = get_logger()
 
-    nvidia_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=NVIDIA_VENDOR_ID,
-        notation_fix=notation_fix)
-
-    intel_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=INTEL_VENDOR_ID,
-        notation_fix=notation_fix)
-
-    amd_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=AMD_VENDOR_ID,
-        notation_fix=notation_fix)
-
-
-    if len(nvidia_ids_list) > 1:
-        logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
-
-    if len(intel_ids_list) > 1:
-        logger.warning("Multiple Intel GPUs found ! Picking the first one.")
-
-    if len(amd_ids_list) > 1:
-        logger.warning("Multiple AMD GPUs found ! Picking the first one.")
-
     bus_ids = {}
-    if len(nvidia_ids_list) > 0:
-        bus_ids["nvidia"] = nvidia_ids_list[0]
-    if len(intel_ids_list) > 0:
-        bus_ids["intel"] = intel_ids_list[0]
-    if len(amd_ids_list) > 0:
-        bus_ids["amd"] = amd_ids_list[0]
+    for manufacturer, vendor_id in VENDOR_IDS.items():
+
+        ids_list = _search_bus_ids(
+            match_pci_class=GPU_PCI_CLASS_PATTERN,
+            match_vendor_id=vendor_id,
+            notation_fix=notation_fix)
+
+        if len(ids_list) > 1:
+            logger.warning(f"Multiple {manufacturer} GPUs found ! Picking the first enumerated one.")
+
+        if len(ids_list) > 0:
+            bus_ids[manufacturer] = ids_list[0]
 
     if "intel" in bus_ids and "amd" in bus_ids:
         logger.warning("Found both an Intel and an AMD GPU. Defaulting to Intel.")
@@ -115,7 +98,7 @@ def get_gpus_bus_ids(notation_fix=True):
 
     return bus_ids
 
-def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
+def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     try:
         out = exec_bash("lspci -n")
@@ -193,9 +176,10 @@ def _read_pci_path(pci_path):
 
 def _get_connected_pci_bridges(pci_id):
 
-    pci_bridges_ids_list = _get_bus_ids(match_pci_class=PCI_BRIDGE_PCI_CLASS_PATTERN,
-                                        match_vendor_id=".+",
-                                        notation_fix=False)
+    pci_bridges_ids_list = _search_bus_ids(
+        match_pci_class=PCI_BRIDGE_PCI_CLASS_PATTERN,
+        match_vendor_id=".+",
+        notation_fix=False)
 
     connected_pci_bridges_ids_list = []
 
