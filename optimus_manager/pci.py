@@ -96,6 +96,9 @@ def get_gpus_bus_ids(notation_fix=True):
         logger.warning("Found both an Intel and an AMD GPU. Defaulting to Intel.")
         del bus_ids["amd"]
 
+    if not ("intel" in bus_ids or "amd" in bus_ids):
+        raise PCIError("Cannot find the integrated GPU. Is this an Optimus system ?")
+
     return bus_ids
 
 def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
