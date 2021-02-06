@@ -208,7 +208,10 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
-    text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
+    if "intel" in bus_ids:
+        text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
+    else:
+        text += _make_amd_device_section(config, bus_ids, xorg_extra_lines_integrated)
 
     text += "Section \"Screen\"\n" \
            "\tIdentifier \"integrated\"\n" \
