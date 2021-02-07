@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 import re
+import subprocess
 import dbus
 import psutil
-from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
 
@@ -32,11 +32,9 @@ def is_ac_power_connected():
 
 
 def is_pat_available():
-    try:
-        exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
-        return True
-    except BashError:
-        return False
+    return subprocess.run(
+        "grep -E '^flags.+ pat( |$)' /proc/cpuinfo", shell=True
+    ).returncode == 0
 
 
 def get_active_renderer():
@@ -49,21 +47,15 @@ def get_active_renderer():
 
 def is_module_available(module_name):
 
-    try:
-        exec_bash("modinfo %s" % module_name)
-    except BashError:
-        return False
-    else:
-        return True
+    return subprocess.run(
+        f"modinfo {module_name}", shell=True
+    ).returncode == 0
 
 def is_module_loaded(module_name):
 
-    try:
-        exec_bash("lsmod | grep -E \"^%s \"" % module_name)
-    except BashError:
-        return False
-    else:
-        return True
+    return subprocess.run(
+        f"lsmod | grep -E \"^{module_name}\"", shell=True
+    ).returncode == 0
 
 def get_current_display_manager():
 
@@ -87,9 +79,10 @@ def using_patched_GDM():
 def check_offloading_available():
 
     try:
-        out = exec_bash("xrandr --listproviders")
-    except BashError as e:
-        raise CheckError("Cannot list xrandr providers : %s" % str(e))
+        out = subprocess.check_output(
+            "xrandr --listproviders", shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise CheckError(f"Cannot list xrandr providers:\n{e.stderr}") from e
 
     for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
@@ -158,9 +151,11 @@ def list_processes_on_nvidia(bus_ids):
 def _is_gl_provider_nvidia():
 
     try:
-        out = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
-    except BashError as e:
-        raise CheckError("Cannot run glxinfo : %s" % str(e))
+        out = subprocess.check_output(
+            "__NV_PRIME_RENDER_OFFLOAD=0 glxinfo",
+            shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise CheckError(f"Cannot run glxinfo: {e.stderr}") from e
 
     for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
@@ -200,9 +195,6 @@ def _is_service_active_dbus(system_bus, service_name):
 
 def _is_service_active_bash(service_name):
 
-    try:
-        exec_bash("systemctl is-active %s" % service_name)
-    except BashError:
-        return False
-    else:
-        return True
+    return subprocess.run(
+        f"systemctl is-active {service_name}", shell=True
+    ).returncode == 0

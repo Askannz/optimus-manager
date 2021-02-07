@@ -1,10 +1,10 @@
 import time
+import subprocess
 from . import envs
 from . import var
 from . import checks
 from . import pci
 from .acpi_data import ACPI_STRINGS
-from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
 class KernelSetupError(Exception):
@@ -235,9 +235,11 @@ def _load_module(available_modules, module, options=None):
             "module %s is not available for current kernel."
             " Is the corresponding package installed ?" % module)
     try:
-        exec_bash("modprobe %s %s" % (module, options))
-    except BashError as e:
-        raise KernelSetupError("error running modprobe for %s : %s" % (module, str(e)))
+        subprocess.check_call(
+            f"modprobe {module} {options}",
+            shell=True, text=True, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        raise KernelSetupError(f"Error running modprobe for {module}: {e.stderr}") from e
 
 def _unload_modules(available_modules, modules_list):
 
@@ -251,10 +253,12 @@ def _unload_modules(available_modules, modules_list):
     logger.info("Unloading modules %s (if loaded)", str(modules_to_unload))
 
     try:
-        # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
-        exec_bash("modprobe -r " + " ".join(modules_to_unload))
-    except BashError as e:
-        raise KernelSetupError("Cannot unload modules %s : %s" % (str(modules_to_unload), str(e)))
+        # We use "modprobe -r" because unlike "rmmod", it does not return an error if the module is not loaded.
+        subprocess.check_call(
+            f"modprobe -r {' '.join(modules_to_unload)}",
+            shell=True, text=True, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        raise KernelSetupError(f"Cannot unload modules {modules_to_unload}: {e.stderr}") from e
 
 
 def _get_PAT_parameter_value(config):
@@ -431,8 +435,6 @@ def _try_custom_set_power_state(state):
     logger.info("Running custom power switching script %s", script_path)
 
     try:
-        exec_bash(script_path)
-    except BashError as e:
-        logger.error(
-            "Cannot run %s. Continuing anyways. Error is : %s",
-            script_path, str(e))
+        subprocess.check_call(script_path, text=True, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Cannot run {script_path}. Continuing anyways. Error is: {e.stderr}")

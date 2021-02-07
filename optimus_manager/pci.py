@@ -1,6 +1,6 @@
 import os
 import re
-from .bash import exec_bash, BashError
+import subprocess
 from .log_utils import get_logger
 
 VENDOR_IDS = {
@@ -50,9 +50,11 @@ def hot_reset_nvidia():
 
     logger.info("Triggering PCI hot reset of bridge %s", nvidia_pci_bridge)
     try:
-        exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)
-    except BashError as e:
-        raise PCIError("failed to run setpci command : %s" % str(e))
+        subprocess.check_call(
+            f"setpci -s {nvidia_pci_bridge} 0x488.l=0x2000000:0x2000000",
+            shell=True, text=True, stderr=subprocess.PIPE)
+    except subprocess.CalledProcessError as e:
+        raise PCIError(f"Failed to run setpci command : {e.stderr}") from e
 
     logger.info("Rescanning PCI bus")
     rescan()
@@ -104,9 +106,10 @@ def get_gpus_bus_ids(notation_fix=True):
 def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     try:
-        out = exec_bash("lspci -n")
-    except BashError as e:
-        raise PCIError("cannot run lspci -n : %s" % str(e))
+        out = subprocess.check_output(
+            "lspci -n", shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise PCIError(f"Cannot run lspci -n : {e.stderr}") from e
 
     bus_ids_list = []
 

@@ -1,5 +1,5 @@
+from subprocess import check_call, CalledProcessError
 import dbus
-from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
 
@@ -54,8 +54,8 @@ def logout_current_desktop_session():
         "qtile-cmd -o cmd -f shutdown"  # qtile
     ]:
         try:
-            exec_bash(cmd)
-        except BashError:
+            check_call(cmd, shell=True)
+        except CalledProcessError:
             pass
 
 
