@@ -18,75 +18,45 @@ def logout_current_desktop_session():
     except dbus.exceptions.DBusException:
         pass
     else:
-        # KDE Plasma
-        try:
+
+        def logout_kde():
             kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
             kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
-        except dbus.exceptions.DBusException:
-            pass
-
-        # GNOME
-        try:
+        def logout_gnome():
             gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
             gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
-        except dbus.exceptions.DBusException:
-            pass
-
-        # XFCE
-        try:
+        def logout_xfce():
             xfce = session_bus.get_object("org.xfce.SessionManager", "/org/xfce/SessionManager")
             xfce.Logout(False, True, dbus_interface="org.xfce.Session.Manager")
-        except dbus.exceptions.DBusException:
-            pass
-
-        # Deepin
-        try:
+        def logout_deepin():
             deepin = session_bus.get_object('com.deepin.SessionManager', '/com/deepin/SessionManager')
             deepin.RequestLogout()
-        except dbus.exceptions.DBusException:
+
+        for logout_func in [
+            logout_kde,
+            logout_gnome,
+            logout_xfce,
+            logout_deepin
+        ]:
+            try:
+                logout_func()
+            except dbus.exceptions.DBusException:
+                pass
+
+
+    for cmd in [
+        "i3-msg exit",  # i3
+        "openbox --exit",  # Openbox
+        "awesome-client \"awesome.quit()\"",  # AwesomeWM
+        "bspc quit",  # bspwm
+        "pkill -SIGTERM -f dwm",  # dwm
+        "pkill -SIGTERM -f lxsession",  # LXDE
+        "qtile-cmd -o cmd -f shutdown"  # qtile
+    ]:
+        try:
+            exec_bash(cmd)
+        except BashError:
             pass
-
-    # i3
-    try:
-        exec_bash("i3-msg exit")
-    except BashError:
-        pass
-
-    # openbox
-    try:
-        exec_bash("openbox --exit")
-    except BashError:
-        pass
-
-    # AwesomeWM
-    try:
-        exec_bash("awesome-client \"awesome.quit()\"")
-    except BashError:
-        pass
-
-    # bspwm
-    try:
-        exec_bash("bspc quit")
-    except BashError:
-        pass
-
-    # dwm
-    try:
-        exec_bash("pkill -SIGTERM -f dwm")
-    except BashError:
-        pass
-
-    # lxde
-    try:
-        exec_bash("pkill -SIGTERM -f lxsession")
-    except BashError:
-        pass
-    
-    # qtile
-    try:
-        exec_bash("qtile-cmd -o cmd -f shutdown")
-    except BashError:
-        pass
 
 
 def is_there_a_wayland_session():
