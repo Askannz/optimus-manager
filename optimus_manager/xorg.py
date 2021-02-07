@@ -73,7 +73,7 @@ def do_xsetup(requested_mode):
                 subprocess.check_call(cmd, shell=True, text=True, stderr=subprocess.PIPE)
 
         except subprocess.CalledProcessError as e:
-            logger.error("Cannot setup PRIME (xrandr error):\n", e.stderr)
+            logger.error(f"Cannot setup PRIME (xrandr error):\n{e.stderr}")
 
 
     script_path = _get_xsetup_script_path(requested_mode)
@@ -83,7 +83,7 @@ def do_xsetup(requested_mode):
     try:
         subprocess.check_call(script_path, text=True, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
-        logger.error("ERROR : cannot run %s :\n%s", script_path, e.stderr)
+        logger.error(f"ERROR : cannot run {script_path} :\n{e.stderr}")
 
 
 def set_DPI(config):
@@ -98,7 +98,7 @@ def set_DPI(config):
     try:
         subprocess.check_output("xrandr --dpi %s" % dpi_str, shell=True, text=True, stderr=subprocess.PIPE)
     except subprocess.CalledProcessError as e:
-        logger.error("Cannot set DPI (xrandr error):\n", e.stderr)
+        logger.error(f"Cannot set DPI (xrandr error):\n{e.stderr}")
 
 
 def _get_xsetup_script_path(requested_mode):

@@ -286,10 +286,10 @@ def _set_bbswitch_state(state):
     try:
         with open("/proc/acpi/bbswitch", "w") as f:
             f.write(state)
-    except FileNotFoundError:
-        raise KernelSetupError("Cannot open /proc/acpi/bbswitch")
-    except IOError:
-        raise KernelSetupError("Error writing to /proc/acpi/bbswitch")
+    except FileNotFoundError as e:
+        raise KernelSetupError("Cannot open /proc/acpi/bbswitch") from e
+    except IOError as e:
+        raise KernelSetupError("Error writing to /proc/acpi/bbswitch") from e
 
 
 def _set_acpi_call_state(state):
@@ -321,8 +321,8 @@ def _set_acpi_call_state(state):
 
             with open("/proc/acpi/call", "r") as f:
                 output = f.read()
-        except FileNotFoundError:
-            raise KernelSetupError("Cannot open /proc/acpi/call")
+        except FileNotFoundError as e:
+            raise KernelSetupError("Cannot open /proc/acpi/call") from e
         except IOError:
             continue
 
@@ -421,7 +421,7 @@ def _pci_reset(config, available_modules):
             pci.hot_reset_nvidia()
 
     except pci.PCIError as e:
-        raise KernelSetupError("Failed to perform PCI reset : %s" % str(e))
+        raise KernelSetupError(f"Failed to perform PCI reset: {e}") from e
 
 def _try_custom_set_power_state(state):
 

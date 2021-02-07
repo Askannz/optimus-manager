@@ -163,20 +163,20 @@ def _write_to_pci_path(pci_path, string):
     try:
         with open(pci_path, "w") as f:
             f.write(string)
-    except FileNotFoundError:
-        raise PCIError("Cannot find PCI path at %s" % pci_path)
-    except IOError:
-        raise PCIError("Error writing to %s" % pci_path)
+    except FileNotFoundError as e:
+        raise PCIError("Cannot find PCI path at %s" % pci_path) from e
+    except IOError as e:
+        raise PCIError("Error writing to %s" % pci_path) from e
 
 def _read_pci_path(pci_path):
 
     try:
         with open(pci_path, "r") as f:
             string = f.read()
-    except FileNotFoundError:
-        raise PCIError("Cannot find PCI path at %s" % pci_path)
-    except IOError:
-        raise PCIError("Error reading from %s" % pci_path)
+    except FileNotFoundError as e:
+        raise PCIError("Cannot find PCI path at %s" % pci_path) from e
+    except IOError as e:
+        raise PCIError("Error reading from %s" % pci_path) from e
 
     return string
 
