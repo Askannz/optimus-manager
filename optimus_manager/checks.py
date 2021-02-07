@@ -33,7 +33,8 @@ def is_ac_power_connected():
 
 def is_pat_available():
     return subprocess.run(
-        "grep -E '^flags.+ pat( |$)' /proc/cpuinfo", shell=True
+        "grep -E '^flags.+ pat( |$)' /proc/cpuinfo",
+        shell=True, stdout=subprocess.DEVNULL
     ).returncode == 0
 
 
@@ -48,13 +49,15 @@ def get_active_renderer():
 def is_module_available(module_name):
 
     return subprocess.run(
-        f"modinfo {module_name}", shell=True
+        f"modinfo {module_name}",
+        shell=True, stdout=subprocess.DEVNULL
     ).returncode == 0
 
 def is_module_loaded(module_name):
 
     return subprocess.run(
-        f"lsmod | grep -E \"^{module_name}\"", shell=True
+        f"lsmod | grep -E \"^{module_name}\"",
+        shell=True, stdout=subprocess.DEVNULL
     ).returncode == 0
 
 def get_current_display_manager():

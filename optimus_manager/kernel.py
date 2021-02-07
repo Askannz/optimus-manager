@@ -237,7 +237,7 @@ def _load_module(available_modules, module, options=None):
     try:
         subprocess.check_call(
             f"modprobe {module} {options}",
-            shell=True, text=True, stderr=subprocess.PIPE)
+            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise KernelSetupError(f"Error running modprobe for {module}: {e.stderr}") from e
 
@@ -256,7 +256,7 @@ def _unload_modules(available_modules, modules_list):
         # We use "modprobe -r" because unlike "rmmod", it does not return an error if the module is not loaded.
         subprocess.check_call(
             f"modprobe -r {' '.join(modules_to_unload)}",
-            shell=True, text=True, stderr=subprocess.PIPE)
+            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise KernelSetupError(f"Cannot unload modules {modules_to_unload}: {e.stderr}") from e
 
@@ -435,6 +435,7 @@ def _try_custom_set_power_state(state):
     logger.info("Running custom power switching script %s", script_path)
 
     try:
-        subprocess.check_call(script_path, text=True, stderr=subprocess.PIPE)
+        subprocess.check_call(
+            script_path, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         logger.error(f"Cannot run {script_path}. Continuing anyways. Error is: {e.stderr}")

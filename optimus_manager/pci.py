@@ -52,7 +52,7 @@ def hot_reset_nvidia():
     try:
         subprocess.check_call(
             f"setpci -s {nvidia_pci_bridge} 0x488.l=0x2000000:0x2000000",
-            shell=True, text=True, stderr=subprocess.PIPE)
+            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise PCIError(f"Failed to run setpci command : {e.stderr}") from e
 

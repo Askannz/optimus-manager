@@ -51,7 +51,7 @@ def kill_PID(PID_value, signal):
 
     try:
         subprocess.check_call(
-            f"kill {signal} {PID_value}",
-            shell=True, text=True, stderr=subprocess.PIPE)
+            f"kill {signal} {PID_value}", shell=True, text=True,
+            stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise ProcessesError(f"Cannot kill PID {PID_value}: {e.stderr}") from e

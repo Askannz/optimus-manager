@@ -44,7 +44,9 @@ def cleanup_xorg_conf():
 def is_xorg_running():
 
     return any([
-        subprocess.run(f"pidof {name}", shell=True).returncode == 0
+        subprocess.run(
+            f"pidof {name}", shell=True, stdout=subprocess.DEVNULL
+        ).returncode == 0
         for name in ["X", "Xorg"]
     ])
 
@@ -70,7 +72,9 @@ def do_xsetup(requested_mode):
                 "xrandr --setprovideroutputsource modesetting NVIDIA-0",
                 "xrandr --auto"
             ]:
-                subprocess.check_call(cmd, shell=True, text=True, stderr=subprocess.PIPE)
+                subprocess.check_call(
+                    cmd, shell=True, text=True, stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL)
 
         except subprocess.CalledProcessError as e:
             logger.error(f"Cannot setup PRIME (xrandr error):\n{e.stderr}")
@@ -81,7 +85,8 @@ def do_xsetup(requested_mode):
     logger.info("Running %s", script_path)
 
     try:
-        subprocess.check_call(script_path, text=True, stderr=subprocess.PIPE)
+        subprocess.check_call(
+            script_path, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         logger.error(f"ERROR : cannot run {script_path} :\n{e.stderr}")
 
@@ -96,7 +101,9 @@ def set_DPI(config):
         return
 
     try:
-        subprocess.check_output("xrandr --dpi %s" % dpi_str, shell=True, text=True, stderr=subprocess.PIPE)
+        subprocess.check_call(
+            f"xrandr --dpi {dpi_str}", shell=True, text=True,
+            stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         logger.error(f"Cannot set DPI (xrandr error):\n{e.stderr}")
 
