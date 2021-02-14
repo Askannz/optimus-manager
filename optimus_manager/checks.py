@@ -11,6 +11,15 @@ class CheckError(Exception):
     pass
 
 
+def check_running_graphical_session():
+    return subprocess.run(
+        "xhost",
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    ).returncode == 0
+
+
 def is_ac_power_connected():
 
     for power_source_path in Path("/sys/class/power_supply/").iterdir():
