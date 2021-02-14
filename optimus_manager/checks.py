@@ -3,7 +3,6 @@ from pathlib import Path
 import re
 import subprocess
 import dbus
-import psutil
 from .log_utils import get_logger
 
 
@@ -119,45 +118,6 @@ def is_daemon_active():
 
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
-
-def list_processes_on_nvidia(bus_ids):
-
-    nvidia_id = bus_ids["nvidia"]
-
-    paths = [
-        "/dev/nvidia",
-        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-card"),
-        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-render")
-    ]
-
-    def _check_holds_nvidia(pid):
-
-        for fd_path in Path(f"/proc/{pid}/fd").iterdir():
-            try:
-                target = os.readlink(fd_path)
-                for p in paths:
-                    if p in target:
-                        return True
-            except FileNotFoundError:
-                pass
-
-        return False
-
-    processes = []
-
-    for proc in psutil.process_iter(["pid", "cmdline"]):
-        try:
-            if _check_holds_nvidia(proc.pid):
-                cmdline = proc.cmdline()
-                cmdline = cmdline[0] if len(cmdline) > 0 else ""
-                processes.append({
-                    "pid": proc.pid,
-                    "cmdline":cmdline
-                })
-        except PermissionError:
-            pass
-
-    return processes
 
 
 def _is_gl_provider_nvidia():

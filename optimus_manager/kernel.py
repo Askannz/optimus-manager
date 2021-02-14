@@ -97,7 +97,6 @@ def _nvidia_down(config):
     available_modules = get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
-    _wait_no_processes_on_nvidia()
     _unload_nvidia_modules(available_modules)
 
     nvidia_power_down(config, available_modules)
@@ -169,40 +168,6 @@ def _try_load_acpi_call(available_modules):
         logger.error(
             "Cannot load acpi_call. Continuing anyway. Error is: %s", str(e))
 
-
-def _wait_no_processes_on_nvidia():
-
-    logger = get_logger()
-    bus_ids = pci.get_gpus_bus_ids(notation_fix=False)
-
-    tries_counter = 0
-
-    while True:
-
-        processes_list = checks.list_processes_on_nvidia(bus_ids)
-        tries_counter += 1
-
-        if len(processes_list) == 0:
-            logger.info("No processes currently holding the Nvidia GPU")
-            break
-
-        logger.info(
-            "%d processes still using the Nvidia GPU. Waiting %.1f seconds.",
-            len(processes_list), envs.NVIDIA_PROCESSES_WAIT_PERIOD)
-
-        pid_table = "Processes:\n"
-        for p in processes_list:
-            pid_table += f"  {p['pid']} {p['cmdline']}\n"
-
-        logger.info(pid_table)
-
-        if tries_counter > envs.NVIDIA_PROCESSES_WAIT_MAX_TRIES:
-            raise KernelSetupError("Timeout waiting for active processes to release the Nvidia GPU")
-
-        time.sleep(envs.NVIDIA_PROCESSES_WAIT_PERIOD)
-
-
-
 def _unload_nvidia_modules(available_modules):
     _unload_modules(available_modules, ["nvidia_drm", "nvidia_modeset", "nvidia_uvm", "nvidia"])
 
@@ -252,13 +217,29 @@ def _unload_modules(available_modules, modules_list):
 
     logger.info("Unloading modules %s (if loaded)", str(modules_to_unload))
 
-    try:
-        # We use "modprobe -r" because unlike "rmmod", it does not return an error if the module is not loaded.
-        subprocess.check_call(
-            f"modprobe -r {' '.join(modules_to_unload)}",
-            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
-    except subprocess.CalledProcessError as e:
-        raise KernelSetupError(f"Cannot unload modules {modules_to_unload}: {e.stderr}") from e
+    counter = 0
+    while True:
+
+        counter += 1
+
+        try:
+            # We use "modprobe -r" because unlike "rmmod", it does not return an error if the module is not loaded.
+            subprocess.check_call(
+                f"modprobe -r {' '.join(modules_to_unload)}",
+                shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+
+        except subprocess.CalledProcessError as e:
+
+            if counter > envs.MODULES_UNLOAD_WAIT_MAX_TRIES:
+                logger.info(f"Max tries ({counter}) exceeded")
+                raise KernelSetupError(f"Cannot unload modules {modules_to_unload}: {e.stderr}") from e
+            else:
+                logger.info(f"Cannot unload modules: {e.stderr}")
+                logger.info(f"Waiting {envs.MODULES_UNLOAD_WAIT_PERIOD}s and retrying.")
+                time.sleep(envs.MODULES_UNLOAD_WAIT_PERIOD)
+
+        else:
+            break
 
 
 def _get_PAT_parameter_value(config):
