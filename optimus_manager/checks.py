@@ -139,15 +139,21 @@ def _is_service_active(service_name):
 
     logger = get_logger()
 
-    try:
-        system_bus = dbus.SystemBus()
-    except dbus.exceptions.DBusException:
-        logger.warning(
-            "Cannot communicate with the DBus system bus to check status of %s."
-            " Is DBus running ? Falling back to bash commands", service_name)
-        return _is_service_active_bash(service_name)
-    else:
-        return _is_service_active_dbus(system_bus, service_name)
+    if subprocess.run(f"which rc-status", shell=True).returncode == 0:
+        return _is_service_active_openrc(service_name)
+
+    if subprocess.run(f"which systemctl", shell=True).returncode == 0:
+        try:
+            system_bus = dbus.SystemBus()
+        except dbus.exceptions.DBusException:
+            logger.warning(
+                "Cannot communicate with the DBus system bus to check status of %s."
+                " Is DBus running ? Falling back to bash commands", service_name)
+            return _is_service_active_bash(service_name)
+        else:
+            return _is_service_active_dbus(system_bus, service_name)
+
+    return False # ERROR: No service manager found!
 
 def _is_service_active_dbus(system_bus, service_name):
 
@@ -156,7 +162,7 @@ def _is_service_active_dbus(system_bus, service_name):
     try:
         unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
     except dbus.exceptions.DBusException:
-        return _is_service_active_openrc(service_name)
+        return False
 
     optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
     properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
@@ -166,8 +172,6 @@ def _is_service_active_dbus(system_bus, service_name):
 
 
 def _is_service_active_bash(service_name):
-    if subprocess.run(f"which systemctl", shell=True).returncode == 1:
-        return _is_service_active_openrc(service_name)
     return subprocess.run(
         f"systemctl is-active {service_name}", shell=True
     ).returncode == 0
