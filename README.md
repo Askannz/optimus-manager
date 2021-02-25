@@ -43,7 +43,7 @@ Manjaro ships with a default configuration for SDDM (the default login manager f
 Installation
 ----------
 
-Naturally, you must have the proprietary nvidia driver installed on your system. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`. On Manjaro, it is fine to use the built-in driver utility.
+Naturally, you must have the proprietary nvidia driver installed on your system. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`, or a specific nvidia-package if you run a custom kernel (e.g. `nvidia-lts` with `linux-lts` etc.). On Manjaro, it is fine to use the built-in driver utility.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
