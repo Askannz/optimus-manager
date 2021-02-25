@@ -156,7 +156,7 @@ def _is_service_active_dbus(system_bus, service_name):
     try:
         unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
     except dbus.exceptions.DBusException:
-        return False
+        return _is_service_active_openrc(service_name)
 
     optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
     properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
@@ -166,7 +166,13 @@ def _is_service_active_dbus(system_bus, service_name):
 
 
 def _is_service_active_bash(service_name):
-
+    if subprocess.run(f"which systemctl", shell=True).returncode == 1:
+        return _is_service_active_openrc(service_name)
     return subprocess.run(
         f"systemctl is-active {service_name}", shell=True
     ).returncode == 0
+
+def _is_service_active_openrc(service_name):
+    if subprocess.run(f"rc-status --nocolor default | grep -E '%s.*started'" % service_name, shell=True).returncode == 0:
+        return True
+    return False
