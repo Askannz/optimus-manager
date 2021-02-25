@@ -9,6 +9,9 @@ description="Optimus Manager Commands daemon"
 
 depend() {
     before xdm
+	before lightdm
+    before sddm
+    before gdm
 }
 
 start_pre() {
