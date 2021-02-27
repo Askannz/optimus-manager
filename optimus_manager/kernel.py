@@ -82,7 +82,7 @@ def _nvidia_up(config, hybrid):
         logger.info("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-    if config["optimus"]["pci_reset"] == "yes":
+    if config["optimus"]["pci_reset"] != "no":
         _try_pci_reset(config, available_modules)
 
     if config["optimus"]["pci_power_control"] == "yes":
