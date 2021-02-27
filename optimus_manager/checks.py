@@ -139,6 +139,9 @@ def _is_service_active(service_name):
 
     logger = get_logger()
 
+    if subprocess.run(f"which sv", shell=True).returncode == 0:
+        return _is_service_active_sv(service_name)
+
     if subprocess.run(f"which rc-status", shell=True).returncode == 0:
         return _is_service_active_openrc(service_name)
 
@@ -189,3 +192,9 @@ def _is_service_active_openrc(service_name):
 def _is_service_active_s6(service_name):
     # TODO: Check if service running
     return True
+
+
+def _is_service_active_sv(service_name):
+    if subprocess.run(f"sv status %s" % service_name, shell=True).returncode == 0:
+        return True
+    return False
