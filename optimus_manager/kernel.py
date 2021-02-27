@@ -82,7 +82,7 @@ def _nvidia_up(config, hybrid):
         logger.info("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-    if config["optimus"]["pci_reset"] == "yes":
+    if config["optimus"]["pci_reset"] != "no":
         _try_pci_reset(config, available_modules)
 
     if config["optimus"]["pci_power_control"] == "yes":
@@ -127,16 +127,50 @@ def _nvidia_down(config):
 
 def _load_nvidia_modules(config, available_modules):
 
-    pat_value = _get_PAT_parameter_value(config)
-    modeset_value = 1 if config["nvidia"]["modeset"] == "yes" else 0
+    logger = get_logger()
 
-    _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
-    _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
+
+    #
+    # nvidia module
+
+    nvidia_options = []
+
+    if config["nvidia"]["pat"] == "yes":
+
+        if not checks.is_pat_available():
+            logger.warning(
+                "Page Attribute Tables are not available on your system.\n"
+                "Disabling the PAT option for Nvidia.")
+        else:
+            nvidia_options.append("NVreg_UsePageAttributeTable=1")
+
+    if config["nvidia"]["dynamic_power_management"] == "coarse":
+        nvidia_options.append("NVreg_DynamicPowerManagement=0x01")
+    elif config["nvidia"]["dynamic_power_management"] == "fine":
+        nvidia_options.append("NVreg_DynamicPowerManagement=0x02")
+
+    mem_th = config["nvidia"]["dynamic_power_management_memory_threshold"]
+    if mem_th != "":
+        nvidia_options.append(f"NVreg_DynamicPowerManagementVideoMemoryThreshold={mem_th}")
+
+    _load_module(available_modules, "nvidia", options=nvidia_options)
+
+
+    #
+    # nvidia_drm module
+
+    nvidia_drm_options = []
+
+    if config["nvidia"]["modeset"] == "yes":
+        nvidia_drm_options.append("modeset=1")
+
+    _load_module(available_modules, "nvidia_drm", options=nvidia_drm_options)
+
 
 def _load_nouveau(config, available_modules):
     # TODO: move that option to [optimus]
-    modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
-    _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
+    nouveau_options = ["modeset=1"] if config["intel"]["modeset"] == "yes" else []
+    _load_module(available_modules, "nouveau", options=nouveau_options)
 
 def _try_load_nouveau(config, available_modules):
 
@@ -191,7 +225,7 @@ def _load_module(available_modules, module, options=None):
 
     logger = get_logger()
 
-    options = options or ""
+    options = options or []
 
     logger.info("Loading module %s", module)
 
@@ -201,7 +235,7 @@ def _load_module(available_modules, module, options=None):
             " Is the corresponding package installed ?" % module)
     try:
         subprocess.check_call(
-            f"modprobe {module} {options}",
+            f"modprobe {module} {' '.join(options)}",
             shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError as e:
         raise KernelSetupError(f"Error running modprobe for {module}: {e.stderr}") from e
@@ -241,20 +275,6 @@ def _unload_modules(available_modules, modules_list):
         else:
             break
 
-
-def _get_PAT_parameter_value(config):
-
-    logger = get_logger()
-
-    pat_value = {"yes": 1, "no": 0}[config["nvidia"]["pat"]]
-
-    if not checks.is_pat_available():
-        logger.warning(
-            "Page Attribute Tables are not available on your system.\n"
-            "Disabling the PAT option for Nvidia.")
-        pat_value = 0
-
-    return pat_value
 
 def _set_bbswitch_state(state):
 

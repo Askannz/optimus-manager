@@ -35,6 +35,8 @@
 		"dpi": ["integer", true],
 		"ignore_abi": ["single_word", ["yes", "no"], false],
 		"allow_external_gpus": ["single_word", ["yes", "no"], false],
-		"options": ["multi_words", ["overclocking", "triple_buffer"], true]
+		"options": ["multi_words", ["overclocking", "triple_buffer"], true],
+		"dynamic_power_management": ["single_word", ["no", "coarse", "fine"], false],
+		"dynamic_power_management_memory_threshold": ["integer", true]
 	}
 }
