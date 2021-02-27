@@ -195,6 +195,6 @@ def _is_service_active_s6(service_name):
 
 
 def _is_service_active_sv(service_name):
-    if subprocess.run(f"sv status %s | grep 'up: %s'" % service_name, shell=True).returncode == 0:
+    if subprocess.run(f"sv status %s | grep 'up: '" % service_name, shell=True).returncode == 0:
         return True
     return False
