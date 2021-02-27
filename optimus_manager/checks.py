@@ -142,6 +142,9 @@ def _is_service_active(service_name):
     if subprocess.run(f"which rc-status", shell=True).returncode == 0:
         return _is_service_active_openrc(service_name)
 
+    if subprocess.run(f"which s6-svstat", shell=True).returncode == 0:
+        return _is_service_active_s6(service_name)
+
     if subprocess.run(f"which systemctl", shell=True).returncode == 0:
         try:
             system_bus = dbus.SystemBus()
@@ -176,7 +179,13 @@ def _is_service_active_bash(service_name):
         f"systemctl is-active {service_name}", shell=True
     ).returncode == 0
 
+
 def _is_service_active_openrc(service_name):
     if subprocess.run(f"rc-status --nocolor default | grep -E '%s.*started'" % service_name, shell=True).returncode == 0:
         return True
     return False
+
+
+def _is_service_active_s6(service_name):
+    # TODO: Check if service running
+    return True
