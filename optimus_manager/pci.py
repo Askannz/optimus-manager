@@ -20,9 +20,6 @@ class PCIError(Exception):
 def set_power_state(mode):
     _write_to_nvidia_path("power/control", mode)
 
-def get_power_state():
-    return _read_from_nvidia_path("power/control")
-
 def function_level_reset_nvidia():
     _write_to_nvidia_path("reset", "1")
 
@@ -147,16 +144,6 @@ def _write_to_nvidia_path(relative_path, string):
     absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
     _write_to_pci_path(absolute_path, string)
 
-def _read_from_nvidia_path(relative_path):
-
-    bus_ids = get_gpus_bus_ids(notation_fix=False)
-
-    if "nvidia" not in bus_ids.keys():
-        raise PCIError("Nvidia not in PCI bus")
-
-    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
-    return _read_pci_path(absolute_path)
-
 
 def _write_to_pci_path(pci_path, string):
 
@@ -164,9 +151,9 @@ def _write_to_pci_path(pci_path, string):
         with open(pci_path, "w") as f:
             f.write(string)
     except FileNotFoundError as e:
-        raise PCIError("Cannot find PCI path at %s" % pci_path) from e
+        raise PCIError(f"Cannot find PCI path at {pci_path}") from e
     except IOError as e:
-        raise PCIError("Error writing to %s" % pci_path) from e
+        raise PCIError(f"Error writing to {pci_path}: {str(e)}") from e
 
 def _read_pci_path(pci_path):
 
