@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import re
 import subprocess
 from .log_utils import get_logger
@@ -136,13 +137,32 @@ def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
 def _write_to_nvidia_path(relative_path, string):
 
+    logger = get_logger()
+
     bus_ids = get_gpus_bus_ids(notation_fix=False)
 
     if "nvidia" not in bus_ids.keys():
         raise PCIError("Nvidia not in PCI bus")
 
-    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
-    _write_to_pci_path(absolute_path, string)
+    nvidia_id = bus_ids["nvidia"]
+
+    res = re.fullmatch(r"([0-9]{2}:[0-9]{2})\.[0-9]", nvidia_id)
+
+    if res is None:
+        raise PCIError(f"Unexpected PCI ID format: {nvidia_id}")
+
+    partial_id = res.groups()[0]  # Bus ID minus the PCI function number
+
+    # Applying to all PCI functions of the Nvidia card
+    # (in case they have an audio chipset or a Thunderbolt controller, for instance)
+    for device_path in Path("/sys/bus/pci/devices/").iterdir():
+
+        device_id = device_path.name
+        if re.fullmatch(f"0000:{partial_id}\\.([0-9])", device_id):
+
+            write_path = device_path / relative_path
+            logger.info(f"Writing \"{string}\" to {write_path}")
+            _write_to_pci_path(write_path, string)
 
 
 def _write_to_pci_path(pci_path, string):
