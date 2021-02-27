@@ -149,6 +149,10 @@ def _load_nvidia_modules(config, available_modules):
     elif config["nvidia"]["dynamic_power_management"] == "fine":
         nvidia_options.append("NVreg_DynamicPowerManagement=0x02")
 
+    mem_th = config["nvidia"]["dynamic_power_management_memory_threshold"]
+    if mem_th != "":
+        nvidia_options.append(f"NVreg_DynamicPowerManagementVideoMemoryThreshold={mem_th}")
+
     _load_module(available_modules, "nvidia", options=nvidia_options)
 
 
