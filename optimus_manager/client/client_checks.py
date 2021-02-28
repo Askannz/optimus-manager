@@ -31,13 +31,17 @@ def _check_daemon_active():
 
 def _check_power_switching(config):
 
-    if config["optimus"]["switching"] == "none" and config["optimus"]["pci_power_control"] == "no":
+    power_management_default = (
+        config["optimus"]["switching"] == "none" and \
+        config["optimus"]["pci_power_control"] == "no" and \
+        config["nvidia"]["dynamic_power_management"] == "no"
+    )
+
+    if power_management_default:
         print("WARNING : no power management option is currently enabled (this is the default since v1.2)."
               " Switching between GPUs will work but you will likely experience poor battery life.\n"
               "Follow instructions at https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options"
-              " to enable power management.\n"
-              "If you have already enabled the new Runtime D3 power management inside the Nvidia driver (for Turing+ GPU + Coffee Lake+ CPU),"
-              " you can safely ignore this warning.\n")
+              " to enable power management.\n")
 
 def _check_bbswitch_module(config):
 
