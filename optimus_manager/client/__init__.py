@@ -29,8 +29,6 @@ def main():
         _print_version()
     elif args.print_startup:
         _print_startup_mode(config)
-    elif args.set_startup:
-        _print_startup_deperecation_and_exit()
     elif args.temp_config:
         _set_temp_config_and_exit(args.temp_config)
     elif args.unset_temp_config:
@@ -128,12 +126,6 @@ def _print_next_mode(state):
         res_str = "no change"
 
     print("GPU mode requested for next login : %s" % res_str)
-
-def _print_startup_deperecation_and_exit():
-    print(
-        "The argument --set-startup is deprecated. Set startup_mode through the"
-        " configuration file at %s instead" % envs.USER_CONFIG_PATH)
-    sys.exit(1)
 
 
 def _print_startup_mode(config):
