@@ -230,16 +230,16 @@ def _validate_integer(schema_option_info, config_option_value):
 
     if val == "":
         if not can_be_blank:
-            msg = "non-blank integer value required"
+            msg = "value can't be blank"
             return False, msg
 
     else:
         try:
             v = int(val)
-            if v <= 0:
+            if v < 0:
                 raise ValueError
         except ValueError:
-            msg = "non-blank integer value required"
+            msg = f"positive integer value required (got \"{val}\")"
             return False, msg
 
     return True, None
