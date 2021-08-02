@@ -85,7 +85,11 @@ def _nvidia_up(config, hybrid):
     if config["optimus"]["pci_reset"] != "no":
         _try_pci_reset(config, available_modules)
 
-    if config["optimus"]["pci_power_control"] == "yes":
+    power_control = (
+        config["optimus"]["pci_power_control"] == "yes" or \
+        config["nvidia"]["dynamic_power_management"] != "no"
+    )
+    if power_control:
         _try_set_pci_power_state("auto" if hybrid else "on")
 
     _load_nvidia_modules(config, available_modules)
@@ -113,8 +117,12 @@ def _nvidia_down(config):
             logger.info("Removing Nvidia from PCI bus")
             _try_remove_pci()
 
+    power_control = (
+        config["optimus"]["pci_power_control"] == "yes" or \
+        config["nvidia"]["dynamic_power_management"] != "no"
+    )
 
-    if config["optimus"]["pci_power_control"] == "yes":
+    if power_control:
 
         switching_mode = config["optimus"]["switching"]
         if switching_mode == "bbswitch" or switching_mode == "acpi_call":
