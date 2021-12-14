@@ -7,7 +7,7 @@ class SessionsError(Exception):
     pass
 
 
-def logout_current_desktop_session():
+def logout_current_desktop_session(custom=False):
 
     logger = get_logger()
 
@@ -43,16 +43,21 @@ def logout_current_desktop_session():
             except dbus.exceptions.DBusException:
                 pass
 
+    cmds = []
+    if custom:
+        cmds = ["/etc/optimus-manager/logout.sh"]
+    else:
+        cmds = [
+            "i3-msg exit",  # i3
+            "openbox --exit",  # Openbox
+            "awesome-client \"awesome.quit()\"",  # AwesomeWM
+            "bspc quit",  # bspwm
+            "pkill -SIGTERM -f dwm",  # dwm
+            "pkill -SIGTERM -f lxsession",  # LXDE
+            "qtile-cmd -o cmd -f shutdown"  # qtile
+        ]
 
-    for cmd in [
-        "i3-msg exit",  # i3
-        "openbox --exit",  # Openbox
-        "awesome-client \"awesome.quit()\"",  # AwesomeWM
-        "bspc quit",  # bspwm
-        "pkill -SIGTERM -f dwm",  # dwm
-        "pkill -SIGTERM -f lxsession",  # LXDE
-        "qtile-cmd -o cmd -f shutdown"  # qtile
-    ]:
+    for cmd in cmds:
         try:
             check_call(cmd, shell=True)
         except CalledProcessError:

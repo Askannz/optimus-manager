@@ -95,9 +95,9 @@ def _send_switch_command(config, requested_mode):
     print("Switching to mode : %s" % requested_mode)
     command = {"type": "switch", "args": {"mode": requested_mode}}
     _send_command(command)
-
-    if config["optimus"]["auto_logout"] == "yes":
-        sessions.logout_current_desktop_session()
+    auto_logout = config["optimus"]["auto_logout"]
+    if auto_logout in ["yes", "custom"]:
+        sessions.logout_current_desktop_session(custom=auto_logout == "custom")
 
 
 def _get_config():

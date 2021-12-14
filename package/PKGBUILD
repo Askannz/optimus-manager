@@ -26,6 +26,7 @@ backup=('etc/optimus-manager/xorg/integrated-mode/integrated-gpu.conf'
 
         'etc/optimus-manager/nvidia-enable.sh'
         'etc/optimus-manager/nvidia-disable.sh'
+        'etc/optimus-manager/logout.sh'
 
         'var/lib/optimus-manager/persistent/startup_mode')
 source=("git+https://github.com/Askannz/optimus-manager.git#branch=master")
@@ -74,6 +75,8 @@ package() {
 
   install -Dm755 config/nvidia-enable.sh "$pkgdir/etc/optimus-manager/nvidia-enable.sh"
   install -Dm755 config/nvidia-disable.sh "$pkgdir/etc/optimus-manager/nvidia-disable.sh"
+
+  install -Dm755 config/logout.sh "$pkgdir/etc/optimus-manager/logout.sh"
  
   /usr/bin/python3 setup.py install --root="$pkgdir/" --optimize=1 --skip-build
  
