@@ -52,6 +52,7 @@ def logout_current_desktop_session():
         "pkill -SIGTERM -f dwm",  # dwm
         "pkill -SIGTERM -f lxsession",  # LXDE
         "qtile cmd-obj -o cmd -f shutdown"  # qtile
+        "pkill -SIGTERM -f xmonad"  # Xmonad
     ]:
         try:
             check_call(cmd, shell=True)
