@@ -86,7 +86,7 @@ Run
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-Auto-logout is supported for the following desktop environments/window managers: KDE Plasma, Gnome, XFCE, Deepin, i3, Openbox, AwesomeWM, bspwm, dwm, LXDE, QTile. You can disable this feature in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for the following desktop environments/window managers: KDE Plasma, Gnome, XFCE, Deepin, i3, Openbox, AwesomeWM, bspwm, dwm, LXDE, QTile, Xmonad. You can disable this feature in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
 You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
 
