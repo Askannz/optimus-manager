@@ -87,10 +87,10 @@ def get_gpus_bus_ids(notation_fix=True):
             notation_fix=notation_fix)
 
         if len(ids_list) > 1:
-            logger.warning(f"Multiple {manufacturer} GPUs found ! Picking the first enumerated one.")
+            logger.warning(f"Multiple {manufacturer} GPUs found ! Picking the last enumerated one.")
 
         if len(ids_list) > 0:
-            bus_ids[manufacturer] = ids_list[0]
+            bus_ids[manufacturer] = ids_list[-1]
 
     if "intel" in bus_ids and "amd" in bus_ids:
         logger.warning("Found both an Intel and an AMD GPU. Defaulting to Intel.")
