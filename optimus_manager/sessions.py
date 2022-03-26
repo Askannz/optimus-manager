@@ -51,9 +51,9 @@ def logout_current_desktop_session():
         "bspc quit",  # bspwm
         "pkill -SIGTERM -f dwm",  # dwm
         "pkill -SIGTERM -f lxsession",  # LXDE
-        "qtile cmd-obj -o cmd -f shutdown"  # qtile
+        "qtile cmd-obj -o cmd -f shutdown",  # qtile
         "pkill -SIGTERM -f xmonad",  # Xmonad
-        "herbstclient quit" #herbstluftwm
+        "herbstclient quit",  # herbstluftwm
     ]:
         try:
             check_call(cmd, shell=True)
