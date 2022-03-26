@@ -53,7 +53,7 @@ After installation, the optimus-manager daemon should have been started automati
 
 * **Custom Xorg config :** optimus-manager works by auto-generating a Xorg configuration file and putting it into `/etc/X11/xorg.conf.d/`. If you already have custom Xorg configuration files at that location or at `/etc/X11/xorg.conf `, it is strongly advised that you remove anything GPU-related from them to make sure that they do not interfere with the GPU switching process.
 
-* **Nvidia-generated Xorg config :** Similarly, if you have ever used the `nvidia-xonfig` utility or the `Save to X Configuration File` button in the Nvidia control panel, a Xorg config file may have been generated at `/etc/X11/xorg.conf `. It is highly recommended to delete it before trying to switch GPUs.
+* **Nvidia-generated Xorg config :** Similarly, if you have ever used the `nvidia-xconfig` utility or the `Save to X Configuration File` button in the Nvidia control panel, a Xorg config file may have been generated at `/etc/X11/xorg.conf `. It is highly recommended to delete it before trying to switch GPUs.
 
 * **Manjaro-generated Xorg config :** Manjaro has its own driver utility called MHWD that also auto-generates a Xorg config file at `/etc/X11/xorg.conf.d/90-mhwd.conf`. optimus-manager will automatically delete that file to avoid issues.
 
@@ -88,7 +88,7 @@ Run
 
 Auto-logout is supported for the following desktop environments/window managers: KDE Plasma, Gnome, XFCE, Deepin, i3, Openbox, AwesomeWM, bspwm, dwm, LXDE, QTile, Xmonad. You can disable this feature in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
-You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
+You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file](https://github.com/Askannz/optimus-manager/blob/master/optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
 
 Note that switching to and from "integrated" mode can be a little unstable, due to having to load/unload the nvidia kernel modules and change the power state of the card. If you're experiencing stability issues, the safest way to use this mode is to boot straight into it using the `startup_mode` config options or the kernel parameter (see below).
 

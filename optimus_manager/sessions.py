@@ -51,7 +51,8 @@ def logout_current_desktop_session():
         "bspc quit",  # bspwm
         "pkill -SIGTERM -f dwm",  # dwm
         "pkill -SIGTERM -f lxsession",  # LXDE
-        "qtile-cmd -o cmd -f shutdown",  # qtile
+        "pkill -SIGTERM -f xmonad"  # Xmonad
+        "qtile cmd-obj -o cmd -f shutdown"  # qtile
         "pkill -SIGTERM -f xmonad"  # Xmonad
     ]:
         try:
