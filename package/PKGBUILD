@@ -59,6 +59,7 @@ package() {
   install -Dm755 systemd/suspend/optimus-manager.py "$pkgdir/usr/lib/systemd/system-sleep/optimus-manager.py"
 
   install -Dm644 completion/zsh/_optimus-manager "$pkgdir/usr/share/zsh/site-functions/_optimus-manager"
+  install -Dm644 completion/fish/optimus-manager.fish "$pkgdir/usr/share/fish/vendor_completions.d/optimus-manager.fish"
   
   install -Dm644 login_managers/sddm/20-optimus-manager.conf "$pkgdir/etc/sddm.conf.d/20-optimus-manager.conf"
   install -Dm644 login_managers/lightdm/20-optimus-manager.conf  "$pkgdir/etc/lightdm/lightdm.conf.d/20-optimus-manager.conf"
