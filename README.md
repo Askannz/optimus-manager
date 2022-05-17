@@ -97,7 +97,7 @@ Note that switching to and from "integrated" mode can be a little unstable, due 
 
 ![optimus-manager systray screenshot](systray.png "optimus-manager systray")
 
-The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
+The program [optimus-manager-qt](https://github.com/Shatur/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
 Unofficial Gnome Shell extensions are also avaialble :
