@@ -114,6 +114,8 @@ Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where 
 
 Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
+See this project to automatically create corresponding boot entries in GRUB: https://github.com/hakasapl/optimus-manager-grub
+
 Power management
 ----------
 
