@@ -14,7 +14,7 @@ optimus-manager can also work with other display managers (or with no display ma
 
 Introduction
 ----------
-GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel/AMD GPU only acts as a "relay" between the Nvidia GPU and your screen.
+GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel/AMD iGPU only acts as a "relay" between the Nvidia GPU and your screen.
 
 This is essentially a port to Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
@@ -100,7 +100,7 @@ Note that switching to and from "integrated" mode can be a little unstable, due 
 The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
-Unofficial Gnome Shell extensions are also avaialble :
+Unofficial Gnome Shell extensions are also available :
 
 * [optimus-manager-argos (unmaintained)](https://github.com/inzar98/optimus-manager-argos).
 
