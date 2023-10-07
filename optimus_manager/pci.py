@@ -121,8 +121,11 @@ def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
             # Xorg expects bus IDs separated by colons in decimal instead of
             # hexadecimal format without any leading zeroes and prefixed with
             # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            parts=re.split("[.:]", bus_id)
+            if len(parts) > 3:
+                parts=parts[1:]
             bus_id = "PCI:" + ":".join(
-                str(int(field, 16)) for field in re.split("[.:]", bus_id)
+                str(int(field, 16)) for field in parts
             )
 
         pci_class = items[1][:-1]
@@ -146,12 +149,12 @@ def _write_to_nvidia_path(relative_path, string):
 
     nvidia_id = bus_ids["nvidia"]
 
-    res = re.fullmatch(r"([0-9]{2}:[0-9]{2})\.[0-9]", nvidia_id)
+    res = re.fullmatch(r"([0-9]{4}:)?([0-9]{2}:[0-9]{2})\.[0-9]", nvidia_id)
 
     if res is None:
         raise PCIError(f"Unexpected PCI ID format: {nvidia_id}")
 
-    partial_id = res.groups()[0]  # Bus ID minus the PCI function number
+    partial_id = res.groups()[1]  # Bus ID minus the PCI function number
 
     # Applying to all PCI functions of the Nvidia card
     # (in case they have an audio chipset or a Thunderbolt controller, for instance)
