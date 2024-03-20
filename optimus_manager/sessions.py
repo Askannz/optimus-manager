@@ -20,8 +20,12 @@ def logout_current_desktop_session():
     else:
 
         def logout_kde():
-            kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
-            kde.logout(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
+            try:
+                kde = session_bus.get_object("org.kde.Shutdown", "/Shutdown")
+                kde.logout()
+            except:
+                kde = session_bus.get_object("org.kde.ksmserver", "/KSMServer")
+                kde.closeSession(0, 3, 3, dbus_interface="org.kde.KSMServerInterface")
         def logout_gnome():
             gnome = session_bus.get_object("org.gnome.SessionManager", "/org/gnome/SessionManager")
             gnome.Logout(1, dbus_interface="org.gnome.SessionManager")
