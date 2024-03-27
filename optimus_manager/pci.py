@@ -1,11 +1,14 @@
 import os
+from pathlib import Path
 import re
-from .bash import exec_bash, BashError
+import subprocess
 from .log_utils import get_logger
 
-NVIDIA_VENDOR_ID = "10de"
-INTEL_VENDOR_ID = "8086"
-AMD_VENDOR_ID = "1002"
+VENDOR_IDS = {
+    "nvidia": "10de",
+    "intel": "8086",
+    "amd": "1002"
+}
 
 GPU_PCI_CLASS_PATTERN = "03[0-9a-f]{2}"
 PCI_BRIDGE_PCI_CLASS_PATTERN = "0604"
@@ -17,9 +20,6 @@ class PCIError(Exception):
 
 def set_power_state(mode):
     _write_to_nvidia_path("power/control", mode)
-
-def get_power_state():
-    return _read_from_nvidia_path("power/control")
 
 def function_level_reset_nvidia():
     _write_to_nvidia_path("reset", "1")
@@ -48,9 +48,11 @@ def hot_reset_nvidia():
 
     logger.info("Triggering PCI hot reset of bridge %s", nvidia_pci_bridge)
     try:
-        exec_bash("setpci -s %s 0x488.l=0x2000000:0x2000000" % nvidia_pci_bridge)
-    except BashError as e:
-        raise PCIError("failed to run setpci command : %s" % str(e))
+        subprocess.check_call(
+            f"setpci -s {nvidia_pci_bridge} 0x488.l=0x2000000:0x2000000",
+            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        raise PCIError(f"Failed to run setpci command : {e.stderr}") from e
 
     logger.info("Rescanning PCI bus")
     rescan()
@@ -76,51 +78,36 @@ def get_gpus_bus_ids(notation_fix=True):
 
     logger = get_logger()
 
-    nvidia_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=NVIDIA_VENDOR_ID,
-        notation_fix=notation_fix)
-
-    intel_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=INTEL_VENDOR_ID,
-        notation_fix=notation_fix)
-
-    amd_ids_list = _get_bus_ids(
-        match_pci_class=GPU_PCI_CLASS_PATTERN,
-        match_vendor_id=AMD_VENDOR_ID,
-        notation_fix=notation_fix)
-
-
-    if len(nvidia_ids_list) > 1:
-        logger.warning("Multiple Nvidia GPUs found ! Picking the first one.")
-
-    if len(intel_ids_list) > 1:
-        logger.warning("Multiple Intel GPUs found ! Picking the first one.")
-
-    if len(amd_ids_list) > 1:
-        logger.warning("Multiple AMD GPUs found ! Picking the first one.")
-
     bus_ids = {}
-    if len(nvidia_ids_list) > 0:
-        bus_ids["nvidia"] = nvidia_ids_list[0]
-    if len(intel_ids_list) > 0:
-        bus_ids["intel"] = intel_ids_list[0]
-    if len(amd_ids_list) > 0:
-        bus_ids["amd"] = amd_ids_list[0]
+    for manufacturer, vendor_id in VENDOR_IDS.items():
+
+        ids_list = _search_bus_ids(
+            match_pci_class=GPU_PCI_CLASS_PATTERN,
+            match_vendor_id=vendor_id,
+            notation_fix=notation_fix)
+
+        if len(ids_list) > 1:
+            logger.warning(f"Multiple {manufacturer} GPUs found ! Picking the first enumerated one.")
+
+        if len(ids_list) > 0:
+            bus_ids[manufacturer] = ids_list[0]
 
     if "intel" in bus_ids and "amd" in bus_ids:
         logger.warning("Found both an Intel and an AMD GPU. Defaulting to Intel.")
         del bus_ids["amd"]
 
+    if not ("intel" in bus_ids or "amd" in bus_ids):
+        raise PCIError("Cannot find the integrated GPU. Is this an Optimus system ?")
+
     return bus_ids
 
-def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
+def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
     try:
-        out = exec_bash("lspci -n")
-    except BashError as e:
-        raise PCIError("cannot run lspci -n : %s" % str(e))
+        out = subprocess.check_output(
+            "lspci -n", shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise PCIError(f"Cannot run lspci -n : {e.stderr}") from e
 
     bus_ids_list = []
 
@@ -134,8 +121,9 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
             # Xorg expects bus IDs separated by colons in decimal instead of
             # hexadecimal format without any leading zeroes and prefixed with
             # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            # NOTE: lspci -n can sometimes output domain number if there are devices with different number
             bus_id = "PCI:" + ":".join(
-                str(int(field, 16)) for field in re.split("[.:]", bus_id)
+                str(int(field, 16)) for field in re.split("[.:]", bus_id)[-3:]
             )
 
         pci_class = items[1][:-1]
@@ -150,23 +138,32 @@ def _get_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
 
 def _write_to_nvidia_path(relative_path, string):
 
-    bus_ids = get_gpus_bus_ids(notation_fix=False)
-
-    if "nvidia" not in bus_ids.keys():
-        raise PCIError("Nvidia not in PCI bus")
-
-    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
-    _write_to_pci_path(absolute_path, string)
-
-def _read_from_nvidia_path(relative_path):
+    logger = get_logger()
 
     bus_ids = get_gpus_bus_ids(notation_fix=False)
 
     if "nvidia" not in bus_ids.keys():
         raise PCIError("Nvidia not in PCI bus")
 
-    absolute_path = "/sys/bus/pci/devices/0000:%s/%s" % (bus_ids["nvidia"], relative_path)
-    return _read_pci_path(absolute_path)
+    nvidia_id = bus_ids["nvidia"]
+
+    res = re.fullmatch(r"([0-9]{2}:[0-9]{2})\.[0-9]", nvidia_id)
+
+    if res is None:
+        raise PCIError(f"Unexpected PCI ID format: {nvidia_id}")
+
+    partial_id = res.groups()[0]  # Bus ID minus the PCI function number
+
+    # Applying to all PCI functions of the Nvidia card
+    # (in case they have an audio chipset or a Thunderbolt controller, for instance)
+    for device_path in Path("/sys/bus/pci/devices/").iterdir():
+
+        device_id = device_path.name
+        if re.fullmatch(f"0000:{partial_id}\\.([0-9])", device_id):
+
+            write_path = device_path / relative_path
+            logger.info(f"Writing \"{string}\" to {write_path}")
+            _write_to_pci_path(write_path, string)
 
 
 def _write_to_pci_path(pci_path, string):
@@ -174,28 +171,29 @@ def _write_to_pci_path(pci_path, string):
     try:
         with open(pci_path, "w") as f:
             f.write(string)
-    except FileNotFoundError:
-        raise PCIError("Cannot find PCI path at %s" % pci_path)
-    except IOError:
-        raise PCIError("Error writing to %s" % pci_path)
+    except FileNotFoundError as e:
+        raise PCIError(f"Cannot find PCI path at {pci_path}") from e
+    except IOError as e:
+        raise PCIError(f"Error writing to {pci_path}: {str(e)}") from e
 
 def _read_pci_path(pci_path):
 
     try:
         with open(pci_path, "r") as f:
             string = f.read()
-    except FileNotFoundError:
-        raise PCIError("Cannot find PCI path at %s" % pci_path)
-    except IOError:
-        raise PCIError("Error reading from %s" % pci_path)
+    except FileNotFoundError as e:
+        raise PCIError("Cannot find PCI path at %s" % pci_path) from e
+    except IOError as e:
+        raise PCIError("Error reading from %s" % pci_path) from e
 
     return string
 
 def _get_connected_pci_bridges(pci_id):
 
-    pci_bridges_ids_list = _get_bus_ids(match_pci_class=PCI_BRIDGE_PCI_CLASS_PATTERN,
-                                        match_vendor_id=".+",
-                                        notation_fix=False)
+    pci_bridges_ids_list = _search_bus_ids(
+        match_pci_class=PCI_BRIDGE_PCI_CLASS_PATTERN,
+        match_vendor_id=".+",
+        notation_fix=False)
 
     connected_pci_bridges_ids_list = []
 

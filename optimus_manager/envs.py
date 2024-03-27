@@ -1,4 +1,4 @@
-VERSION = "1.3"
+VERSION = "1.5"
 
 SOCKET_PATH = "/tmp/optimus-manager"
 SOCKET_TIMEOUT = 1.0
@@ -48,5 +48,5 @@ NVIDIA_MANUAL_DISABLE_SCRIPT_PATH = "/etc/optimus-manager/nvidia-disable.sh"
 LOG_DIR_PATH = "/var/log/optimus-manager"
 
 
-NVIDIA_PROCESSES_WAIT_MAX_TRIES = 5
-NVIDIA_PROCESSES_WAIT_PERIOD = 1
+MODULES_UNLOAD_WAIT_MAX_TRIES = 5
+MODULES_UNLOAD_WAIT_PERIOD = 1

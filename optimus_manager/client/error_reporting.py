@@ -1,5 +1,5 @@
 from .. import envs
-from ..checks import get_active_renderer, check_offloading_available, CheckError
+from ..checks import get_active_renderer, check_offloading_available, check_running_graphical_session, CheckError
 
 
 def report_errors(state):
@@ -42,29 +42,31 @@ def report_errors(state):
 
     elif state["type"] == "done":
 
-        expected_renderer = {
-            "integrated": "integrated",
-            "hybrid": "integrated",
-            "nvidia": "nvidia"
-        }[state["current_mode"]]
+        if check_running_graphical_session():
 
-        try:
-            active_renderer = get_active_renderer()
-        except CheckError as e:
-            print("ERROR: cannot check the active card (should be \"%s\"). Reason: %s" % (expected_renderer, str(e)))
-            print("Something went wrong during the last GPU setup...")
-            print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
-            return True
+            expected_renderer = {
+                "integrated": "integrated",
+                "hybrid": "integrated",
+                "nvidia": "nvidia"
+            }[state["current_mode"]]
 
-        if expected_renderer != active_renderer:
-            print("ERROR: the active card is \"%s\" but it should be \"%s\"." % (active_renderer, expected_renderer))
-            print("Something went wrong during the last GPU setup...")
-            print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
-            return True
+            try:
+                active_renderer = get_active_renderer()
+            except CheckError as e:
+                print("ERROR: cannot check the active card (should be \"%s\"). Reason: %s" % (expected_renderer, str(e)))
+                print("Something went wrong during the last GPU setup...")
+                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+                return True
 
-        if state["current_mode"] == "hybrid" and not check_offloading_available():
-            print("WARNING: hybrid mode is set but Nvidia card does not seem to be available for offloading.")
-            print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+            if expected_renderer != active_renderer:
+                print("ERROR: the active card is \"%s\" but it should be \"%s\"." % (active_renderer, expected_renderer))
+                print("Something went wrong during the last GPU setup...")
+                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+                return True
+
+            if state["current_mode"] == "hybrid" and not check_offloading_available():
+                print("WARNING: hybrid mode is set but Nvidia card does not seem to be available for offloading.")
+                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
 
         return False
 

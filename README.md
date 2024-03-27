@@ -1,8 +1,6 @@
 optimus-manager
 ==================
 
-**IMPORTANT :** this README is for the current **master** branch, which contains some new features that have not been added to an official release yet (most notably, support for AMD GPUs). If you are using the latest stable release (v1.3.1), the corresponding README is available here : https://github.com/Askannz/optimus-manager/wiki/v1.3.1-README.
-
 This Linux program provides a solution for GPU switching on Optimus laptops (i.e laptops with a dual Nvidia/Intel or Nvidia/AMD configuration).
 
 Obviously this is unofficial, I am not affiliated with Nvidia in any way.
@@ -14,15 +12,29 @@ Supported display managers are : SDDM, LightDM, GDM.
 
 optimus-manager can also work with other display managers (or with no display manager at all) but you have to configure them manually (see [FAQ section 1](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm) [FAQ section 2](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#i-do-not-use-a-display-manager-i-use-startx-or-xinit) ).
 
+## Index
+
+ 1. [Introduction ](#intro)
+ 2. [IMPORTANT : Gnome and GDM users ](#gnome-gdm)
+ 3. [IMPORTANT : Manjaro KDE users ](#kde)
+ 4. [Installation ](#installation)
+ 5. [Uninstallation ](#uninstallation)
+ 6. [Usage ](#usage)
+ 7. [Power Management ](#power-management)
+ 8. [Configuration ](#configuration)
+ 9. [FAQ / Troubleshooting ](#faq)
+10. [Credit ](#credit)
+
+<a name="intro"></a>
 Introduction
 ----------
-GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel/AMD GPU only acts as a "relay" between the Nvidia GPU and your screen.
+GPU offloading and power management with Nvidia cards are not properly supported on Linux ([though there has been some great progress recently](https://devtalk.nvidia.com/default/topic/1060977/announcements-and-news/-linux-solaris-and-freebsd-driver-435-17-beta-release-/)), which can make it hard to use your Optimus laptop at full performance. optimus-manager provides a workaround to this problem by allowing you to run your whole desktop session on the Nvidia GPU, while the Intel/AMD iGPU only acts as a "relay" between the Nvidia GPU and your screen.
 
 This is essentially a port to Archlinux of the **nvidia-prime** solution created by Canonical for Ubuntu.
 
 To learn more about the current Optimus situation on Linux and how this solution works, read the [Home Wiki page](https://github.com/Askannz/optimus-manager/wiki).
 
-
+<a name="gnome-gdm"></a>
 IMPORTANT : Gnome and GDM users
 ----------
 
@@ -34,16 +46,17 @@ If you use Gnome or the Gnome Display Manager (GDM), there are a couple extra re
 
 Another quirk of GDM is that the X server may not automatically restart after a GPU switch. If you see an empty black screen or a black screen with a blinking cursor, try switching back to an empty TTY (with Ctrl+Alt+F5 for instance), then back to TTY1 with Ctrl+Alt+F1. See [this FAQ question](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#after-trying-to-switch-gpus-i-am-stuck-with-a-black-screen-or-a-black-screen-with-a-blinking-cursor-or-a-tty-login-screen).
 
+<a name="kde"></a>
 IMPORTANT : Manjaro KDE users
 ----------
 
 Manjaro ships with a default configuration for SDDM (the default login manager for KDE) which overrides some keys needed by optimus-manager. To use optimus-manager, you need to edit the file `/etc/sddm.conf` and simply put a `#` before the line starting with `DisplayCommand`and the one starting with `DisplayStopCommand`.
 
-
+<a name="installation"></a>
 Installation
 ----------
 
-Naturally, you must have the proprietary nvidia driver installed on your system. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`. On Manjaro, it is fine to use the built-in driver utility.
+Naturally, you must have the proprietary nvidia driver installed on your system. On Archlinux, you can use the packages `nvidia` or `nvidia-dkms`, or a specific nvidia-package if you run a custom kernel (e.g. `nvidia-lts` with `linux-lts` etc.). On Manjaro, it is fine to use the built-in driver utility.
 
 You can install optimus-manager from this AUR package : [optimus-manager](https://aur.archlinux.org/packages/optimus-manager/)
 
@@ -55,7 +68,7 @@ After installation, the optimus-manager daemon should have been started automati
 
 * **Custom Xorg config :** optimus-manager works by auto-generating a Xorg configuration file and putting it into `/etc/X11/xorg.conf.d/`. If you already have custom Xorg configuration files at that location or at `/etc/X11/xorg.conf `, it is strongly advised that you remove anything GPU-related from them to make sure that they do not interfere with the GPU switching process.
 
-* **Nvidia-generated Xorg config :** Similarly, if you have ever used the `nvidia-xonfig` utility or the `Save to X Configuration File` button in the Nvidia control panel, a Xorg config file may have been generated at `/etc/X11/xorg.conf `. It is highly recommended to delete it before trying to switch GPUs.
+* **Nvidia-generated Xorg config :** Similarly, if you have ever used the `nvidia-xconfig` utility or the `Save to X Configuration File` button in the Nvidia control panel, a Xorg config file may have been generated at `/etc/X11/xorg.conf `. It is highly recommended to delete it before trying to switch GPUs.
 
 * **Manjaro-generated Xorg config :** Manjaro has its own driver utility called MHWD that also auto-generates a Xorg config file at `/etc/X11/xorg.conf.d/90-mhwd.conf`. optimus-manager will automatically delete that file to avoid issues.
 
@@ -69,6 +82,7 @@ After installation, the optimus-manager daemon should have been started automati
 
 * **GPU monitoring apps** : if you have an application (or tray widget) that automatically monitors the Nvidia GPU for things like load, temperature, VRAM usage, etc, make sure it is not running before switching to integrated mode. Those applications work by constantly polling the nvidia driver, which may prevent it from being unloaded by optimus-manager.
 
+<a name="uninstallation"></a>
 Uninstallation
 ----------
 
@@ -78,6 +92,7 @@ You can also force cleanup by running `optimus-manager --cleanup`.
 
 You can also disable optimus-manager by disabling the systemd service `optimus-manager.service` (needs a reboot to be applied).
 
+<a name="usage"></a>
 Usage
 ----------
 
@@ -88,9 +103,11 @@ Run
 
 *WARNING :* Switching mode automatically logs you out, so make sure you save your work and close all your applications before doing so.
 
-Auto-logout is supported for Gnome, KDE Plasma, LXDE, Deepin, Xfce, i3, Openbox, AwesomeWM, bspwm and dwm. You can disable it in the configuration file. In that case, the GPU switch will not be effective until the next login.
+Auto-logout is supported for the following desktop environments/window managers: KDE Plasma, Gnome, XFCE, Deepin, i3, Openbox, AwesomeWM, bspwm, dwm, LXDE, QTile, Xmonad, herbstluftwm. You can disable this feature in the configuration file. In that case, the GPU switch will not be effective until the next login.
 
-You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file][optimus-manager.conf](optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
+You can also specify which GPU you want to be used by default when the system boots, by setting `startup_mode` in the [configuration file](https://github.com/Askannz/optimus-manager/blob/master/optimus-manager.conf) at `/etc/optimus-manager/optimus-manager.conf`.
+
+Note that switching to and from "integrated" mode can be a little unstable, due to having to load/unload the nvidia kernel modules and change the power state of the card. If you're experiencing stability issues, the safest way to use this mode is to boot straight into it using the `startup_mode` config options or the kernel parameter (see below).
 
 
 #### System Tray App
@@ -100,7 +117,7 @@ You can also specify which GPU you want to be used by default when the system bo
 The program [optimus-manager-qt](https://github.com/Shatur95/optimus-manager-qt) provides a system tray icon for easy switching. It also includes a GUI for setting options without editing the configuration file manually.    
 AUR package : [optimus-manager-qt](https://aur.archlinux.org/packages/optimus-manager-qt/)
 
-Unofficial Gnome Shell extensions are also avaialble :
+Unofficial Gnome Shell extensions are also available :
 
 * [optimus-manager-argos (unmaintained)](https://github.com/inzar98/optimus-manager-argos).
 
@@ -114,6 +131,9 @@ Simply add `optimus-manager.startup=MODE` to your kernel parameters list, where 
 
 Also note that this parameter only affects which GPU your desktop session starts with ; it has absolutely no effect on the boot process before that, because optimus-manager has no control over it.
 
+See this project to automatically create corresponding boot entries in GRUB: https://github.com/hakasapl/optimus-manager-grub
+
+<a name="power-management"></a>
 Power management
 ----------
 
@@ -121,6 +141,7 @@ Since version v1.2, power management is disabled by default, so the Nvidia GPU w
 
 Please refer to [the guide on power management](https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options) in the Wiki.
 
+<a name="configuration"></a>
 Configuration
 ----------
 
@@ -148,11 +169,13 @@ If you need the display manager to run some specific commands to set up the disp
 
 Finally, if you need to run some specific commands prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if the available power management methods are not supported), you can write them to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
+<a name="faq"></a>
 FAQ / Troubleshooting
 ----------
 
 See the [FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting) in the Wiki.
 
+<a name="credit"></a>
 Credit
 ----------
 The Qt tray app was created by [Shatur95](https://github.com/Shatur95).

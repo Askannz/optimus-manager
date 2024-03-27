@@ -1,10 +1,10 @@
 import time
+import subprocess
 from . import envs
 from . import var
 from . import checks
 from . import pci
 from .acpi_data import ACPI_STRINGS
-from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
 class KernelSetupError(Exception):
@@ -82,10 +82,14 @@ def _nvidia_up(config, hybrid):
         logger.info("Nvidia card not visible in PCI bus, rescanning")
         _try_rescan_pci()
 
-    if config["optimus"]["pci_reset"] == "yes":
+    if config["optimus"]["pci_reset"] != "no":
         _try_pci_reset(config, available_modules)
 
-    if config["optimus"]["pci_power_control"] == "yes":
+    power_control = (
+        config["optimus"]["pci_power_control"] == "yes" or \
+        config["nvidia"]["dynamic_power_management"] != "no"
+    )
+    if power_control:
         _try_set_pci_power_state("auto" if hybrid else "on")
 
     _load_nvidia_modules(config, available_modules)
@@ -97,7 +101,6 @@ def _nvidia_down(config):
     available_modules = get_available_modules()
     logger.info("Available modules: %s", str(available_modules))
 
-    _wait_no_processes_on_nvidia()
     _unload_nvidia_modules(available_modules)
 
     nvidia_power_down(config, available_modules)
@@ -114,8 +117,12 @@ def _nvidia_down(config):
             logger.info("Removing Nvidia from PCI bus")
             _try_remove_pci()
 
+    power_control = (
+        config["optimus"]["pci_power_control"] == "yes" or \
+        config["nvidia"]["dynamic_power_management"] != "no"
+    )
 
-    if config["optimus"]["pci_power_control"] == "yes":
+    if power_control:
 
         switching_mode = config["optimus"]["switching"]
         if switching_mode == "bbswitch" or switching_mode == "acpi_call":
@@ -128,16 +135,50 @@ def _nvidia_down(config):
 
 def _load_nvidia_modules(config, available_modules):
 
-    pat_value = _get_PAT_parameter_value(config)
-    modeset_value = 1 if config["nvidia"]["modeset"] == "yes" else 0
+    logger = get_logger()
 
-    _load_module(available_modules, "nvidia", options="NVreg_UsePageAttributeTable=%d" % pat_value)
-    _load_module(available_modules, "nvidia_drm", options="modeset=%d" % modeset_value)
+
+    #
+    # nvidia module
+
+    nvidia_options = []
+
+    if config["nvidia"]["pat"] == "yes":
+
+        if not checks.is_pat_available():
+            logger.warning(
+                "Page Attribute Tables are not available on your system.\n"
+                "Disabling the PAT option for Nvidia.")
+        else:
+            nvidia_options.append("NVreg_UsePageAttributeTable=1")
+
+    if config["nvidia"]["dynamic_power_management"] == "coarse":
+        nvidia_options.append("NVreg_DynamicPowerManagement=0x01")
+    elif config["nvidia"]["dynamic_power_management"] == "fine":
+        nvidia_options.append("NVreg_DynamicPowerManagement=0x02")
+
+    mem_th = config["nvidia"]["dynamic_power_management_memory_threshold"]
+    if mem_th != "":
+        nvidia_options.append(f"NVreg_DynamicPowerManagementVideoMemoryThreshold={mem_th}")
+
+    _load_module(available_modules, "nvidia", options=nvidia_options)
+
+
+    #
+    # nvidia_drm module
+
+    nvidia_drm_options = []
+
+    if config["nvidia"]["modeset"] == "yes":
+        nvidia_drm_options.append("modeset=1")
+
+    _load_module(available_modules, "nvidia_drm", options=nvidia_drm_options)
+
 
 def _load_nouveau(config, available_modules):
     # TODO: move that option to [optimus]
-    modeset_value = 1 if config["intel"]["modeset"] == "yes" else 0
-    _load_module(available_modules, "nouveau", options="modeset=%d" % modeset_value)
+    nouveau_options = ["modeset=1"] if config["intel"]["modeset"] == "yes" else []
+    _load_module(available_modules, "nouveau", options=nouveau_options)
 
 def _try_load_nouveau(config, available_modules):
 
@@ -169,40 +210,6 @@ def _try_load_acpi_call(available_modules):
         logger.error(
             "Cannot load acpi_call. Continuing anyway. Error is: %s", str(e))
 
-
-def _wait_no_processes_on_nvidia():
-
-    logger = get_logger()
-    bus_ids = pci.get_gpus_bus_ids(notation_fix=False)
-
-    tries_counter = 0
-
-    while True:
-
-        processes_list = checks.list_processes_on_nvidia(bus_ids)
-        tries_counter += 1
-
-        if len(processes_list) == 0:
-            logger.info("No processes currently holding the Nvidia GPU")
-            break
-
-        logger.info(
-            "%d processes still using the Nvidia GPU. Waiting %.1f seconds.",
-            len(processes_list), envs.NVIDIA_PROCESSES_WAIT_PERIOD)
-
-        pid_table = "Processes:\n"
-        for p in processes_list:
-            pid_table += f"  {p['pid']} {p['cmdline']}\n"
-
-        logger.info(pid_table)
-
-        if tries_counter > envs.NVIDIA_PROCESSES_WAIT_MAX_TRIES:
-            raise KernelSetupError("Timeout waiting for active processes to release the Nvidia GPU")
-
-        time.sleep(envs.NVIDIA_PROCESSES_WAIT_PERIOD)
-
-
-
 def _unload_nvidia_modules(available_modules):
     _unload_modules(available_modules, ["nvidia_drm", "nvidia_modeset", "nvidia_uvm", "nvidia"])
 
@@ -226,7 +233,7 @@ def _load_module(available_modules, module, options=None):
 
     logger = get_logger()
 
-    options = options or ""
+    options = options or []
 
     logger.info("Loading module %s", module)
 
@@ -235,9 +242,11 @@ def _load_module(available_modules, module, options=None):
             "module %s is not available for current kernel."
             " Is the corresponding package installed ?" % module)
     try:
-        exec_bash("modprobe %s %s" % (module, options))
-    except BashError as e:
-        raise KernelSetupError("error running modprobe for %s : %s" % (module, str(e)))
+        subprocess.check_call(
+            f"modprobe {module} {' '.join(options)}",
+            shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        raise KernelSetupError(f"Error running modprobe for {module}: {e.stderr}") from e
 
 def _unload_modules(available_modules, modules_list):
 
@@ -250,26 +259,30 @@ def _unload_modules(available_modules, modules_list):
 
     logger.info("Unloading modules %s (if loaded)", str(modules_to_unload))
 
-    try:
-        # Unlike "rmmod", "modprobe -r" does not return an error if the module is not loaded.
-        exec_bash("modprobe -r " + " ".join(modules_to_unload))
-    except BashError as e:
-        raise KernelSetupError("Cannot unload modules %s : %s" % (str(modules_to_unload), str(e)))
+    counter = 0
+    while True:
 
+        counter += 1
 
-def _get_PAT_parameter_value(config):
+        try:
+            # We use "modprobe -r" because unlike "rmmod", it does not return an error if the module is not loaded.
+            subprocess.check_call(
+                f"modprobe -r {' '.join(modules_to_unload)}",
+                shell=True, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
 
-    logger = get_logger()
+        except subprocess.CalledProcessError as e:
 
-    pat_value = {"yes": 1, "no": 0}[config["nvidia"]["pat"]]
+            if counter > envs.MODULES_UNLOAD_WAIT_MAX_TRIES:
+                logger.info(f"Max tries ({counter}) exceeded")
+                raise KernelSetupError(f"Cannot unload modules {modules_to_unload}: {e.stderr}") from e
+            else:
+                logger.info(f"Cannot unload modules: {e.stderr}")
+                logger.info(f"Waiting {envs.MODULES_UNLOAD_WAIT_PERIOD}s and retrying.")
+                time.sleep(envs.MODULES_UNLOAD_WAIT_PERIOD)
 
-    if not checks.is_pat_available():
-        logger.warning(
-            "Page Attribute Tables are not available on your system.\n"
-            "Disabling the PAT option for Nvidia.")
-        pat_value = 0
+        else:
+            break
 
-    return pat_value
 
 def _set_bbswitch_state(state):
 
@@ -282,10 +295,10 @@ def _set_bbswitch_state(state):
     try:
         with open("/proc/acpi/bbswitch", "w") as f:
             f.write(state)
-    except FileNotFoundError:
-        raise KernelSetupError("Cannot open /proc/acpi/bbswitch")
-    except IOError:
-        raise KernelSetupError("Error writing to /proc/acpi/bbswitch")
+    except FileNotFoundError as e:
+        raise KernelSetupError("Cannot open /proc/acpi/bbswitch") from e
+    except IOError as e:
+        raise KernelSetupError("Error writing to /proc/acpi/bbswitch") from e
 
 
 def _set_acpi_call_state(state):
@@ -317,8 +330,8 @@ def _set_acpi_call_state(state):
 
             with open("/proc/acpi/call", "r") as f:
                 output = f.read()
-        except FileNotFoundError:
-            raise KernelSetupError("Cannot open /proc/acpi/call")
+        except FileNotFoundError as e:
+            raise KernelSetupError("Cannot open /proc/acpi/call") from e
         except IOError:
             continue
 
@@ -417,7 +430,7 @@ def _pci_reset(config, available_modules):
             pci.hot_reset_nvidia()
 
     except pci.PCIError as e:
-        raise KernelSetupError("Failed to perform PCI reset : %s" % str(e))
+        raise KernelSetupError(f"Failed to perform PCI reset: {e}") from e
 
 def _try_custom_set_power_state(state):
 
@@ -431,8 +444,7 @@ def _try_custom_set_power_state(state):
     logger.info("Running custom power switching script %s", script_path)
 
     try:
-        exec_bash(script_path)
-    except BashError as e:
-        logger.error(
-            "Cannot run %s. Continuing anyways. Error is : %s",
-            script_path, str(e))
+        subprocess.check_call(
+            script_path, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Cannot run {script_path}. Continuing anyways. Error is: {e.stderr}")

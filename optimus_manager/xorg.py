@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from optimus_manager.bash import exec_bash, BashError
+import subprocess
 import optimus_manager.envs as envs
 import optimus_manager.checks as checks
 from .pci import get_gpus_bus_ids
@@ -43,19 +43,12 @@ def cleanup_xorg_conf():
 
 def is_xorg_running():
 
-    try:
-        exec_bash("pidof X")
-        return True
-    except BashError:
-        pass
-
-    try:
-        exec_bash("pidof Xorg")
-        return True
-    except BashError:
-        pass
-
-    return False
+    return any([
+        subprocess.run(
+            f"pidof {name}", shell=True, stdout=subprocess.DEVNULL
+        ).returncode == 0
+        for name in ["X", "Xorg"]
+    ])
 
 
 def is_there_a_default_xorg_conf_file():
@@ -75,10 +68,16 @@ def do_xsetup(requested_mode):
         logger.info("Running xrandr commands")
 
         try:
-            exec_bash("xrandr --setprovideroutputsource modesetting NVIDIA-0")
-            exec_bash("xrandr --auto")
-        except BashError as e:
-            logger.error("Cannot setup PRIME : %s", str(e))
+            for cmd in [
+                "xrandr --setprovideroutputsource modesetting NVIDIA-0",
+                "xrandr --auto"
+            ]:
+                subprocess.check_call(
+                    cmd, shell=True, text=True, stderr=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL)
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Cannot setup PRIME (xrandr error):\n{e.stderr}")
 
 
     script_path = _get_xsetup_script_path(requested_mode)
@@ -86,12 +85,15 @@ def do_xsetup(requested_mode):
     logger.info("Running %s", script_path)
 
     try:
-        exec_bash(script_path)
-    except BashError as e:
-        logger.error("ERROR : cannot run %s : %s", script_path, str(e))
+        subprocess.check_call(
+            script_path, text=True, stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"ERROR : cannot run {script_path} :\n{e.stderr}")
 
 
 def set_DPI(config):
+
+    logger = get_logger()
 
     dpi_str = config["nvidia"]["dpi"]
 
@@ -99,9 +101,12 @@ def set_DPI(config):
         return
 
     try:
-        exec_bash("xrandr --dpi %s" % dpi_str)
-    except BashError as e:
-        raise XorgSetupError("Cannot set DPI : %s" % str(e)) from e
+        subprocess.check_call(
+            f"xrandr --dpi {dpi_str}", shell=True, text=True,
+            stderr=subprocess.PIPE, stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Cannot set DPI (xrandr error):\n{e.stderr}")
+
 
 def _get_xsetup_script_path(requested_mode):
 
@@ -208,7 +213,10 @@ def _generate_hybrid(config, bus_ids, xorg_extra):
            "\tOption \"AllowNVIDIAGPUScreens\"\n" \
            "EndSection\n\n"
 
-    text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
+    if "intel" in bus_ids:
+        text += _make_intel_device_section(config, bus_ids, xorg_extra_lines_integrated)
+    else:
+        text += _make_amd_device_section(config, bus_ids, xorg_extra_lines_integrated)
 
     text += "Section \"Screen\"\n" \
            "\tIdentifier \"integrated\"\n" \

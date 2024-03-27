@@ -18,10 +18,10 @@ def read_temp_conf_path_var():
     try:
         with open(filepath, 'r') as f:
             return f.read().strip()
-    except FileNotFoundError:
-        raise VarError("File %s not found." % str(filepath))
-    except IOError:
-        raise VarError("Cannot open or read %s" % str(filepath))
+    except FileNotFoundError as e:
+        raise VarError("File %s not found." % str(filepath)) from e
+    except IOError as e:
+        raise VarError("Cannot open or read %s" % str(filepath)) from e
 
 def write_temp_conf_path_var(path):
 
@@ -32,8 +32,8 @@ def write_temp_conf_path_var(path):
     try:
         with open(envs.TEMP_CONFIG_PATH_VAR_PATH, 'w') as f:
             f.write(path)
-    except IOError:
-        raise VarError("Cannot open or write to %s" % envs.TEMP_CONFIG_PATH_VAR_PATH)
+    except IOError as e:
+        raise VarError("Cannot open or write to %s" % envs.TEMP_CONFIG_PATH_VAR_PATH) from e
 
 def remove_temp_conf_path_var():
 
@@ -51,8 +51,8 @@ def write_acpi_call_strings(call_strings_list):
     try:
         with open(filepath, 'w') as f:
             json.dump(call_strings_list, f)
-    except IOError:
-        raise VarError("Cannot open or write to %s" % str(filepath))
+    except IOError as e:
+        raise VarError("Cannot open or write to %s" % str(filepath)) from e
 
 def read_acpi_call_strings():
 
@@ -61,10 +61,10 @@ def read_acpi_call_strings():
     try:
         with open(filepath, 'r') as f:
             return json.load(f)
-    except FileNotFoundError:
-        raise VarError("File %s not found." % str(filepath))
-    except (IOError, json.decoder.JSONDecodeError):
-        raise VarError("Cannot open or read %s" % str(filepath))
+    except FileNotFoundError as e:
+        raise VarError("File %s not found." % str(filepath)) from e
+    except (IOError, json.decoder.JSONDecodeError) as e:
+        raise VarError("Cannot open or read %s" % str(filepath)) from e
 
 def write_last_acpi_call_state(state):
 
@@ -75,8 +75,8 @@ def write_last_acpi_call_state(state):
     try:
         with open(filepath, 'w') as f:
             f.write(state)
-    except IOError:
-        raise VarError("Cannot open or write to %s" % str(filepath))
+    except IOError as e:
+        raise VarError("Cannot open or write to %s" % str(filepath)) from e
 
 def read_last_acpi_call_state():
 
@@ -85,10 +85,10 @@ def read_last_acpi_call_state():
     try:
         with open(filepath, 'r') as f:
             return f.read().strip()
-    except FileNotFoundError:
-        raise VarError("File %s not found." % str(filepath))
-    except IOError:
-        raise VarError("Cannot open or read %s" % str(filepath))
+    except FileNotFoundError as e:
+        raise VarError("File %s not found." % str(filepath)) from e
+    except IOError as e:
+        raise VarError("Cannot open or read %s" % str(filepath)) from e
 
 
 def make_daemon_run_id():

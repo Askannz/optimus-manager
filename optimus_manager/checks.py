@@ -2,14 +2,22 @@ import os
 from pathlib import Path
 from ctypes import byref, POINTER, c_uint, Structure, c_int, c_void_p, CDLL
 import re
+import subprocess
 import dbus
-import psutil
-from .bash import exec_bash, BashError
 from .log_utils import get_logger
 
 
 class CheckError(Exception):
     pass
+
+
+def check_running_graphical_session():
+    return subprocess.run(
+        "xhost",
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    ).returncode == 0
 
 
 def is_ac_power_connected():
@@ -73,11 +81,10 @@ def is_nvidia_display_connected():
 
 
 def is_pat_available():
-    try:
-        exec_bash("grep -E '^flags.+ pat( |$)' /proc/cpuinfo")
-        return True
-    except BashError:
-        return False
+    return subprocess.run(
+        "grep -E '^flags.+ pat( |$)' /proc/cpuinfo",
+        shell=True, stdout=subprocess.DEVNULL
+    ).returncode == 0
 
 
 def get_active_renderer():
@@ -90,21 +97,17 @@ def get_active_renderer():
 
 def is_module_available(module_name):
 
-    try:
-        exec_bash("modinfo %s" % module_name)
-    except BashError:
-        return False
-    else:
-        return True
+    return subprocess.run(
+        f"modinfo -n {module_name}",
+        shell=True, stdout=subprocess.DEVNULL
+    ).returncode == 0
 
 def is_module_loaded(module_name):
 
-    try:
-        exec_bash("lsmod | grep -E \"^%s \"" % module_name)
-    except BashError:
-        return False
-    else:
-        return True
+    return subprocess.run(
+        f"lsmod | grep -E \"^{module_name}\"",
+        shell=True, stdout=subprocess.DEVNULL
+    ).returncode == 0
 
 def get_current_display_manager():
 
@@ -128,9 +131,10 @@ def using_patched_GDM():
 def check_offloading_available():
 
     try:
-        out = exec_bash("xrandr --listproviders")
-    except BashError as e:
-        raise CheckError("Cannot list xrandr providers : %s" % str(e))
+        out = subprocess.check_output(
+            "xrandr --listproviders", shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise CheckError(f"Cannot list xrandr providers:\n{e.stderr}") from e
 
     for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
@@ -156,52 +160,15 @@ def is_daemon_active():
 def is_bumblebeed_service_active():
     return _is_service_active("bumblebeed")
 
-def list_processes_on_nvidia(bus_ids):
-
-    nvidia_id = bus_ids["nvidia"]
-
-    paths = [
-        "/dev/nvidia",
-        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-card"),
-        os.path.realpath(f"/dev/dri/by-path/pci-0000:{nvidia_id}-render")
-    ]
-
-    def _check_holds_nvidia(pid):
-
-        for fd_path in Path(f"/proc/{pid}/fd").iterdir():
-            try:
-                target = os.readlink(fd_path)
-                for p in paths:
-                    if p in target:
-                        return True
-            except FileNotFoundError:
-                pass
-
-        return False
-
-    processes = []
-
-    for proc in psutil.process_iter(["pid", "cmdline"]):
-        try:
-            if _check_holds_nvidia(proc.pid):
-                cmdline = proc.cmdline()
-                cmdline = cmdline[0] if len(cmdline) > 0 else ""
-                processes.append({
-                    "pid": proc.pid,
-                    "cmdline":cmdline
-                })
-        except PermissionError:
-            pass
-
-    return processes
-
 
 def _is_gl_provider_nvidia():
 
     try:
-        out = exec_bash("__NV_PRIME_RENDER_OFFLOAD=0 glxinfo")
-    except BashError as e:
-        raise CheckError("Cannot run glxinfo : %s" % str(e))
+        out = subprocess.check_output(
+            "__NV_PRIME_RENDER_OFFLOAD=0 glxinfo",
+            shell=True, text=True, stderr=subprocess.PIPE).strip()
+    except subprocess.CalledProcessError as e:
+        raise CheckError(f"Cannot run glxinfo: {e.stderr}") from e
 
     for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
@@ -213,15 +180,27 @@ def _is_service_active(service_name):
 
     logger = get_logger()
 
-    try:
-        system_bus = dbus.SystemBus()
-    except dbus.exceptions.DBusException:
-        logger.warning(
-            "Cannot communicate with the DBus system bus to check status of %s."
-            " Is DBus running ? Falling back to bash commands", service_name)
-        return _is_service_active_bash(service_name)
-    else:
-        return _is_service_active_dbus(system_bus, service_name)
+    if subprocess.run(f"which sv", shell=True).returncode == 0:
+        return _is_service_active_sv(service_name)
+
+    if subprocess.run(f"which rc-status", shell=True).returncode == 0:
+        return _is_service_active_openrc(service_name)
+
+    if subprocess.run(f"which s6-svstat", shell=True).returncode == 0:
+        return _is_service_active_s6(service_name)
+
+    if subprocess.run(f"which systemctl", shell=True).returncode == 0:
+        try:
+            system_bus = dbus.SystemBus()
+        except dbus.exceptions.DBusException:
+            logger.warning(
+                "Cannot communicate with the DBus system bus to check status of %s."
+                " Is DBus running ? Falling back to bash commands", service_name)
+            return _is_service_active_bash(service_name)
+        else:
+            return _is_service_active_dbus(system_bus, service_name)
+
+    return False # ERROR: No service manager found!
 
 def _is_service_active_dbus(system_bus, service_name):
 
@@ -240,10 +219,23 @@ def _is_service_active_dbus(system_bus, service_name):
 
 
 def _is_service_active_bash(service_name):
+    return subprocess.run(
+        f"systemctl is-active {service_name}", shell=True
+    ).returncode == 0
 
-    try:
-        exec_bash("systemctl is-active %s" % service_name)
-    except BashError:
-        return False
-    else:
+
+def _is_service_active_openrc(service_name):
+    if subprocess.run(f"rc-status --nocolor default | grep -E '%s.*started'" % service_name, shell=True).returncode == 0:
         return True
+    return False
+
+
+def _is_service_active_s6(service_name):
+    # TODO: Check if service running
+    return True
+
+
+def _is_service_active_sv(service_name):
+    if subprocess.run(f"sv status %s | grep 'up: '" % service_name, shell=True).returncode == 0:
+        return True
+    return False
