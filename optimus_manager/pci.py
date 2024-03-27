@@ -121,8 +121,9 @@ def _search_bus_ids(match_pci_class, match_vendor_id, notation_fix=True):
             # Xorg expects bus IDs separated by colons in decimal instead of
             # hexadecimal format without any leading zeroes and prefixed with
             # `PCI:`, so `3c:00:0` should become `PCI:60:0:0`
+            # NOTE: lspci -n can sometimes output domain number if there are devices with different number
             bus_id = "PCI:" + ":".join(
-                str(int(field, 16)) for field in re.split("[.:]", bus_id)
+                str(int(field, 16)) for field in re.split("[.:]", bus_id)[-3:]
             )
 
         pci_class = items[1][:-1]
