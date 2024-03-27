@@ -1,0 +1,18 @@
+#compdef optimus-manager
+
+declare -a args
+args=(
+    '(-)'{-h,--help}'[display usage information]'
+    '(-)'{-V,--version}'[display version information and exit]'
+    '(-)--status[print current status of optimus-manager]'
+    '(-)--print-mode[print the GPU mode that your current desktop session is running on]'
+    '(-)--print-next-mode[print the GPU mode that will be used the next time you log into your session]'
+    '(-)--print-startup[print the GPU mode that will be used on startup]'
+    '--switch=[set the GPU mode to MODE, you need to log out then log in to apply the change]:mode:(integrated nvidia hybrid)'
+    '(--unset-temp-config)--temp-config=[set a path to a temporary configuration file to use for the next reboot ONLY]:path:_files'
+    '(--temp-config)--unset-temp-config[undo --temp-config (unset temp config path)]'
+    '--no-confirm[do not ask for confirmation and skip all warnings when switching GPUs]'
+    '--cleanup[remove auto-generated configuration files left over by the daemon]'
+)
+
+_arguments $args
