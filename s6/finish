@@ -1,0 +1,2 @@
+#!/usr/bin/execlineb -P
+foreground { python3 -u -m optimus_manager.hooks.post_daemon_stop }

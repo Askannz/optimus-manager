@@ -1,0 +1,4 @@
+#!/usr/bin/execlineb -P
+foreground { python3 -u -m optimus_manager.hooks.pre_daemon_start }
+foreground { python3 -u -m optimus_manager.hooks.pre_xorg_start }
+exec python3 -u -m optimus_manager.daemon

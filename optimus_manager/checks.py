@@ -139,15 +139,27 @@ def _is_service_active(service_name):
 
     logger = get_logger()
 
-    try:
-        system_bus = dbus.SystemBus()
-    except dbus.exceptions.DBusException:
-        logger.warning(
-            "Cannot communicate with the DBus system bus to check status of %s."
-            " Is DBus running ? Falling back to bash commands", service_name)
-        return _is_service_active_bash(service_name)
-    else:
-        return _is_service_active_dbus(system_bus, service_name)
+    if subprocess.run(f"which sv", shell=True).returncode == 0:
+        return _is_service_active_sv(service_name)
+
+    if subprocess.run(f"which rc-status", shell=True).returncode == 0:
+        return _is_service_active_openrc(service_name)
+
+    if subprocess.run(f"which s6-svstat", shell=True).returncode == 0:
+        return _is_service_active_s6(service_name)
+
+    if subprocess.run(f"which systemctl", shell=True).returncode == 0:
+        try:
+            system_bus = dbus.SystemBus()
+        except dbus.exceptions.DBusException:
+            logger.warning(
+                "Cannot communicate with the DBus system bus to check status of %s."
+                " Is DBus running ? Falling back to bash commands", service_name)
+            return _is_service_active_bash(service_name)
+        else:
+            return _is_service_active_dbus(system_bus, service_name)
+
+    return False # ERROR: No service manager found!
 
 def _is_service_active_dbus(system_bus, service_name):
 
@@ -166,7 +178,23 @@ def _is_service_active_dbus(system_bus, service_name):
 
 
 def _is_service_active_bash(service_name):
-
     return subprocess.run(
         f"systemctl is-active {service_name}", shell=True
     ).returncode == 0
+
+
+def _is_service_active_openrc(service_name):
+    if subprocess.run(f"rc-status --nocolor default | grep -E '%s.*started'" % service_name, shell=True).returncode == 0:
+        return True
+    return False
+
+
+def _is_service_active_s6(service_name):
+    # TODO: Check if service running
+    return True
+
+
+def _is_service_active_sv(service_name):
+    if subprocess.run(f"sv status %s | grep 'up: '" % service_name, shell=True).returncode == 0:
+        return True
+    return False
