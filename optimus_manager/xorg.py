@@ -65,11 +65,13 @@ def do_xsetup(requested_mode):
 
     if requested_mode == "nvidia":
 
+        provider = checks.get_integrated_provider()
+
         logger.info("Running xrandr commands")
 
         try:
             for cmd in [
-                "xrandr --setprovideroutputsource modesetting NVIDIA-0",
+                (f"xrandr --setprovideroutputsource \"{provider}\" NVIDIA-0"),
                 "xrandr --auto"
             ]:
                 subprocess.check_call(
@@ -148,6 +150,9 @@ def _get_xsetup_script_path(requested_mode):
 def _generate_nvidia(config, bus_ids, xorg_extra):
 
     integrated_gpu = "intel" if "intel" in bus_ids else "amd"
+    driver = "modesetting"
+    if config[integrated_gpu]["driver"] != "modesetting":
+        driver = "intel" if "intel" in bus_ids and checks.is_xorg_intel_module_available() else "amdgpu" if checks.is_xorg_amdgpu_module_available() else "modesetting"
     xorg_extra_nvidia = xorg_extra["nvidia-mode"]["nvidia-gpu"]
     xorg_extra_integrated = xorg_extra["nvidia-mode"]["integrated-gpu"]
 
@@ -173,7 +178,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
     text += "Section \"Device\"\n" \
             "\tIdentifier \"integrated\"\n" \
-            "\tDriver \"modesetting\"\n"
+            "\tDriver \"%s\"\n" % driver
     text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
     for line in xorg_extra_integrated:
         text += ("\t" + line + "\n")
