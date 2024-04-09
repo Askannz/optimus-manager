@@ -151,7 +151,7 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
 
     integrated_gpu = "intel" if "intel" in bus_ids else "amd"
     driver = "modesetting"
-    if config[integrated_gpu]["driver"] != "modesetting":
+    if config[integrated_gpu]["driver"] != "modesetting" and config[integrated_gpu]["driver"] != "hybrid":
         driver = "intel" if "intel" in bus_ids and checks.is_xorg_intel_module_available() else "amdgpu" if checks.is_xorg_amdgpu_module_available() else "modesetting"
     xorg_extra_nvidia = xorg_extra["nvidia-mode"]["nvidia-gpu"]
     xorg_extra_integrated = xorg_extra["nvidia-mode"]["integrated-gpu"]
@@ -179,6 +179,8 @@ def _generate_nvidia(config, bus_ids, xorg_extra):
     text += "Section \"Device\"\n" \
             "\tIdentifier \"integrated\"\n" \
             "\tDriver \"%s\"\n" % driver
+    if driver == "modesetting":
+        text += "\tOption \"AccelMethod\" \"none\"\n"
     text += "\tBusID \"%s\"\n" % bus_ids[integrated_gpu]
     for line in xorg_extra_integrated:
         text += ("\t" + line + "\n")
@@ -284,6 +286,8 @@ def _make_intel_device_section(config, bus_ids, xorg_extra_lines):
     if config["intel"]["driver"] == "intel" and not checks.is_xorg_intel_module_available():
         logger.warning("The Xorg module intel is not available. Defaulting to modesetting.")
         driver = "modesetting"
+    elif config["intel"]["driver"] == "hybrid":
+        driver = "intel"
     else:
         driver = config["intel"]["driver"]
 
@@ -298,7 +302,9 @@ def _make_intel_device_section(config, bus_ids, xorg_extra_lines):
     if config["intel"]["tearfree"] != "":
         tearfree_enabled_str = {"yes": "true", "no": "false"}[config["intel"]["tearfree"]]
         text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
-    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    
+    if dri != 0:
+        text += "\tOption \"DRI\" \"%d\"\n" % dri
 
     for line in xorg_extra_lines:
         text += ("\t" + line + "\n")
@@ -315,6 +321,8 @@ def _make_amd_device_section(config, bus_ids, xorg_extra_lines):
     if config["amd"]["driver"] == "amdgpu" and not checks.is_xorg_amdgpu_module_available():
         logger.warning("The Xorg module amdgpu is not available. Defaulting to modesetting.")
         driver = "modesetting"
+    elif config["amd"]["driver"] == "hybrid":
+        driver = "amdgpu"
     else:
         driver = config["amd"]["driver"]
 
@@ -327,7 +335,9 @@ def _make_amd_device_section(config, bus_ids, xorg_extra_lines):
     if config["amd"]["tearfree"] != "":
         tearfree_enabled_str = {"yes": "true", "no": "false"}[config["amd"]["tearfree"]]
         text += "\tOption \"TearFree\" \"%s\"\n" % tearfree_enabled_str
-    text += "\tOption \"DRI\" \"%d\"\n" % dri
+    
+    if dri != 0:
+        text += "\tOption \"DRI\" \"%d\"\n" % dri
 
     for line in xorg_extra_lines:
         text += ("\t" + line + "\n")
