@@ -31,7 +31,7 @@ Remove similar tools:
 
 * **GPU monitoring apps** : if you have an application (or tray widget) that automatically monitors the Nvidia GPU for things like load, temperature, VRAM usage, etc, make sure it is not running before switching to integrated mode. Those applications work by constantly polling the nvidia driver, which may prevent it from being unloaded by optimus-manager.
 
-If using gmd:
+If using gdm:
 - install [gdm-prime](https://aur.archlinux.org/packages/gdm-prime/)
 - At `/etc/gdm/custom.conf`, remove the `#` before `#WaylandEnable=false`
 
