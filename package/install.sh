@@ -2,7 +2,7 @@
 set -e
 
 #  for executing this, in the terminal application enter:
-#  curl -s https://github.com/Askannz/optimus-manager/blob/master/package/install.sh | bash
+#  curl -s https://raw.githubusercontent.com/Askannz/optimus-manager/master/package/install.sh | bash
 
 
 mainFunction () {
