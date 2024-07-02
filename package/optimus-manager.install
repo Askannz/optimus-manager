@@ -1,31 +1,43 @@
+#! /bin/bash
 
 
 post_install() {
-
-    echo "optimus-manager : enabling optimus-manager.service"
-    mkdir -p /etc/systemd/system/graphical.target.wants/
-    ln -s /usr/lib/systemd/system/optimus-manager.service /etc/systemd/system/graphical.target.wants/optimus-manager.service
-    
-    bold=$(tput bold)
-    red=$(tput setaf 1)
-    normal=$(tput sgr0)
-    echo "${bold}${red}Please reboot your computer before using optimus-manager${normal}"
+	systemctl enable "optimus-manager.service"
 }
 
+
+post_upgrade () {
+	RemoveBackupFiles
+	systemctl daemon-reload
+}
+
+
 post_remove() {
+	systemctl disable "optimus-manager.service"
+	RemoveBackupFiles
+	rm --force "/etc/optimus-manager/optimus-manager.conf"
+	rm --force "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
+}
 
-	echo "optimus-manager : cleaning up auto-generated Xorg conf"
 
-    xorg_conf=/etc/X11/xorg.conf.d/10-optimus-manager.conf
-    if [ -f "$xorg_conf" ]; then
-        rm $xorg_conf
-    fi
+RemoveBackupFiles () {
+	local Backup
+	local Backups=(
+		'etc/optimus-manager/nvidia-enable.sh'
+		'etc/optimus-manager/nvidia-disable.sh'
+		'etc/optimus-manager/optimus-manager.conf'
+		'etc/optimus-manager/xorg/integrated-mode/integrated-gpu.conf'
+		'etc/optimus-manager/xorg/nvidia-mode/integrated-gpu.conf'
+		'etc/optimus-manager/xorg/nvidia-mode/nvidia-gpu.conf'
+		'etc/optimus-manager/xorg/hybrid-mode/integrated-gpu.conf'
+		'etc/optimus-manager/xorg/hybrid-mode/nvidia-gpu.conf'
+		'etc/optimus-manager/xsetup-integrated.sh'
+		'etc/optimus-manager/xsetup-nvidia.sh'
+		'etc/optimus-manager/xsetup-hybrid.sh'
+		'var/lib/optimus-manager/persistent/startup_mode'
+	)
 
-    echo "optimus-manager : disabling optimus-manager.service"
-
-    service_file_link=/etc/systemd/system/graphical.target.wants/optimus-manager.service
-    if [ -L "$service_file_link" ]; then
-        rm $service_file_link
-    fi
-
+	for Backup in "${Backups[@]}}"; do
+		rm --force "${Backup}."{pacnew,pacsave}*
+	done
 }
