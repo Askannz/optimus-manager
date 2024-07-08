@@ -1,4 +1,4 @@
-## Function
+## ⚙️ Function
 
 Enhances the performance and power management on NVIDIA Optimus Laptops, by properly selecting when to use each GPU.
 
@@ -6,19 +6,26 @@ The NVIDIA GPU runs the whole desktop, while the Intel/AMD GPU acts as relay bet
 
 More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
-## Contributing
+## 🔧 Contributing
 
-1. Thorougly test code
-2. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls)
-3. Mention the user: @es20490446e
-4. Accepted in two days
+1. Thorougly test code.
+2. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls).
+3. Mention the user: `@es20490446e`.
+4. Accepted in two days.
 
-## Supported platforms
+## 🔥 Reporting issues
+
+1. Isolate which specific config is causing your issue.
+2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues).
+
+When requesting further info your issue may be closed. Just reopen it when done so.
+
+## 🖥️ Supported platforms
 
 - Graphic server: only Xorg, no Wayland
 - Display managers : SDDM, LightDM, GDM, [custom](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm), [none](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#i-do-not-use-a-display-manager-i-use-startx-or-xinit)
 
-## Installation
+## 💽 Installation
 
 Remove similar tools:
 * **Custom Xorg config :** optimus-manager works by auto-generating a Xorg configuration file and putting it into `/etc/X11/xorg.conf.d/`. If you already have custom Xorg configuration files at that location or at `/etc/X11/xorg.conf `, it is strongly advised that you remove anything GPU-related from them to make sure that they do not interfere with the GPU switching process.
@@ -36,11 +43,10 @@ If using gdm:
 - At `/etc/gdm/custom.conf`, remove the `#` before `#WaylandEnable=false`
 
 In any case:
-- Install the NVIDIA drivers
+- Install the NVIDIA drivers. If your card is [Turing](https://en.wikipedia.org/wiki/Turing_(microarchitecture)#Products_using_Turing) or later, favor `nvidia-open`.
 - Install the optimus-manager package. In the AUR: [`optimus-manager-git`](https://aur.archlinux.org/packages/optimus-manager-git)
-- Check daemon status with: `systemctl status optimus-manager`
 
-## Usage
+## 📜 Usage
 
 Run
 * `optimus-manager --switch nvidia` to switch to the Nvidia GPU
@@ -79,13 +85,13 @@ Also note that this parameter only affects which GPU your desktop session starts
 
 See this project to automatically create corresponding boot entries in GRUB: https://github.com/hakasapl/optimus-manager-grub
 
-## Power management
+## 🔋 Power management
 
 Since version v1.2, power management is disabled by default, so the Nvidia GPU will stay powered on (consuming energy) until manual configuration is done. This choice was made because there is no catch-all configuration that works for all laptop models, and incorrect configurations often break the boot process.
 
 Please refer to [the guide on power management](https://github.com/Askannz/optimus-manager/wiki/A-guide--to-power-management-options) in the Wiki.
 
-## Configuration
+## 📝 Configuration
 
 #### Main configuration file
 
@@ -111,6 +117,6 @@ If you need the display manager to run some specific commands to set up the disp
 
 Finally, if you need to run some specific commands prior to enabling or after disabling the nvidia graphics card (for example, to manually enable the card if the available power management methods are not supported), you can write them to `/etc/optimus-manager/nvidia-enable.sh` and `/etc/optimus-manager/nvidia-disable.sh`.
 
-## FAQ / Troubleshooting
+## 🤔 FAQ / Troubleshooting
 
 - [FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting)
