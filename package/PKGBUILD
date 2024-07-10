@@ -1,14 +1,14 @@
 #! /bin/bash
 
 pkgname="optimus-manager-git"
+install="optimus-manager.install"
+
 pkgdesc="Allows switching between the integrated and the dedicated graphics cards on NVIDIA Optimus laptops"
+url="https://github.com/Askannz/optimus-manager"
 license=("MIT")
 
-#  PKGBUILD and program maintained at:
-url="https://github.com/Askannz/optimus-manager"
-
 epoch=1
-pkgver=r730.57596e0.python3.12
+pkgver=r731.01c9294.python3.12
 pkgrel=1
 arch=("any")
 
@@ -66,6 +66,15 @@ backup=(
 )
 
 
+SoftwareVersion () {
+	cd "${srcdir}/optimus-manager"
+
+	printf "r%s.%s" \
+		"$(git rev-list --count HEAD)" \
+		"$(git rev-parse --short=7 HEAD)"
+}
+
+
 PythonVersion () {
 	pacman --sync --info python |
 	grep '^Version' |
@@ -73,17 +82,26 @@ PythonVersion () {
 	cut --delimiter=':' --fields=1 |
 	rev |
 	tr -d ' ' |
-	cut --delimiter='.' --fields=1,2
+	cut --delimiter='.' --fields=1,2 |
+	head -n1
 }
 
 
 pkgver () {
-	cd "${srcdir}/optimus-manager"
+	local SoftwareVersion; SoftwareVersion="$(SoftwareVersion)"
+	local PythonVersion; PythonVersion="$(PythonVersion)"
 
-	printf "r%s.%s.python%s" \
-		"$(git rev-list --count HEAD)" \
-		"$(git rev-parse --short=7 HEAD)" \
-		"$(PythonVersion)"
+	if [[ -z "${SoftwareVersion}" ]]; then
+		echo "Failed to retrieve: SoftwareVersion" >&2
+		false
+	elif [[ -z "${PythonVersion}" ]]; then
+		echo "Failed to retrieve: PythonVersion" >&2
+		false
+	else
+		printf "%s.python%s" \
+			"${SoftwareVersion}" \
+			"${PythonVersion}"
+	fi
 }
 
 
