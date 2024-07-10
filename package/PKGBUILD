@@ -8,7 +8,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r728.97e4f15.python3.12
+pkgver=r730.57596e0.python3.12
 pkgrel=1
 arch=("any")
 
@@ -69,10 +69,11 @@ backup=(
 PythonVersion () {
 	pacman --sync --info python |
 	grep '^Version' |
-	cut --delimiter=' ' --fields=11- |
-	cut --delimiter='.' --fields=1,2 |
-	sort --version-sort --reverse |
-	head -n1
+	rev |
+	cut --delimiter=':' --fields=1 |
+	rev |
+	tr -d ' ' |
+	cut --delimiter='.' --fields=1,2
 }
 
 
