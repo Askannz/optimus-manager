@@ -1,15 +1,15 @@
 #! /bin/bash
 
 pkgname="optimus-manager-git"
-install="optimus-manager.install"
-
 pkgdesc="Allows switching between the integrated and the dedicated graphics cards on NVIDIA Optimus laptops"
-url="https://github.com/Askannz/optimus-manager"
 license=("MIT")
 
+#  PKGBUILD and program maintained at:
+url="https://github.com/Askannz/optimus-manager"
+
 epoch=1
-pkgver=r731.01c9294.python3.12
-pkgrel=1
+pkgver=r732.fced1de.python3.12
+pkgrel=2
 arch=("any")
 
 source=("git+${url}.git")
@@ -76,14 +76,8 @@ SoftwareVersion () {
 
 
 PythonVersion () {
-	pacman --sync --info python |
-	grep '^Version' |
-	rev |
-	cut --delimiter=':' --fields=1 |
-	rev |
-	tr -d ' ' |
-	cut --delimiter='.' --fields=1,2 |
-	head -n1
+	pacman --sync --print-format "%v" python |
+	cut --delimiter='.' --fields=1,2
 }
 
 
