@@ -45,15 +45,16 @@ def logout_current_desktop_session():
 
 
     for cmd in [
-        "i3-msg exit",  # i3
-        "openbox --exit",  # Openbox
         "awesome-client \"awesome.quit()\"",  # AwesomeWM
         "bspc quit",  # bspwm
         "pkill -SIGTERM -f dwm",  # dwm
+        "herbstclient quit",  # herbstluftwm
+        "i3-msg exit",  # i3
+        "pkill -SIGTERM -f lightdm" # lightdm
         "pkill -SIGTERM -f lxsession",  # LXDE
+        "openbox --exit",  # Openbox
         "qtile cmd-obj -o cmd -f shutdown",  # qtile
         "pkill -SIGTERM -f xmonad",  # Xmonad
-        "herbstclient quit",  # herbstluftwm
     ]:
         try:
             check_call(cmd, shell=True)
