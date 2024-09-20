@@ -22,8 +22,8 @@ When requesting further info your issue may be closed. Just reopen it when done 
 
 ## 🖥️ Supported platforms
 
-- Graphic server: only Xorg, no Wayland
-- Display managers : SDDM, LightDM, GDM, [custom](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm), [none](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#i-do-not-use-a-display-manager-i-use-startx-or-xinit)
+- Graphic protocols: Xorg, Wayland without configurable options.
+- Display managers : SDDM, LightDM, GDM, [custom](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#my-display-manager-is-not-sddm-lightdm-nor-sddm), [none](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting#i-do-not-use-a-display-manager-i-use-startx-or-xinit).
 
 ## 💽 Installation
 
