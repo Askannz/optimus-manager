@@ -1,10 +1,10 @@
-#!/sbin/openrc-run
+#! /sbin/openrc-run
 
 # Source: https://github.com/anlorn/jorgicio-gentoo-overlay/blob/master/x11-misc/optimus-manager/files/optimus-manager-9999.sh
 # By @Anlorn
 
 command="/usr/bin/python3 -u -m optimus_manager.daemon"
-pidfile=${pidfile-/var/run/optimus-manager.pid}
+pidfile="${pidfile-/var/run/optimus-manager.pid}"
 description="Optimus Manager Commands daemon"
 
 depend() {
@@ -20,7 +20,7 @@ start_pre() {
 }
 
 stop_post() {
-  /usr/bin/python3 -u -m optimus_manager.hooks.post_daemon_stop
+    /usr/bin/python3 -u -m optimus_manager.hooks.post_daemon_stop
 }
 
 start() {

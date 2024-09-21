@@ -1,6 +1,5 @@
-# Taken from /usr/share/acpi_call/examples/turn_off_gpu.sh, from the package acpi_call.
-# This script only provides commands to turn the GPU off, so I had to guess the corresponding commands
-# for turning it on. May or may not be correct.
+# Taken from the package `acpi_call`, file `/usr/share/acpi_call/examples/turn_off_gpu.sh`.
+# Commands for turning PCI on are guessed, they may not be correct.
 
 ACPI_STRINGS = [
 

@@ -1,14 +1,14 @@
 #! /bin/bash
 
 pkgname="optimus-manager-git"
-pkgdesc="Allows switching between the integrated and the dedicated graphics cards on NVIDIA Optimus laptops"
+pkgdesc="Allows using Nvidia Optimus laptop graphics"
 license=("MIT")
 
 #  PKGBUILD and program maintained at:
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r739.99dfe2f.python3.12
+pkgver=r743.2868105.python3.12
 pkgrel=1
 arch=("any")
 
@@ -39,6 +39,7 @@ makedepends=(
 depends=(
 	"dbus-python"
 	"glxinfo"
+	"NVIDIA-MODULE"
 	"python"
 	"xorg-xrandr"
 )
@@ -125,7 +126,7 @@ PackageFiles () {
 PackageDefaultConf () {
 	install -Dm644 \
 		"${srcdir}/optimus-manager/optimus-manager.conf" \
-		"${pkgdir}/usr/share/optimus-manager.conf"
+		"${pkgdir}/usr/share/optimus-manager/optimus-manager.conf"
 }
 
 

@@ -1,2 +1,3 @@
-#!/bin/sh
+#! /bin/sh
+
 python3 -u -m optimus_manager.hooks.post_daemon_stop

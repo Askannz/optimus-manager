@@ -1,3 +1,3 @@
-#!/bin/sh
+#! /bin/bash
 
-# Everything you write here will be executed by the display manager when setting up the login screen in "integrated" mode.
+# Write here your own custom commands for setting up the login screen in `integrated` mode.

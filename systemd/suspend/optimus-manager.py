@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 import sys
 from optimus_manager.hooks import pre_suspend, post_resume
 
