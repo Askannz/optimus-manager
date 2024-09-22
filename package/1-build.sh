@@ -25,7 +25,7 @@ makePackage () {
 
 	export PACMAN_AUTH=('sudo')
 	export PACKAGER="${USER} <@${HOSTNAME}>"
-	so makepkg --holdver --needed --noconfirm --noextract --syncdeps --skipinteg --rmdeps
+	so makepkg --needed --noconfirm --noextract --syncdeps --skipinteg --rmdeps
 }
 
 
