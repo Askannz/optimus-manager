@@ -6,13 +6,13 @@ files=("optimus-manager.install" "PKGBUILD")
 
 
 mainFunction () {
-	#checkUncommittedChanges
+	checkUncommittedChanges
 	cloneAurRepo
 	checkFilesHaveBeenChanged
-	#syncFiles
-	#updateSrcinfo
-	#uploadChanges
-	#removeAurRepoClone
+	syncFiles
+	updateSrcinfo
+	uploadChanges
+	removeAurRepoClone
 }
 
 
