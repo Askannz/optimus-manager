@@ -8,7 +8,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r753.5845aa9.python3.12
+pkgver=r755.5d00aeb.python3.12
 pkgrel=1
 arch=("any")
 
