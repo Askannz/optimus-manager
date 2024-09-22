@@ -35,6 +35,7 @@ checkFilesHaveBeenChanged () {
 	done
 
 	if ! "${changed}"; then
+		removeAurRepoClone
 		exit 0
 	fi
 }
