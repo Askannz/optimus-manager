@@ -114,6 +114,7 @@ removeAurRepoClone () {
 so () {
 	local error
 
+	#shellcheck disable=SC2068
 	if ! error="$(${@} 2>&1 >"/dev/null")" ; then
 		if [[ -z "${error}" ]] ; then
 			error="Command failed"
@@ -156,9 +157,9 @@ uploadChanges () {
 		exit 1
 	fi
 
-	echo "${description}"
-	echo so git add --all
-	echo so git commit --message="${description}"
+	so git add --all
+	#shellcheck disable=SC2016
+	so 'git commit --message="${description}"'
 }
 
 
