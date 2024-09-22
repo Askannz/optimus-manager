@@ -11,8 +11,7 @@ More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
 1. Thorougly test code.
 2. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls).
-3. Mention the user: `@es20490446e`.
-4. Accepted in two days.
+3. Accepted in two days.
 
 
 ## 🔥 Reporting issues
