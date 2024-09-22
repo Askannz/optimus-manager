@@ -13,9 +13,7 @@ STATE_FILE_PATH = "%s/state.json" % TMP_VARS_FOLDER_PATH
 USER_CONFIG_COPY_PATH = "%s/config_copy.conf" % TMP_VARS_FOLDER_PATH
 CURRENT_DAEMON_RUN_ID = "%s/daemon_run_id" % TMP_VARS_FOLDER_PATH
 
-
 XORG_CONF_PATH = "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
-
 DEFAULT_CONFIG_PATH = "/usr/share/optimus-manager/optimus-manager.conf"
 USER_CONFIG_PATH = "/etc/optimus-manager/optimus-manager.conf"
 

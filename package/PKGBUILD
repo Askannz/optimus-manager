@@ -8,7 +8,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r743.2868105.python3.12
+pkgver=r745.b2693a4.python3.12
 pkgrel=1
 arch=("any")
 
@@ -18,7 +18,12 @@ sha1sums=("SKIP")
 
 conflicts=(
 	"bumblebee"
+	"envycontrol"
+	"nvidia-exec"
+	"nvidia-switch"
+	"nvidia-xrun"
 	"optimus-manager"
+	"switcheroo-control"
 )
 
 
@@ -46,6 +51,7 @@ depends=(
 
 
 optdepends=(
+	'gdm-prime: needed if your login screen is gdm'
 	'bbswitch: alternatively switches GPUs by using standard Optimus ACPI calls'
 	'acpi_call: alternatively switches GPUs by brute forcing ACPI calls'
 )

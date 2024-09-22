@@ -1,7 +1,14 @@
 #! /bin/bash
 
 
-post_install() {
+pre_install () {
+	rm --force \
+		"/etc/X11/xorg.conf" \
+		"/etc/X11/nvidia-xorg.conf.d/"*nvidia*
+}
+
+
+post_install () {
 	systemctl enable "optimus-manager.service"
 }
 
