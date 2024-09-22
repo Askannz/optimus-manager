@@ -6,7 +6,7 @@ files=("optimus-manager.install" "PKGBUILD")
 
 
 mainFunction () {
-	checkUncommittedChanges
+	#checkUncommittedChanges
 	cloneAurRepo
 	checkFilesHaveBeenChanged
 	syncFiles
@@ -67,6 +67,8 @@ cloneAurRepo () {
 
 fileLastCommitDescription () {
 	local file="${1}"
+
+	cd "${here}"
 	git log -1 --pretty=format:%s -- "${file}"
 }
 
@@ -110,18 +112,15 @@ removeAurRepoClone () {
 
 
 so () {
-	local commands="${*}"
+	local error
 
-	if [[ "${verbose}" -eq 1 ]]; then
-		if ! ${commands}; then
-			exit "${?}"
-		fi
-	elif ! error="$(eval "${commands}" 2>&1 >"/dev/null")" ; then
-		if [ "${error}" == "" ] ; then
-			error="Command failed: ${commands}"
+	if ! error="$(${@} 2>&1 >"/dev/null")" ; then
+		if [[ -z "${error}" ]] ; then
+			error="Command failed"
 		fi
 
-		echo "${FUNCNAME[1]}: ${error}" >&2
+		echo "${FUNCNAME[1]}: ${*}:" >&2
+		echo "${error}" >&2
 		exit 1
 	fi
 }
@@ -157,8 +156,9 @@ uploadChanges () {
 		exit 1
 	fi
 
-	so git add "${files[@]}" ".SRCINFO"
-	so git commit --message="${description}"
+	echo "${description}"
+	echo so git add --all
+	echo so git commit --message="${description}"
 }
 
 
