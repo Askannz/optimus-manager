@@ -39,7 +39,7 @@ When requesting further info your issue may be closed. Just reopen it when done 
 
 ## 📝 Configuration
 
-On X11 the Nvidia GPU is used for everything by default. This provides maximum performance and ease of use at the expense of power consumtion. If you want to try to optimize this, see `/etc/optimus-manager/`.
+On X11 the Nvidia GPU is used for everything by default. This provides maximum performance and ease of use at the expense of power consumption. If you want to try to optimize this, see `/etc/optimus-manager/`.
 
 On Wayland the Nvidia GPU is used for high performance apps which use GLX or Vulkan. While the integrated GPU for no so demanding apps which use EGL, like the desktop itself and the web browser. This behavior is not configurable.
 
