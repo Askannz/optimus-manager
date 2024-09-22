@@ -6,12 +6,37 @@ files=("optimus-manager.install" "PKGBUILD")
 
 
 mainFunction () {
-	checkUncommittedChanges
+	#checkUncommittedChanges
 	cloneAurRepo
-	syncFiles
-	updateSrcinfo
-	uploadChanges
-	removeAurRepoClone
+	checkFilesHaveBeenChanged
+	#syncFiles
+	#updateSrcinfo
+	#uploadChanges
+	#removeAurRepoClone
+}
+
+
+checkFilesHaveBeenChanged () {
+	local aurSum
+	local changed=false
+	local file
+	local index=0
+	local repoSum
+
+	while [[ "${index}" -lt "${#files[@]}" ]] && ! "${changed}"; do
+		repoSum="$(fileSum "${here}/${files[$index]}")"
+		aurSum="$(fileSum "${here}/optimus-manager-git/${files[$index]}")"
+
+		if [[ "${repoSum}" != "${aurSum}" ]]; then
+			changed=true
+		else
+			index="$((index +1))"
+		fi
+	done
+
+	if ! "${changed}"; then
+		exit 0
+	fi
 }
 
 
@@ -46,6 +71,14 @@ fileLastCommitDescription () {
 fileModificationEpoch () {
 	local file="${1}"
 	stat --format=%Y "${file}"
+}
+
+
+fileSum () {
+	local file="${1}"
+
+	sha1sum "${file}" |
+	cut --delimiter=' ' --fields=1
 }
 
 
