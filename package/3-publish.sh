@@ -157,7 +157,7 @@ uploadChanges () {
 		exit 1
 	fi
 
-	so git add --all
+	so git add "${files[@]}" ".SRCINFO"
 	so git commit --message="${description}"
 }
 
