@@ -9,7 +9,7 @@ More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
 ## 🔧 Contributing
 
-1. Thorougly test code.
+1. Thorougly test code. See the scripts at [`package`](https://github.com/Askannz/optimus-manager/tree/master/package).
 2. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls).
 3. Accepted in two days.
 
