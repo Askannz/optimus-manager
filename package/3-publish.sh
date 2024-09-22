@@ -59,6 +59,8 @@ cloneAurRepo () {
 		so git clone \
 			--depth 1 --shallow-submodules \
 			"ssh://aur@aur.archlinux.org/optimus-manager-git.git"
+	else
+		so git fetch
 	fi
 }
 
