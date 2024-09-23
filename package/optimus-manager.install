@@ -3,8 +3,8 @@
 
 pre_install () {
 	rm --force \
-		"/etc/X11/xorg.conf" \
-		"/etc/X11/nvidia-xorg.conf.d/"*nvidia*
+		"etc/X11/xorg.conf" \
+		"etc/X11/nvidia-xorg.conf.d/"*nvidia*
 }
 
 
@@ -19,6 +19,6 @@ post_upgrade () {
 
 
 post_remove() {
-	systemctl disable "optimus-manager.service"
-	rm --force "/etc/X11/xorg.conf.d/10-optimus-manager.conf"
+	systemctl disable --now "optimus-manager.service"
+	rm --force "etc/X11/xorg.conf.d/10-optimus-manager.conf"
 }

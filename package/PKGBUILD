@@ -1,6 +1,7 @@
 #! /bin/bash
 
 pkgname="optimus-manager-git"
+install="optimus-manager.install"
 pkgdesc="Allows using Nvidia Optimus laptop graphics"
 license=("MIT")
 
@@ -8,7 +9,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r755.5d00aeb.python3.12
+pkgver=r759.a744346.python3.12
 pkgrel=1
 arch=("any")
 
