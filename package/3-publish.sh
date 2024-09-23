@@ -6,7 +6,7 @@ files=("optimus-manager.install" "PKGBUILD")
 
 
 mainFunction () {
-	#checkUncommittedChanges
+	checkUncommittedChanges
 	cloneAurRepo
 	checkFilesHaveBeenChanged
 	syncFiles
@@ -159,7 +159,8 @@ uploadChanges () {
 
 	so git add --all
 	#shellcheck disable=SC2016
-	so 'git commit --message="${description}"'
+	git commit --message="${description}" >/dev/null
+	so git push
 }
 
 
