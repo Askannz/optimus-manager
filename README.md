@@ -7,21 +7,27 @@ The Nvidia GPU runs the whole desktop, while the Intel/AMD GPU acts as relay bet
 More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
 
+## 📚 Guides
+
+If you are experiencing an issue, first try:
+- [Driver installation](https://wiki.archlinux.org/title/NVIDIA).
+- [Driver troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
+- [Optimus Manager FAQ](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting).
+
 ## 🔧 Contributing
 
-1. Thorougly test code. See the scripts at [`package`](https://github.com/Askannz/optimus-manager/tree/master/package).
-2. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls).
-3. Accepted in two days.
+If you figured out how to fix an issue, or to how improve ease of use, you may contribute an improvement:
+1. Click on the "Fork" button.
+2. `git clone git@github.com:[YOUR-USER]/optimus-manager.git`
+3. Modify the faulty files.
+4. Thorougly test that the program still works. See the scripts at [`package`](https://github.com/Askannz/optimus-manager/tree/master/package).
+5. `git summary` + `git add --all` + `git commit --message="[SUMMARY OF CHANGES]` + `git push`.
+6. Open a [pull request](https://github.com/Askannz/optimus-manager/pulls).
+7. Accepted in two days.
 
+## 🗳️ Reporting issues
 
-## 🔥 Issues
-
-Try the guides on:
-- [Installation](https://wiki.archlinux.org/title/NVIDIA).
-- [Troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
-- [FAQ](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting).
-
-If those don't work, or the ease of use can be improved:
+If you are unable to fix an issue by yourself, or how to implement an idea to make things easier, report it:
 1. Isolate which specific config is causing your issue.
 2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues).
 3. When requesting further info your report may be closed. Just reopen it when done so.
