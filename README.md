@@ -16,6 +16,7 @@ More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
 ## 🔥 Reporting issues
 
+1. Try the guides on [installation](https://wiki.archlinux.org/title/NVIDIA) and [troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
 1. Isolate which specific config is causing your issue.
 2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues).
 
