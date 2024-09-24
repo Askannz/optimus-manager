@@ -14,13 +14,17 @@ More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 3. Accepted in two days.
 
 
-## 🔥 Reporting issues
+## 🔥 Issues
 
-1. Try the guides on [installation](https://wiki.archlinux.org/title/NVIDIA) and [troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
+Try the guides on:
+- [Installation](https://wiki.archlinux.org/title/NVIDIA).
+- [Troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
+- [FAQ](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting).
+
+If those don't work, or the ease of use can be improved:
 1. Isolate which specific config is causing your issue.
 2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues).
-
-When requesting further info your issue may be closed. Just reopen it when done so.
+3. When requesting further info your report may be closed. Just reopen it when done so.
 
 
 ## 🖥️ Supported platforms
@@ -80,8 +84,3 @@ Or if you are using the GRUB bootloader, you can use [`optimus-manager-grub`](ht
 ## 📜 Terminal
 
 - `optimus-manager --switch [nvidia\integrated\hybrid]`
-
-
-## 🤔 FAQ / Troubleshooting
-
-- [FAQ section](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting).
