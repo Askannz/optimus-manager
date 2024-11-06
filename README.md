@@ -29,7 +29,7 @@ If you figured out how to fix an issue, or to how improve ease of use, you may c
 
 If you are unable to fix an issue by yourself, or how to implement an idea to make things easier, report it:
 1. Isolate which specific config is causing your issue.
-2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues).
+2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues). Include the output of `inxi --graphics`.
 3. When requesting further info your report may be closed. Just reopen it when done so.
 
 
