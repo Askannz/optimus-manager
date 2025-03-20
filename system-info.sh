@@ -3,50 +3,19 @@ set -e
 
 
 mainFunction () {
-	echo "=== inxi ==="
-	inxi -SMGsr -c0
-	echo
+	inxiInfo
+	displayManagerInfo
 
-	if [[ -f /etc/systemd/system/display-manager.service ]]; then
-		echo "=== display manager ==="
-		grep "^ExecStart" /etc/systemd/system/display-manager.service | cut --delimiter='=' --fields=2 | rev | cut --delimiter='/' --fields=1 | rev
-		echo
-	fi
+	lspciInfo
+	xrandrInfo
 
-	echo "=== lspci ==="
-	lspci | grep --ignore-case -e "3d" -e "vga"
-	echo
+	glxinfoDefaultInfo
+	glxinfoOffloadedInfo
 
-	echo "=== xrandr providers ==="
-	xrandr --listproviders || true
-	echo
+	optimusManagerStatusInfo
+	nvidiaSmiInfo
 
-	echo "=== glxinfo default ==="
-	glxinfo | grep --ignore-case -e vendor -e renderer
-	echo
-
-	echo "=== glxinfo offloaded ==="
-	__NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME="nvidia" __VK_LAYER_NV_optimus="NVIDIA_only" __GL_SHOW_GRAPHICS_OSD=1 glxinfo | grep --ignore-case -e vendor -e renderer || true
-	echo
-
-	echo "=== optimus-manager status ==="
-	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
-		echo "not installed" >&2
-	elif [[ -x "/usr/bin/systemctl" ]]; then
-		SYSTEMD_COLORS=0 systemctl --full --no-pager status optimus-manager || true
-	else
-		optimus-manager --status || true
-	fi
-	echo
-
-	echo "=== nvidia-smi ==="
-	nvidia-smi
-	echo
-
-	if [[ -x "/usr/bin/optimus-manager" ]]; then
-		echo "=== optimus-manager.conf ==="
-		cat "/etc/optimus-manager/optimus-manager.conf" || true
-	fi
+	optimusManagerConfInfo
 }
 
 
@@ -78,6 +47,116 @@ checkDepends () {
 
 		exit 1
 	fi
+}
+
+
+displayManagerInfo () {
+	local service="/etc/systemd/system/display-manager.service"
+
+	if [[ -f "${service}" ]]; then
+		echo "=== display manager ==="
+
+		grep "^ExecStart" "${service}" |
+		cut --delimiter='=' --fields=2 |
+		rev |
+		cut --delimiter='/' --fields=1 |
+		rev
+
+		echo
+	fi
+}
+
+
+glxinfoDefaultInfo () {
+	echo "=== glxinfo default ==="
+	glxinfo | grep --ignore-case -e vendor -e renderer
+	echo
+}
+
+
+glxinfoOffloadedInfo () {
+	echo "=== glxinfo offloaded ==="
+
+	__NV_PRIME_RENDER_OFFLOAD=1 \
+	__GLX_VENDOR_LIBRARY_NAME="nvidia" \
+	__VK_LAYER_NV_optimus="NVIDIA_only" \
+	__GL_SHOW_GRAPHICS_OSD=1 \
+	glxinfo |
+	grep --ignore-case -e vendor -e renderer ||
+	true
+
+	echo
+}
+
+
+inxiInfo () {
+	echo "=== inxi ==="
+	inxi -SMGsr -c0
+	echo
+}
+
+
+lspciInfo () {
+	echo "=== lspci ==="
+	lspci | grep --ignore-case -e "3d" -e "vga"
+	echo
+}
+
+
+nvidiaSmiInfo () {
+	echo "=== nvidia-smi ==="
+	nvidia-smi
+	echo
+}
+
+
+optimusManagerConfInfo () {
+	if [[ -x "/usr/bin/optimus-manager" ]]; then
+		echo "=== optimus-manager.conf ==="
+		cat "/etc/optimus-manager/optimus-manager.conf" || true
+	fi
+}
+
+
+optimusManagerLog () {
+	local dir="/var/log/optimus-manager/switch"
+
+	if [[ -d "${dir}" ]]; then
+		find "${dir}" |
+		sort |
+		tail -n1
+	fi
+}
+
+
+optimusManagerServiceStatus () {
+	SYSTEMD_COLORS=0 \
+	systemctl --full --no-pager status optimus-manager ||
+	true
+}
+
+
+optimusManagerStatusInfo () {
+	echo "=== optimus-manager status ==="
+
+	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
+		echo "not installed" >&2
+	elif [[ -x "/usr/bin/systemctl" ]]; then
+		optimusManagerServiceStatus
+	elif local log && log="$(optimusManagerLog)" && [[ -n "${log}" ]]; then
+		cat "${log}"
+	else
+		optimus-manager --status || true
+	fi
+
+	echo
+}
+
+
+xrandrInfo () {
+	echo "=== xrandr providers ==="
+	xrandr --listproviders || true
+	echo
 }
 
 
