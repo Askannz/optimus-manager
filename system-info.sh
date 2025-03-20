@@ -1,7 +1,5 @@
 #! /bin/bash
 set -e
-# For running this tool, in the application "terminal" type:
-# "PathToThisFile
 
 
 mainFunction () {
