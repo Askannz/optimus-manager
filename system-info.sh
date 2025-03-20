@@ -1,10 +1,12 @@
 #! /bin/bash
 set -e
+# For running this tool, in the application "terminal" type:
+# "PathToThisFile
 
 
 mainFunction () {
 	echo "=== inxi ==="
-	inxi -SMGsr
+	inxi -SMGsr -c0
 	echo
 
 	echo "=== lspci ==="
@@ -27,7 +29,7 @@ mainFunction () {
 	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
 		echo "not installed" >&2
 	elif [[ -x "/usr/bin/systemctl" ]]; then
-		systemctl --full --no-pager status optimus-manager || true
+		SYSTEMD_COLORS=0 systemctl --full --no-pager status optimus-manager || true
 	else
 		optimus-manager --status || true
 	fi
