@@ -4,7 +4,7 @@ set -e
 
 mainFunction () {
 	echo "=== inxi ==="
-	inxi -SMGsr | cat
+	inxi -SMGsr
 	echo
 
 	echo "=== lspci ==="
@@ -27,7 +27,7 @@ mainFunction () {
 	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
 		echo "not installed" >&2
 	elif [[ -x "/usr/bin/systemctl" ]]; then
-		systemctl --full --no-pager status optimus-manager | cat || true
+		systemctl --full --no-pager status optimus-manager || true
 	else
 		optimus-manager --status || true
 	fi
