@@ -9,7 +9,7 @@ More info at the [wiki](https://github.com/Askannz/optimus-manager/wiki).
 
 ## 📚 Guides
 
-If you are experiencing an issue, first try:
+Most issues are due to the Nvidia driver itself. If you are experiencing any, first try:
 - [Driver installation](https://wiki.archlinux.org/title/NVIDIA).
 - [Driver troubleshooting](https://wiki.archlinux.org/title/NVIDIA/Troubleshooting).
 - [Optimus Manager FAQ](https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting).
@@ -29,8 +29,9 @@ If you figured out how to fix an issue, or to how improve ease of use, you may c
 
 If you are unable to fix an issue by yourself, or how to implement an idea to make things easier, report it:
 1. Isolate which specific config is causing your issue.
-2. Open an [issue report](https://github.com/Askannz/optimus-manager/issues). Include the output of `inxi --graphics`.
-3. When requesting further info your report may be closed. Just reopen it when done so.
+2. Collec system info, by in the app "terminal" typing `curl --silent https://raw.githubusercontent.com/Askannz/optimus-manager/refs/heads/master/system-info.sh | bash &> ~/system-info.txt`.
+3. Open an [issue report](https://github.com/Askannz/optimus-manager/issues). Include the file `system-info.txt`, generated above.
+4. When requesting further info your report may be closed. Just reopen it when done so.
 
 
 ## 🖥️ Supported platforms
