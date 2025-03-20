@@ -7,6 +7,12 @@ mainFunction () {
 	inxi -SMGsr -c0
 	echo
 
+	if [[ -f /etc/systemd/system/display-manager.service ]]; then
+		echo "=== display manager ==="
+		grep "^ExecStart" /etc/systemd/system/display-manager.service | cut --delimiter='=' --fields=2 | rev | cut --delimiter='/' --fields=1 | rev
+		echo
+	fi
+
 	echo "=== lspci ==="
 	lspci | grep --ignore-case -e "3d" -e "vga"
 	echo
