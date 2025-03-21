@@ -8,14 +8,18 @@ mainFunction () {
 
 	lspciInfo
 	xrandrInfo
-
-	glxinfoDefaultInfo
 	glxinfoOffloadedInfo
 
-	optimusManagerStatusInfo
+	kernelErrorsInfo
+	displayManagerErrorsInfo
+	nvidiaX11LogInfo
+
 	nvidiaSmiInfo
 
+	optimusManagerDaemonInfo
+	optimusManagerSwitchingInfo
 	optimusManagerConfInfo
+	optimusManagerX11ConfInfo
 }
 
 
@@ -50,27 +54,32 @@ checkDepends () {
 }
 
 
+displayManagerErrorsInfo () {
+	if [[ -f "/usr/lib/systemd/system/${displayManager}.service" ]]; then
+		echo "=== display manager errors ==="
+		journalctl --boot=1 --priority=3 --unit="${displayManager}.service" --no-pager
+		echo
+	fi
+}
+
+
 displayManagerInfo () {
 	local service="/etc/systemd/system/display-manager.service"
 
 	if [[ -f "${service}" ]]; then
 		echo "=== display manager ==="
 
-		grep "^ExecStart" "${service}" |
-		cut --delimiter='=' --fields=2 |
-		rev |
-		cut --delimiter='/' --fields=1 |
-		rev
+		displayManager="$(
+			grep "^ExecStart" "${service}" |
+			cut --delimiter='=' --fields=2 |
+			rev |
+			cut --delimiter='/' --fields=1 |
+			rev
+		)"
 
+		echo "${displayManager}"
 		echo
 	fi
-}
-
-
-glxinfoDefaultInfo () {
-	echo "=== glxinfo default ==="
-	glxinfo | grep --ignore-case -e vendor -e renderer
-	echo
 }
 
 
@@ -96,6 +105,15 @@ inxiInfo () {
 }
 
 
+kernelErrorsInfo () {
+	if [[ -x "/usr/bin/journalctl" ]]; then
+		echo "=== kernel errors ==="
+		journalctl --boot=1 --priority=3 --dmesg --no-pager
+		echo
+	fi
+}
+
+
 lspciInfo () {
 	echo "=== lspci ==="
 	lspci | grep --ignore-case -e "3d" -e "vga"
@@ -110,16 +128,67 @@ nvidiaSmiInfo () {
 }
 
 
+nvidiaX11LogInfo () {
+	local log="/var/log/Xorg.0.log"
+	echo "=== nvidia x11 log ==="
+
+	if [[ ! "${log}" ]]; then
+		echo "no log at: ${log}"
+	else
+		local messages; messages="$(
+			grep -e "nvidia" "${log}"
+		)"
+
+		if [[ -z "${messages}" ]]; then
+			echo "no nvidia messages at: ${messages}"
+		else
+			echo "(--) = probed"
+			echo "(**) = from config file"
+			echo "(==) = default setting"
+			echo "(++) = from command line"
+			echo "(!!) = notice"
+			echo "(II) = informational"
+			echo "(WW) = warning"
+			echo "(EE) = error"
+			echo "(NI) = not implemented"
+			echo "(??) = unknown"
+			echo "${messages}"
+		fi
+	fi
+
+	echo
+}
+
+
 optimusManagerConfInfo () {
 	if [[ -x "/usr/bin/optimus-manager" ]]; then
-		echo "=== optimus-manager.conf ==="
+		echo "=== optimus-manager conf ==="
 		cat "/etc/optimus-manager/optimus-manager.conf" || true
+		echo
 	fi
 }
 
 
+optimusManagerDaemonInfo () {
+	echo "=== optimus-manager daemon ==="
+
+	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
+		echo "not installed" >&2
+	elif [[ -x "/usr/bin/systemctl" ]]; then
+		optimusManagerServiceStatus
+	elif local log && log="$(optimusManagerLog "daemon")" && [[ -n "${log}" ]]; then
+		cat "${log}"
+	else
+		optimus-manager --status || true
+	fi
+
+	echo
+}
+
+
 optimusManagerLog () {
-	local dir="/var/log/optimus-manager/switch"
+	local type="${1}"
+	local dir="/var/log/optimus-manager/${type}"
 
 	if [[ -d "${dir}" ]]; then
 		find "${dir}" |
@@ -136,17 +205,28 @@ optimusManagerServiceStatus () {
 }
 
 
-optimusManagerStatusInfo () {
-	echo "=== optimus-manager status ==="
+optimusManagerSwitchingInfo () {
+	echo "=== optimus-manager switching log ==="
 
-	if [[ ! -x "/usr/bin/optimus-manager" ]]; then
-		echo "not installed" >&2
-	elif [[ -x "/usr/bin/systemctl" ]]; then
-		optimusManagerServiceStatus
-	elif local log && log="$(optimusManagerLog)" && [[ -n "${log}" ]]; then
+	if local log && log="$(optimusManagerLog "switch")" && [[ -n "${log}" ]]; then
 		cat "${log}"
 	else
-		optimus-manager --status || true
+		echo "absent"
+	fi
+
+	echo
+}
+
+
+optimusManagerX11ConfInfo () {
+	local conf="/etc/X11/xorg.conf.d/10-optimus-manager.conf"
+
+	echo "=== optimus-manager x11 conf ==="
+
+	if [[ -f "${conf}" ]]; then
+		cat "${conf}"
+	else
+		echo "not generated"
 	fi
 
 	echo
