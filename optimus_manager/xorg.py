@@ -200,10 +200,27 @@ def _generate_integrated(config, bus_ids, xorg_extra):
 
     xorg_extra_lines = xorg_extra["integrated-mode"]["integrated-gpu"]
 
+    text = "Section \"ServerLayout\"\n" \
+            "\tIdentifier \"layout\"\n" \
+            "\tScreen 0 \"integrated\"\n" \
+            "EndSection\n\n"
+    
+    text += "Section \"Monitor\"\n" \
+            "\tIdentifier \"monitor0\"\n" \
+            "EndSection\n\n"
+
     if "intel" in bus_ids:
-        return _make_intel_device_section(config, bus_ids, xorg_extra_lines)
+        text += _make_intel_device_section(config, bus_ids, xorg_extra_lines)
     else:
-        return _make_amd_device_section(config, bus_ids, xorg_extra_lines)
+        text += _make_amd_device_section(config, bus_ids, xorg_extra_lines)
+
+    text += "Section \"Screen\"\n" \
+            "\tIdentifier \"integrated\"\n" \
+            "\tDevice \"integrated\"\n" \
+            "\tMonitor \"monitor0\"\n" \
+            "EndSection\n\n"
+    
+    return text
 
 
 def _generate_hybrid(config, bus_ids, xorg_extra):
