@@ -111,7 +111,7 @@ pkgver () {
 
 
 prepare () {
-	local Version; Version="$(SofwareVersion)"
+	local Version; Version="$(SoftwareVersion)"
 
 	sed --in-place \
 		"s|^VERSION = \".*\"$|VERSION = \"${Version}\"|" \
