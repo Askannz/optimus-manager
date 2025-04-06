@@ -1,12 +1,11 @@
-import sys
-import os
-from pathlib import Path
 import logging
+import os
+import sys
+from pathlib import Path
 from . import envs
 
 
 def set_logger_config(log_type, log_id):
-
     log_dir_path = Path(envs.LOG_DIR_PATH)
     log_filepath = log_dir_path / log_type / ("%s-%s.log" % (log_type, log_id))
 
@@ -25,6 +24,7 @@ def set_logger_config(log_type, log_id):
 
     try:
         os.chmod(log_filepath, 0o777)
+
     except PermissionError:
         pass
 

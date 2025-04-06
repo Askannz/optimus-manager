@@ -1,97 +1,111 @@
 #! /usr/bin/env python3
-import sys
-import os
 import argparse
-import socket
 import json
-from .. import envs
+import os
+import socket
+import sys
+from .args import parse_args
+from .error_reporting import report_errors
+from .client_checks import run_switch_checks
 from .. import checks
+from .. import envs
+from .. import sessions
 from ..config import load_config, ConfigError
 from ..kernel_parameters import get_kernel_parameters
 from ..var import read_temp_conf_path_var, load_state, VarError
-from ..xorg import cleanup_xorg_conf, is_there_a_default_xorg_conf_file, is_there_a_MHWD_file
-from .. import sessions
-from .args import parse_args
-from .utils import ask_confirmation
-from .error_reporting import report_errors
-from .client_checks import run_switch_checks
+from ..xorg import cleanup_xorg_conf
 
 
 def main():
-
     args = parse_args()
     state = load_state()
     fatal = report_errors(state)
-
     config = _get_config()
 
     if args.version:
         _print_version()
+
     elif args.print_startup:
         _print_startup_mode(config)
+
     elif args.temp_config:
         _set_temp_config_and_exit(args.temp_config)
+
     elif args.unset_temp_config:
         _unset_temp_config_and_exit()
+
     elif args.cleanup:
         _cleanup_xorg_and_exit()
 
     else:
-
         if fatal:
-            print("Cannot execute command because of previous errors.")
             sys.exit(1)
 
-        if args.print_mode:
+        elif args.print_mode:
             _print_current_mode(state)
+
         elif args.print_next_mode:
             _print_next_mode(state)
+
         elif args.status:
             _print_status(config, state)
+
         elif args.switch:
             _gpu_switch(config, args.switch, args.no_confirm)
+
         else:
-            print("Invalid arguments.")
+            print("Invalid arguments")
             sys.exit(1)
 
     sys.exit(0)
 
 
-def _gpu_switch(config, switch_mode, no_confirm):
+def _ask_confirmation():
+    ans = input("> ").lower()
 
+    if ans == "y":
+        return True
+
+    else:
+        if ans != "n":
+            print("Invalid choice")
+
+        print("Canceled")
+        return False
+
+
+def _gpu_switch(config, switch_mode, no_confirm):
     if switch_mode not in ["integrated", "nvidia", "hybrid", "intel"]:
-        print("Invalid mode : %s" % switch_mode)
+        print("Invalid mode: %s" % switch_mode)
         sys.exit(1)
 
     if switch_mode == "intel":
-        print("Warning: mode \"intel\" is deprecated, use \"integrated\" instead")
         switch_mode = "integrated"
 
     run_switch_checks(config, switch_mode)
 
     if config["optimus"]["auto_logout"] == "yes":
-
         if no_confirm:
             confirmation = True
+
         else:
-            print("You are about to switch GPUs. This will forcibly close all graphical sessions"
-                  " and all your applications WILL CLOSE.\n"
-                  "(you can pass the --no-confirm option to disable this warning)\n"
-                  "Continue ? (y/N)")
-            confirmation = ask_confirmation()
+            print("This will close all desktops and applications\n"
+                  "(Disable this warning with: --no-confirm)\n"
+                  "Continue? (y/N)")
+            confirmation = _ask_confirmation()
 
         if confirmation:
             _send_switch_command(config, switch_mode)
+
         else:
             sys.exit(1)
 
     else:
         _send_switch_command(config, switch_mode)
-        print("Please logout all graphical sessions then log back in to apply the change.")
+        print("The change will apply on next login")
 
 
 def _send_switch_command(config, requested_mode):
-
     print("Switching to mode : %s" % requested_mode)
     command = {"type": "switch", "args": {"mode": requested_mode}}
     _send_command(command)
@@ -101,58 +115,57 @@ def _send_switch_command(config, requested_mode):
 
 
 def _get_config():
-
     try:
         config = load_config()
-    except ConfigError as e:
-        print("Error loading config file : %s" % str(e))
+
+    except ConfigError as error:
+        print("Error loading config file: %s" % str(error))
         sys.exit(1)
 
     return config
 
 
 def _print_version():
-    print("Optimus Manager (Client) version %s" % envs.VERSION)
+    print("Version: %s" % envs.VERSION)
 
 
 def _print_current_mode(state):
-    print("Current GPU mode : %s" % state["current_mode"])
+    print("Current mode: %s" % state["current_mode"])
+
 
 def _print_next_mode(state):
-
     if state["type"] == "pending_pre_xorg_start":
         res_str = state["requested_mode"]
-    else:
-        res_str = "no change"
 
-    print("GPU mode requested for next login : %s" % res_str)
+    else:
+        res_str = "Current"
+
+    print("Mode for next login: %s" % res_str)
 
 
 def _print_startup_mode(config):
-
     startup_mode = config["optimus"]["startup_mode"]
     kernel_parameters = get_kernel_parameters()
 
-    print("GPU at startup : %s" % startup_mode)
+    print("Startup mode: %s" % startup_mode)
 
     if kernel_parameters["startup_mode"] is not None:
-        print(
-            "\nNote : the startup mode for the current boot was set to \"%s\" with"
-            " a kernel parameter. Kernel parameters override the value above.\n"
+        print("Startup mode overriden by kernel parameter: %s"
             % kernel_parameters["startup_mode"])
 
 
 def _print_temp_config_path():
-
     try:
         path = read_temp_conf_path_var()
+
     except VarError:
-        print("Temporary config path: no")
+        print("Temporary config: None")
+
     else:
-        print("Temporary config path: %s" % path)
+        print("Temporary config: %s" % path)
+
 
 def _print_status(config, state):
-
     _print_version()
     print("")
     _print_current_mode(state)
@@ -160,8 +173,8 @@ def _print_status(config, state):
     _print_startup_mode(config)
     _print_temp_config_path()
 
-def _send_command(command):
 
+def _send_command(command):
     msg = json.dumps(command).encode('utf-8')
 
     try:
@@ -171,27 +184,24 @@ def _send_command(command):
         client.close()
 
     except (ConnectionRefusedError, OSError):
-        print("Cannot connect to the UNIX socket at %s. Is optimus-manager-daemon running ?\n"
-              "\nYou can enable and start it by running those commands as root :\n"
-              "\nsystemctl enable optimus-manager.service\n"
-              "systemctl start optimus-manager.service\n" % envs.SOCKET_PATH)
+        print("Socket unavailable: %s" % envs.SOCKET_PATH)
         sys.exit(1)
 
-def _set_temp_config_and_exit(rel_path):
 
+def _set_temp_config_and_exit(rel_path):
     abs_path = os.path.join(os.getcwd(), rel_path)
 
     if not os.path.isfile(abs_path):
-        print("ERROR : no such config file : %s" % abs_path)
+        print("Temp config file doesn't exist: %s" % abs_path)
         sys.exit(1)
 
-    print("Setting temp config file path to : %s" % abs_path)
+    print("Temp config file: %s" % abs_path)
     command = {"type": "temp_config", "args": {"path": abs_path}}
     _send_command(command)
     sys.exit(0)
 
-def _unset_temp_config_and_exit():
 
+def _unset_temp_config_and_exit():
     print("Unsetting temp config path")
     command = {"type": "temp_config", "args": {"path": ""}}
     _send_command(command)
@@ -199,9 +209,8 @@ def _unset_temp_config_and_exit():
 
 
 def _cleanup_xorg_and_exit():
-
     if os.geteuid() != 0:
-        print("You need to execute the command as root for this action.")
+        print("Not root")
         sys.exit(1)
 
     cleanup_xorg_conf()

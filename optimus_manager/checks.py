@@ -1,9 +1,9 @@
+import dbus
 import os
-from pathlib import Path
-from ctypes import byref, POINTER, c_uint, Structure, c_int, c_void_p, CDLL
 import re
 import subprocess
-import dbus
+from ctypes import byref, c_int, c_uint, c_void_p, CDLL, POINTER, Structure
+from pathlib import Path
 from .log_utils import get_logger
 
 
@@ -21,11 +21,8 @@ def check_running_graphical_session():
 
 
 def is_ac_power_connected():
-
     for power_source_path in Path("/sys/class/power_supply/").iterdir():
-
         try:
-
             with open(power_source_path / "type", 'r') as f:
                 if f.read().strip() != "Mains":
                     continue
@@ -53,8 +50,9 @@ def is_nvidia_display_connected():
 
     try:
         nvcfg_lib = CDLL("libnvidia-cfg.so")
+
     except OSError:
-        raise CheckError("Failed to open 'libnvidia-cfg.so'. Is package 'nvidia-utils' installed?")
+        raise CheckError("Missing nvidia-utils component: libnvidia-cfg.so")
 
     if nvcfg_lib.nvCfgGetPciDevices(byref(num_gpus), byref(gpus)) != 1:
         return False
@@ -68,6 +66,7 @@ def is_nvidia_display_connected():
                 continue
 
             mask = c_uint()
+
             if nvcfg_lib.nvCfgGetDisplayDevices(device_handle, byref(mask)) != 1:
                 continue
 
@@ -75,7 +74,8 @@ def is_nvidia_display_connected():
                 return True
 
         finally:
-            nvcfg_lib.nvCfgCloseDevice(device_handle)  # ignores if the function fails
+            nvcfg_lib.nvCfgCloseDevice(device_handle)
+            # Ignores if the function fails
 
     return False
 
@@ -88,76 +88,76 @@ def is_pat_available():
 
 
 def get_active_renderer():
-
     if _is_gl_provider_nvidia():
         return "nvidia"
     else:
         return "integrated"
 
-def get_integrated_provider():
 
+def get_integrated_provider():
     try:
         out = subprocess.check_output(
                 "xrandr --listproviders", shell=True, text=True, stderr=subprocess.PIPE).strip()
-    except subprocess.CalledProcessError as e:
-        raise CheckError(f"Cannot list xrandr providers:\n{e.stderr}") from e
+
+    except subprocess.CalledProcessError as error:
+        raise CheckError(f"No xrandr provider: {error.stderr}") from error
 
     for line in out.splitlines():
         for _p in line.split():
             if _p in ["AMD", "Intel"]:
                 return line.split("name:")[1]
+
     return "modesetting"
 
 
 def is_module_available(module_name):
-
     return subprocess.run(
         f"modinfo -n {module_name}",
         shell=True, stdout=subprocess.DEVNULL
     ).returncode == 0
 
-def is_module_loaded(module_name):
 
+def is_module_loaded(module_name):
     return subprocess.run(
         f"lsmod | grep -E \"^{module_name}\"",
         shell=True, stdout=subprocess.DEVNULL
     ).returncode == 0
 
-def get_current_display_manager():
 
+def get_current_display_manager():
     if not os.path.isfile("/etc/systemd/system/display-manager.service"):
-        raise CheckError("No display-manager.service file found")
+        raise CheckError("Missing: display-manager.service")
 
     dm_service_path = os.path.realpath("/etc/systemd/system/display-manager.service")
     dm_service_filename = os.path.split(dm_service_path)[-1]
     dm_name = os.path.splitext(dm_service_filename)[0]
-
     return dm_name
 
 
 def using_patched_GDM():
-
     folder_path_1 = "/etc/gdm/Prime"
     folder_path_2 = "/etc/gdm3/Prime"
-
     return os.path.isdir(folder_path_1) or os.path.isdir(folder_path_2)
 
-def check_offloading_available():
 
+def check_offloading_available():
     try:
         out = subprocess.check_output(
             "xrandr --listproviders", shell=True, text=True, stderr=subprocess.PIPE).strip()
-    except subprocess.CalledProcessError as e:
-        raise CheckError(f"Cannot list xrandr providers:\n{e.stderr}") from e
+
+    except subprocess.CalledProcessError as error:
+        raise CheckError(f"Unable to list xrandr providers: {error.stderr}") from error
 
     for line in out.splitlines():
         if re.search("^Provider [0-9]+:", line) and "name:NVIDIA-G0" in line:
             return True
+
     return False
 
 
 def is_xorg_intel_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/intel_drv.so")
+
 
 def is_xorg_amdgpu_module_available():
     return os.path.isfile("/usr/lib/xorg/modules/drivers/amdgpu_drv.so")
@@ -176,22 +176,22 @@ def is_bumblebeed_service_active():
 
 
 def _is_gl_provider_nvidia():
-
     try:
         out = subprocess.check_output(
             "__NV_PRIME_RENDER_OFFLOAD=0 glxinfo",
             shell=True, text=True, stderr=subprocess.PIPE).strip()
-    except subprocess.CalledProcessError as e:
-        raise CheckError(f"Cannot run glxinfo: {e.stderr}") from e
+
+    except subprocess.CalledProcessError as error:
+        raise CheckError(f"glxinfo failed: {error.stderr}") from error
 
     for line in out.splitlines():
         if "server glx vendor string: NVIDIA Corporation" in line:
             return True
+
     return False
 
 
 def _is_service_active(service_name):
-
     logger = get_logger()
 
     if subprocess.run(f"which sv", shell=True).returncode == 0:
@@ -206,29 +206,31 @@ def _is_service_active(service_name):
     if subprocess.run(f"which systemctl", shell=True).returncode == 0:
         try:
             system_bus = dbus.SystemBus()
+
         except dbus.exceptions.DBusException:
             logger.warning(
-                "Cannot communicate with the DBus system bus to check status of %s."
-                " Is DBus running ? Falling back to bash commands", service_name)
+                "Falling back to Bash commands: No DBus for: %s", service_name)
+
             return _is_service_active_bash(service_name)
+
         else:
             return _is_service_active_dbus(system_bus, service_name)
 
-    return False # ERROR: No service manager found!
+    return False # No service manager found
+
 
 def _is_service_active_dbus(system_bus, service_name):
-
     systemd = system_bus.get_object("org.freedesktop.systemd1", "/org/freedesktop/systemd1")
 
     try:
         unit_path = systemd.GetUnit("%s.service" % service_name, dbus_interface="org.freedesktop.systemd1.Manager")
+
     except dbus.exceptions.DBusException:
         return False
 
     optimus_manager_interface = system_bus.get_object("org.freedesktop.systemd1", unit_path)
     properties_manager = dbus.Interface(optimus_manager_interface, 'org.freedesktop.DBus.Properties')
     state = properties_manager.Get("org.freedesktop.systemd1.Unit", "SubState")
-
     return state == "running"
 
 
@@ -245,11 +247,12 @@ def _is_service_active_openrc(service_name):
 
 
 def _is_service_active_s6(service_name):
-    # TODO: Check if service running
+    # TODO: Check if s6 service is running
     return True
 
 
 def _is_service_active_sv(service_name):
     if subprocess.run(f"sv status %s | grep 'up: '" % service_name, shell=True).returncode == 0:
         return True
+
     return False

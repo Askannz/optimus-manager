@@ -2,17 +2,17 @@
 
 declare -a args
 args=(
-    '(-)'{-h,--help}'[display usage information]'
-    '(-)'{-V,--version}'[display version information and exit]'
-    '(-)--status[print current status of optimus-manager]'
-    '(-)--print-mode[print the GPU mode that your current desktop session is running on]'
-    '(-)--print-next-mode[print the GPU mode that will be used the next time you log into your session]'
-    '(-)--print-startup[print the GPU mode that will be used on startup]'
-    '--switch=[set the GPU mode to MODE, you need to log out then log in to apply the change]:mode:(integrated nvidia hybrid)'
-    '(--unset-temp-config)--temp-config=[set a path to a temporary configuration file to use for the next reboot ONLY]:path:_files'
-    '(--temp-config)--unset-temp-config[undo --temp-config (unset temp config path)]'
-    '--no-confirm[do not ask for confirmation and skip all warnings when switching GPUs]'
-    '--cleanup[remove auto-generated configuration files left over by the daemon]'
+    '(-)'{-h,--help}'[displays usage information]'
+    '(-)'{-V,--version}'[prints the version]'
+    '(-)--status[prints the current status]'
+    '(-)--print-mode[prints the current GPU mode]'
+    '(-)--print-next-mode[prints the GPU mode that will be used on the next login]'
+    '(-)--print-startup[prints the GPU mode that will be used on startup]'
+    '--switch=[sets the GPU mode for future logins]:mode:(nvidia integrated hybrid)'
+    '(--unset-temp-config)--temp-config=[sets the temporary configuration file to use only on next boot]:path:_files'
+    '(--temp-config)--unset-temp-config[reverts --temp-config]'
+    '--no-confirm[skips the confirmation for loggin out]'
+    '--cleanup[removes auto-generated configuration files left over by the daemon]'
 )
 
 _arguments $args

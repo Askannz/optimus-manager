@@ -7,7 +7,7 @@ from optimus_manager import __version__
 setup(
     name='optimus-manager',
     version=__version__,
-    description='Management utility for Optimus laptops on Linux.',
+    description='Handles GPU switching on Optimus laptops',
     long_description=open(
         join(dirname(__file__), 'README.md')).read(),
     url='https://github.com/Askannz/optimus-manager',

@@ -9,7 +9,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=1
-pkgver=r763.01a04f9.python3.12
+pkgver=0.python3.13
 pkgrel=1
 arch=("any")
 
@@ -76,10 +76,13 @@ backup=(
 
 SoftwareVersion () {
 	cd "${srcdir}/optimus-manager"
+	local Version="$(git rev-list --count HEAD)"
 
-	printf "r%s.%s" \
-		"$(git rev-list --count HEAD)" \
-		"$(git rev-parse --short=7 HEAD)"
+	if [[ "${Version}" -le 1 ]]; then
+		echo 0
+	else
+		echo "${Version}"
+	fi
 }
 
 
@@ -104,6 +107,15 @@ pkgver () {
 			"${SoftwareVersion}" \
 			"${PythonVersion}"
 	fi
+}
+
+
+prepare () {
+	local Version; Version="$(SofwareVersion)"
+
+	sed --in-place \
+		"s|^VERSION = \".*\"$|VERSION = \"${Version}\"|" \
+		"${srcdir}/optimus-manager/optimus_manager/envs.py"
 }
 
 

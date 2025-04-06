@@ -2,33 +2,35 @@ import argparse
 
 
 def parse_args():
+    parser = argparse.ArgumentParser(description="optimus-manager client")
 
-    parser = argparse.ArgumentParser(description="Client program for optimus-manager.\n"
-                                                 "https://github.com/Askannz/optimus-manager")
-    parser.add_argument('-v', '--version', action='store_true', help='Print version and exit.')
+    parser.add_argument('-v', '--version', action='store_true', help='Prints the version')
 
     parser.add_argument('--status', action='store_true',
-                        help="Print current status of optimus-manager")
+                        help="Prints the current status")
+
     parser.add_argument('--print-mode', action='store_true',
-                        help="Print the GPU mode that your current desktop session is running on.")
+                        help="Prints the current GPU mode")
+
     parser.add_argument('--print-next-mode', action='store_true',
-                        help="Print the GPU mode that will be used the next time you log into your session.")
+                        help="Prints the GPU mode that will be used on the next login")
+
     parser.add_argument('--print-startup', action='store_true',
-                        help="Print the GPU mode that will be used on startup.")
+                        help="Prints the GPU mode that will be used on startup")
 
     parser.add_argument('--switch', metavar='MODE', action='store',
-                        help="Set the GPU mode to MODE. You need to log out then log in to apply the change."
-                             "Possible modes : integrated, nvidia, hybrid, intel (deprecated, equivalent to integrated)")
+                        help="Sets the GPU mode for future logins"
+                             "Options: nvidia, integrated, hybrid")
 
     parser.add_argument('--temp-config', metavar='PATH', action='store',
-                        help="Set a path to a temporary configuration file to use for the next reboot ONLY. Useful for testing"
-                             " power switching configurations without ending up with an unbootable setup.")
-    parser.add_argument('--unset-temp-config', action='store_true', help="Undo --temp-config (unset temp config path)")
+                        help="Sets the temporary configuration file to use only on next boot")
 
+    parser.add_argument('--unset-temp-config', action='store_true', help="Reverts --temp-config")
 
     parser.add_argument('--no-confirm', action='store_true',
-                        help="Do not ask for confirmation and skip all warnings when switching GPUs.")
+                        help="Skips the confirmation for loggin out")
+
     parser.add_argument('--cleanup', action='store_true',
-                        help="Remove auto-generated configuration files left over by the daemon.")
+                        help="Removes auto-generated configuration files left over by the daemon")
 
     return parser.parse_args()

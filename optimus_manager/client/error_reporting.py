@@ -3,47 +3,40 @@ from ..checks import get_active_renderer, check_offloading_available, check_runn
 
 
 def report_errors(state):
-
     if state is None:
-        print("ERROR: no state file found. Is optimus-manager.service running ?")
+        print("No state file")
         return True
 
     elif state["type"] == "startup_failed":
-        print("ERROR: the optimus-manager service failed boot-time startup.")
+        print("Failed to start: optimus-manager.service")
         print("Log at %s/daemon/daemon-%s.log" % (envs.LOG_DIR_PATH, state["daemon_run_id"]))
         return True
 
     elif state["type"] == "pending_pre_xorg_start":
         if state["current_mode"] is None:
-            print("ERROR: a GPU setup was initiated on startup but Xorg pre-start hook did not run.")
+            print("GPU setup failed: Xorg pre-start hook did not run")
             return True
+
         else:
-            print("A GPU switch from %s to %s is pending." % (state["current_mode"], state["requested_mode"]))
-            print("Log out and log back in to apply.")
+            print("GPU switch pending for next login: %s -> %s" % (state["current_mode"], state["requested_mode"]))
 
     elif state["type"] == "pre_xorg_start_failed":
-        print("ERROR: the latest GPU setup attempt failed at Xorg pre-start hook.")
-        print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+        print("GPU setup failed: Xorg pre-start hook failed")
+        print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
         return True
 
     elif state["type"] == "pending_post_xorg_start":
-        print("ERROR: a GPU setup was initiated but Xorg post-start hook did not run.")
-        print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
-        print("If your login manager is GDM, make sure to follow those instructions:")
-        print("https://github.com/Askannz/optimus-manager#important--gnome-and-gdm-users")
-        print("If your display manager is neither GDM, SDDM nor LightDM, or if you don't use one, read the wiki:")
-        print("https://github.com/Askannz/optimus-manager/wiki/FAQ,-common-issues,-troubleshooting")
+        print("GPU setup failed: Xorg post-start hook did not run")
+        print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
         return True
 
     elif state["type"] == "post_xorg_start_failed":
-        print("ERROR: the latest GPU setup attempt failed at Xorg post-start hook.")
-        print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+        print("GPU setup failed: Xorg post-start hook failed")
+        print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
         return True
 
     elif state["type"] == "done":
-
         if check_running_graphical_session():
-
             expected_renderer = {
                 "integrated": "integrated",
                 "hybrid": "integrated",
@@ -52,21 +45,20 @@ def report_errors(state):
 
             try:
                 active_renderer = get_active_renderer()
-            except CheckError as e:
-                print("ERROR: cannot check the active card (should be \"%s\"). Reason: %s" % (expected_renderer, str(e)))
-                print("Something went wrong during the last GPU setup...")
-                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+
+            except CheckError as error:
+                print("GPU setup failed: Unable to check the active card (%s): %s" % (expected_renderer, str(error)))
+                print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
                 return True
 
             if expected_renderer != active_renderer:
-                print("ERROR: the active card is \"%s\" but it should be \"%s\"." % (active_renderer, expected_renderer))
-                print("Something went wrong during the last GPU setup...")
-                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+                print("GPU setup failed: Wrong active card: \"%s\" vs \"%s\"" % (active_renderer, expected_renderer))
+                print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
                 return True
 
             if state["current_mode"] == "hybrid" and not check_offloading_available():
-                print("WARNING: hybrid mode is set but Nvidia card does not seem to be available for offloading.")
-                print("Log at %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
+                print("Hybrid mode doesn't work: the Nvidia card is unavailable for offloading")
+                print("Log at: %s/switch/switch-%s.log" % (envs.LOG_DIR_PATH, state["switch_id"]))
 
         return False
 

@@ -1,9 +1,7 @@
-# Taken from the package `acpi_call`, file `/usr/share/acpi_call/examples/turn_off_gpu.sh`.
-# Commands for turning PCI on are guessed, they may not be correct.
+# Taken from: `/usr/share/acpi_call/examples/turn_off_gpu.sh`
+# `On` commands are guessed
 
 ACPI_STRINGS = [
-
-    # OFF command, ON command
     ("\\_SB.PCI0.P0P1.VGA._OFF", "\\_SB.PCI0.P0P1.VGA._ON"),
     ("\\_SB.PCI0.P0P2.VGA._OFF", "\\_SB.PCI0.P0P2.VGA._ON"),
     ("\\_SB.PCI0.P0P3.PEGP._OFF", "\\_SB.PCI0.P0P3.PEGP._ON"),
