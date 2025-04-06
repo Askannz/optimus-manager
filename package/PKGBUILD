@@ -8,7 +8,7 @@ license=("MIT")
 #  PKGBUILD and program maintained at:
 url="https://github.com/Askannz/optimus-manager"
 
-epoch=1
+epoch=2
 pkgver=785.python3.13
 pkgrel=1
 arch=("any")
