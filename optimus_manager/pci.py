@@ -207,7 +207,7 @@ def _get_connected_pci_bridges(pci_id):
         while not connected_bridges and index < len(directories):
             dir_path = os.path.join(path, directories[index])
 
-            if os.path.isdir(dir_path) and dir_name == "0000:%s" % pci_id:
+            if os.path.isdir(dir_path) and directories[index] == "0000:%s" % pci_id:
                 connected_bridges.append(bridge)
 
             index += 1
