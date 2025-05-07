@@ -9,7 +9,7 @@ license=("MIT")
 url="https://github.com/Askannz/optimus-manager"
 
 epoch=2
-pkgver=788.python3.13
+pkgver=791.python3.13
 pkgrel=1
 arch=("any")
 
@@ -215,10 +215,6 @@ PackageSystemd () {
 	install -Dm755 \
 		"systemd/suspend/optimus-manager.py" \
 		"${pkgdir}/usr/lib/systemd/system-sleep/optimus-manager.py"
-
-	install -Dm644 \
-		"systemd/logind/10-optimus-manager.conf" \
-		"${pkgdir}/usr/lib/systemd/logind.conf.d/10-optimus-manager.conf"
 }
 
 
