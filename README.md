@@ -90,4 +90,4 @@ Or if you are using the GRUB bootloader, you can use [`optimus-manager-grub`](ht
 
 ## 📜 Terminal
 
-- `optimus-manager --switch [nvidia\integrated\hybrid]`
+- See `man optimus-manager`
