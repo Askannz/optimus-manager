@@ -99,8 +99,8 @@ def get_gpus_bus_ids(notation_fix=True):
         logger.warning("Found both an Intel and an AMD GPU: Picking the Intel one")
         del bus_ids["amd"]
 
-    if not ("intel" in bus_ids or "amd" in bus_ids):
-        raise PCIError("Unable to find an integrated GPU: Maybe not an Optimus computer")
+    elif not ("intel" in bus_ids or "amd" in bus_ids):
+        logger.warning("No integrated GPU on: Using nvidia mode")
 
     return bus_ids
 

@@ -16,7 +16,7 @@ def configure_xorg(config, requested_gpu_mode):
     bus_ids = get_gpus_bus_ids()
     xorg_extra = load_extra_xorg_options()
 
-    if requested_gpu_mode == "nvidia":
+    if requested_gpu_mode == "nvidia" or not ("intel" in bus_ids or "amd" in bus_ids):
         xorg_conf_text = _generate_nvidia(config, bus_ids, xorg_extra)
 
     elif requested_gpu_mode == "integrated":
@@ -91,22 +91,17 @@ def set_DPI(config):
 
 def _get_xsetup_script_path(requested_mode):
     logger = get_logger()
+    bus_ids = get_gpus_bus_ids()
 
-    if requested_mode == "integrated":
-        bus_ids = get_gpus_bus_ids()
+    if requested_mode == "nvidia" or not ("intel" in bus_ids or "amd" in bus_ids):
+        script_name = "nvidia"
 
-        if "intel" in bus_ids:
-            if Path(envs.XSETUP_SCRIPTS_PATHS["intel"]).exists():
+    elif requested_mode == "integrated":
+        if "intel" in bus_ids and Path(envs.XSETUP_SCRIPTS_PATHS["intel"]).exists():
                 script_name = "intel"
-
-            else:
-                script_name = "integrated"
 
         else:
             script_name = "integrated"
-
-    elif requested_mode == "nvidia":
-        script_name = "nvidia"
 
     elif requested_mode == "hybrid":
         script_name = "hybrid"
