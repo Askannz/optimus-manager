@@ -1,0 +1,45 @@
+.TH optimus-manager "1"
+
+.SH NAME
+optimus-manager - configures Nvidia Optimus graphics
+
+.SH USAGE
+optimus-manager [option]
+
+.SH OPTIONS
+
+.TP
+.SS --status
+Prints the current status.
+
+.TP
+.SS --print-mode
+Prints the current GPU mode.
+
+.TP
+.SS --print-next-mode
+Prints the GPU mode that will be used on the next login.
+
+.TP
+.SS --print-startup
+Prints the GPU mode that will be used on startup.
+
+.TP
+.SS --switch
+Sets the GPU mode for future logins. Options: nvidia, integrated, hybrid.
+
+.TP
+.SS --temp-config
+Sets the temporary configuration file to use only on next boot.
+
+.TP
+.SS --unset-temp-config
+Reverts "--temp-config".
+
+.TP
+.SS --no-confirm
+Skips the confirmation for loggin out.
+
+.TP
+.SS --cleanup
+Removes auto-generated configuration files left over by the daemon.

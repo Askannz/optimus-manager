@@ -25,7 +25,8 @@ def parse_args():
     parser.add_argument('--temp-config', metavar='PATH', action='store',
                         help="Sets the temporary configuration file to use only on next boot")
 
-    parser.add_argument('--unset-temp-config', action='store_true', help="Reverts --temp-config")
+    parser.add_argument('--unset-temp-config', action='store_true',
+                        help="Reverts --temp-config")
 
     parser.add_argument('--no-confirm', action='store_true',
                         help="Skips the confirmation for loggin out")

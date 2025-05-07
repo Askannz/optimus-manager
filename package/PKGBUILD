@@ -136,6 +136,7 @@ PackageFiles () {
 	PackageEtc
 	PackageLicense
 	PackageLoginManagers
+	PackageManual
 	PackageModprobe
 	PackageProfile
 	PackageSystemd
@@ -188,6 +189,13 @@ PackageLoginManagers () {
 	install -Dm644 \
 		login_managers/sddm/20-optimus-manager.conf \
 		"${pkgdir}/etc/sddm.conf.d/20-optimus-manager.conf"
+}
+
+
+PackageManual () {
+	install -Dm644 \
+		"${srcdir}/optimus-manager/optimus-manager.1" \
+		"${pkgdir}/usr/share/man/man1/optimus-manager.1"
 }
 
 
