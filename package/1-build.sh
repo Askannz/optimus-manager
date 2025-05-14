@@ -23,7 +23,7 @@ checkRequiredSoftware () {
 makePackage () {
 	cd "${here}"
 
-	export PACMAN_AUTH=('sudo')
+	export PACMAN_AUTH="sudo"
 	export PACKAGER="${USER} <@${HOSTNAME}>"
 	so makepkg --needed --noconfirm --noextract --syncdeps --skipinteg --rmdeps
 }
