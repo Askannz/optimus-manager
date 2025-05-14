@@ -6,13 +6,21 @@ files=("optimus-manager.install" "PKGBUILD")
 
 
 mainFunction () {
-	checkUncommittedChanges
+	checkDescription
 	cloneAurRepo
 	checkFilesHaveBeenChanged
 	syncFiles
 	updateSrcinfo
 	uploadChanges
 	removeAurRepoClone
+}
+
+
+checkDescription () {
+	if [[ -z "${description}" ]]; then
+		echo "No description provided" >&2
+		exit 1
+	fi
 }
 
 
@@ -41,17 +49,6 @@ checkFilesHaveBeenChanged () {
 }
 
 
-checkUncommittedChanges () {
-	local uncommittedChanges; uncommittedChanges="$(uncommittedChanges)"
-
-	if [[ -n "${uncommittedChanges}" ]]; then
-		echo "Cannot publish: Uncommitted changes:" >&2
-		echo "${uncommittedChanges}" >&2
-		exit 1
-	fi
-}
-
-
 cloneAurRepo () {
 	cd "${here}"
 
@@ -62,14 +59,6 @@ cloneAurRepo () {
 	else
 		so git fetch
 	fi
-}
-
-
-fileLastCommitDescription () {
-	local file="${1}"
-
-	cd "${here}"
-	git log -1 --pretty=format:%s -- "${file}"
 }
 
 
@@ -84,25 +73,6 @@ fileSum () {
 
 	sha1sum "${file}" |
 	cut --delimiter=' ' --fields=1
-}
-
-
-lastUpdatedFile () {
-	local epoch=0
-	local file
-	local oldEpoch
-	local result
-
-	for file in "${files[@]}"; do
-		oldEpoch="${epoch}"
-		epoch="$(fileModificationEpoch "${here}/${file}")"
-
-		if [[ "${epoch}" -gt "${oldEpoch}" ]]; then
-			result="${file}"
-		fi
-	done
-
-	echo "${result}"
 }
 
 
@@ -136,12 +106,6 @@ syncFiles () {
 }
 
 
-uncommittedChanges () {
-	cd "${here}"
-	git status --porcelain
-}
-
-
 updateSrcinfo () {
 	cd "${here}/optimus-manager-git"
 	makepkg --printsrcinfo > .SRCINFO
@@ -151,12 +115,6 @@ updateSrcinfo () {
 uploadChanges () {
 	cd "${here}/optimus-manager-git"
 
-	local description; description="$(fileLastCommitDescription "$(lastUpdatedFile)")"
-	if [[ -z "${description}" ]]; then
-		echo "${FUNCNAME[0]}: Unable to upload: Empty description" >&2
-		exit 1
-	fi
-
 	so git add --all
 	#shellcheck disable=SC2016
 	git commit --message="${description}" >/dev/null
@@ -164,4 +122,5 @@ uploadChanges () {
 }
 
 
+description="${*}"
 mainFunction

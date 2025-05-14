@@ -9,6 +9,7 @@ mainFunction () {
 	so rm --force "${here}/"*.pkg.*
 	syncSrc
 	makePackage
+	zeroPkgver
 }
 
 
@@ -60,6 +61,11 @@ syncSrc () {
 		find . -mindepth 1 -maxdepth 1 -not -name "package" -and -not -name ".*" |
 		cut --delimiter='/' --fields=2-
 	)
+}
+
+
+zeroPkgver () {
+	sed --in-place "s|^pkgver=.*|pkgver=0|" "${here}/PKGBUILD"
 }
 
 
