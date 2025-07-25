@@ -132,7 +132,7 @@ nvidiaX11LogInfo () {
 	local log="/var/log/Xorg.0.log"
 	echo "=== nvidia x11 log ==="
 
-	if [[ ! "${log}" ]]; then
+	if [[ ! -f "${log}" ]]; then
 		echo "no log at: ${log}"
 	else
 		local messages; messages="$(
