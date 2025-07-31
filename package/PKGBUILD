@@ -8,7 +8,7 @@ license=("MIT")
 #  PKGBUILD and program maintained at:
 url="https://github.com/Askannz/optimus-manager"
 
-epoch=3
+epoch=4
 pkgver=0
 pkgrel=1
 arch=("any")
@@ -77,12 +77,13 @@ backup=(
 SoftwareVersion () {
 	cd "${srcdir}/optimus-manager"
 	local Commits; Commits="$(git rev-list --count HEAD)"
-	local Hash; Hash="$(git rev-parse --short=7 HEAD)"
 
-	if [[ "${Commits}" -le 1 ]]; then
-		echo 0
-	elif [[ -n "${Commits}" ]] && [[ -n "${Hash}" ]]; then
-		echo "r${Commits}.${Hash}"
+	if [[ -n "${Commits}" ]]; then
+		if [[ "${Commits}" -le 1 ]]; then
+			echo 0
+		else
+			echo "${Commits}"
+		fi
 	fi
 }
 
