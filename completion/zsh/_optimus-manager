@@ -11,7 +11,7 @@ args=(
     '--switch=[sets the GPU mode for future logins]:mode:(nvidia integrated hybrid)'
     '(--unset-temp-config)--temp-config=[sets the temporary configuration file to use only on next boot]:path:_files'
     '(--temp-config)--unset-temp-config[reverts --temp-config]'
-    '--no-confirm[skips the confirmation for loggin out]'
+    '--no-confirm[skips the confirmation for logging out]'
     '--cleanup[removes auto-generated configuration files left over by the daemon]'
 )
 
