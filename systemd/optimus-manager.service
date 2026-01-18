@@ -3,7 +3,7 @@ Description=Optimus Manager Commands Daemon
 Before=display-manager.service
 
 [Service]
-ExecStartPre=/usr/bin/rm --force etc/X11/xorg.conf.d/10-optimus-manager.conf
+ExecStartPre=/usr/bin/rm --force /etc/X11/xorg.conf.d/10-optimus-manager.conf
 ExecStartPre=-/usr/bin/bash -c 'if lspci | grep VGA | grep --quiet Intel; then cat /sys/class/drm/card*/gt_RP0_freq_mhz | tee /sys/class/drm/card*/gt_min_freq_mhz; fi'
 ExecStartPre=-/usr/bin/bash -c 'if lspci | grep VGA | grep --quiet --extended-regexp "AMD|ATI"; then echo performance | tee /sys/class/drm/card*/device/power_dpm_force_performance_level; fi'
 ExecStartPre=-/usr/bin/python3 -u -m optimus_manager.hooks.pre_daemon_start
