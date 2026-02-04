@@ -1,5 +1,4 @@
 #! /bin/bash
-set -e
 
 if [[ "${XDG_SESSION_TYPE}" == "wayland" ]]; then
 	export __NV_PRIME_RENDER_OFFLOAD=1
