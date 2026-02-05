@@ -146,7 +146,7 @@ def _write_to_nvidia_path(relative_path, string):
         raise PCIError("Nvidia isn't in the PCI bus")
 
     nvidia_id = bus_ids["nvidia"]
-    res = re.fullmatch(r"([0-9]{2}:[0-9]{2})\.[0-9]", nvidia_id)
+    res = re.fullmatch(r"([0-9a-f]{2}:[0-9a-f]{2})\.[0-9]", nvidia_id)
 
     if res is None:
         raise PCIError(f"Unexpected PCI ID format: {nvidia_id}")
