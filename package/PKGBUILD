@@ -32,7 +32,7 @@ SoftwareVersion () {
 
 
 PythonVersion="$(
-	pacman --sync --print-format "%v" python |
+	pacman --sync --nodeps --nodeps --print-format "%v" python |
 	cut --delimiter='-' --fields=1
 )"
 
