@@ -18,14 +18,17 @@ sha1sums=("SKIP")
 
 
 SoftwareVersion="$(
-	cd "${srcdir}/optimus-manager"
-	local Commits; Commits="$(git rev-list --count HEAD)"
+	if ! cd "${srcdir}/optimus-manager" 2> /dev/null; then
+		echo 0
+	else
+		local Commits; Commits="$(git rev-list --count HEAD)"
 
-	if [[ -n "${Commits}" ]]; then
-		if [[ "${Commits}" -le 1 ]]; then
-			echo 0
-		else
-			echo "${Commits}"
+		if [[ -n "${Commits}" ]]; then
+			if [[ "${Commits}" -le 1 ]]; then
+				echo 0
+			else
+				echo "${Commits}"
+			fi
 		fi
 	fi
 )"
