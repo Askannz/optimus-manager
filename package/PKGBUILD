@@ -17,7 +17,7 @@ source=("git+${url}.git")
 sha1sums=("SKIP")
 
 
-SoftwareVersion () {
+SoftwareVersion="$(
 	cd "${srcdir}/optimus-manager"
 	local Commits; Commits="$(git rev-list --count HEAD)"
 
@@ -28,7 +28,7 @@ SoftwareVersion () {
 			echo "${Commits}"
 		fi
 	fi
-}
+)"
 
 
 PythonVersion="$(
@@ -38,8 +38,6 @@ PythonVersion="$(
 
 
 pkgver () {
-	local SoftwareVersion; SoftwareVersion="$(SoftwareVersion)"
-
 	if [[ -z "${SoftwareVersion}" ]]; then
 		echo "Failed to retrieve: SoftwareVersion" >&2
 		false
@@ -83,7 +81,7 @@ depends=(
 	"dbus-python"
 	"glxinfo"
 	"NVIDIA-MODULE"
-	"python=${PythonVersion}"
+	"python"
 	"xorg-xrandr"
 )
 
@@ -112,10 +110,8 @@ backup=(
 
 
 prepare () {
-	local Version; Version="$(SoftwareVersion)"
-
 	sed --in-place \
-		"s|^VERSION = \".*\"$|VERSION = \"${Version}\"|" \
+		"s|^VERSION = \".*\"$|VERSION = \"${SoftwareVersion}\"|" \
 		"${srcdir}/optimus-manager/optimus_manager/envs.py"
 }
 
